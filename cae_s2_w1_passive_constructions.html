@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 2: Passive Constructions</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #4a9eff;
+            --accent-hover: #73b5ff;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 {
+            top: -10%;
+            right: -5%;
+            width: 400px;
+            height: 400px;
+        }
+        .orb-2 {
+            bottom: -10%;
+            left: -5%;
+            width: 500px;
+            height: 500px;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--text-pri);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section {
+            margin-bottom: 5rem;
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Section 1: Orientation */
+        .orientation-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .orientation-card p {
+            font-size: 1.1rem;
+            color: var(--text-pri);
+        }
+
+        /* Section 2: Accordion */
+        .acc-wrapper {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        .acc-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-pri);
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .acc-header:hover {
+            background: var(--surface-alt);
+        }
+        .acc-header .chevron {
+            font-size: 1.5rem;
+            transition: transform 0.35s ease;
+            color: var(--accent);
+        }
+        .acc-wrapper.open > .acc-header .chevron {
+            transform: rotate(180deg);
+        }
+        
+        .acc-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s ease;
+        }
+        .acc-wrapper.open > .acc-content {
+            grid-template-rows: 1fr;
+        }
+        .acc-content > .acc-inner {
+            overflow: hidden;
+        }
+        
+        .acc-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+        
+        .sub-acc { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); margin-top: 1rem; }
+        .sub-acc .acc-header { padding: 1rem 1.5rem; }
+        
+        .guide-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        .guide-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-pri);
+        }
+        .guide-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Section 3: Exercises */
+        .global-progress {
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-alt);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text { font-size: 0.9rem; color: var(--text-sec); text-align: right; margin: 0; }
+
+        .text-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .text-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--text-pri);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .text-content {
+            font-size: 1.15rem;
+            line-height: 2.4;
+            color: var(--text-pri);
+        }
+
+        /* Inline Input Styling */
+        .inline-gap-wrapper {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 4px;
+            position: relative;
+            white-space: nowrap;
+        }
+        .gap-num {
+            font-size: 0.75rem;
+            color: var(--text-sec);
+            margin-right: 4px;
+            font-weight: 600;
+            transform: translateY(-8px);
+            display: inline-block;
+        }
+        .gap-input {
+            background: rgba(0,0,0,0.3);
+            border: none;
+            border-bottom: 2px solid var(--accent);
+            color: var(--text-pri);
+            padding: 4px 8px;
+            border-radius: 4px 4px 0 0;
+            font-family: inherit;
+            font-size: 1.1rem;
+            text-align: center;
+            width: 110px;
+            transition: all 0.2s;
+        }
+        .gap-input:focus {
+            outline: none;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            background: #0d1117;
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+        }
+        .gap-input:disabled {
+            opacity: 1;
+            border-radius: 4px;
+        }
+        .gap-input.correct {
+            border: 1px solid var(--correct);
+            color: var(--correct);
+            background: rgba(52, 211, 153, 0.1);
+        }
+        .gap-input.incorrect {
+            border: 1px solid var(--incorrect);
+            color: var(--incorrect);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .btn-inline {
+            background: var(--surface-alt);
+            color: var(--text-sec);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-inline:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .feedback-inline {
+            margin-left: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: none;
+            align-items: center;
+        }
+        .feedback-inline.visible {
+            display: inline-flex;
+        }
+        .icon-correct { color: var(--correct); }
+        .icon-incorrect { color: var(--incorrect); }
+        .correction-text {
+            color: var(--correct);
+            margin-left: 6px;
+            font-size: 1rem;
+            background: rgba(52, 211, 153, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .text-summary {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .text-summary.visible {
+            opacity: 1;
+        }
+
+        /* Section 4: Wrap-up */
+        .wrap-up-list {
+            list-style: none;
+            counter-reset: wrapup-counter;
+        }
+        .wrap-up-list li {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        .wrap-up-list li::before {
+            counter-increment: wrapup-counter;
+            content: counter(wrapup-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            background: rgba(74, 158, 255, 0.15);
+            color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .wrap-up-note {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--text-sec);
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 2rem 1rem; }
+            h1 { font-size: 2rem; }
+            .text-card { padding: 1.5rem; }
+            .text-content { font-size: 1.05rem; line-height: 2.2; }
+            .gap-input { width: 90px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <!-- SECTION 1: ORIENTATION -->
+        <section id="orientation">
+            <h1>Session 2: Removing the Scaffolding</h1>
+            <div class="orientation-card">
+                <p>In our last session, we built the map of the passive system. You looked at all the forms, learned their names, and practised manipulating them when given a clear prompt.</p>
+                <p>Today, the scaffolding is gone. There are no key words, no transformation labels, and no hints telling you what structure to use.</p>
+                <p>CAE Part 2 (open cloze) tests whether you can read a sentence, understand its underlying grammar, and produce the missing word entirely from scratch. The missing words in passive constructions are exactly the small grammatical words your brain tends to filter out as background noise: <em>was, been, being, had, be, by</em>. Today, we challenge that habit directly.</p>
+                <p><strong>There is one rule above all others for Part 2: ONE word per gap.</strong> No exceptions. A contraction (like <em>can't</em>) counts as two words. A phrasal particle cannot be joined to its verb. One single word.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: FORMAT GUIDE -->
+        <section id="format-guide">
+            <div class="acc-wrapper" id="main-guide-acc">
+                <button class="acc-header" onclick="toggleAcc('main-guide-acc')">
+                    <h3>Part 2 — Format & Strategy (open for reference)</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        
+                        <!-- Panel 1 -->
+                        <div class="acc-wrapper sub-acc" id="panel-1">
+                            <button class="acc-header" onclick="toggleAcc('panel-1')">
+                                <h4>What Part 2 tests</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>Part 2 is an open cloze: a single text of approximately 150–160 words with 8 numbered gaps. Each gap requires exactly one word.</p>
+                                    <p>Unlike Part 1 (multiple choice), there are no options. You must supply the word from your own grammatical and contextual knowledge. The words tested are almost always <strong>grammatical (function) words</strong>: auxiliaries, prepositions, articles, pronouns, conjunctions, relative pronouns, and discourse markers. Content words (nouns, adjectives, main verbs) are almost never gapped.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2 -->
+                        <div class="acc-wrapper sub-acc" id="panel-2">
+                            <button class="acc-header" onclick="toggleAcc('panel-2')">
+                                <h4>The passive in Part 2</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>When a passive structure is gapped, the missing word is typically one of: <em>was, were, been, being, be, had, have, has, by</em>.</p>
+                                    <p>The signal is always in the surrounding words. Common patterns:</p>
+                                    <ul class="guide-list">
+                                        <li><strong>[gap] + past participle</strong> → missing auxiliary (was, were, had, been, have, is, are, will)</li>
+                                        <li><strong>modal + [gap] + past participle</strong> → missing "be"</li>
+                                        <li><strong>have/has/had + [gap] + past participle</strong> → missing "been"</li>
+                                        <li><strong>is/are/was/were + [gap] + past participle</strong> → missing "being" (continuous) or direct passive</li>
+                                        <li><strong>passive verb + [gap] + agent</strong> → missing "by"</li>
+                                    </ul>
+                                    <p style="margin-top: 1rem;"><strong>The strategy:</strong> when you see a past participle, look left. What auxiliary is missing?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3 -->
+                        <div class="acc-wrapper sub-acc" id="panel-3">
+                            <button class="acc-header" onclick="toggleAcc('panel-3')">
+                                <h4>The one-word rule and common traps</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>One word only — this is non-negotiable in the exam.</p>
+                                    <ul class="guide-list">
+                                        <li><strong>Contractions:</strong> Writing a contraction (don't, can't) counts as two words and scores zero.</li>
+                                        <li><strong>Phrasal verbs:</strong> Never write a phrasal verb particle in the same gap as the verb itself.</li>
+                                        <li><strong>Overthinking content:</strong> If you find yourself wanting to write a noun or adjective, stop and re-read the sentence. Part 2 gaps are structural, not lexical.</li>
+                                        <li><strong>Leaving blanks:</strong> Always write something. A wrong answer and a blank both score zero, but a guess might be right.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            <h2>Part 2: Open Cloze</h2>
+            
+            <div class="global-progress">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="global-progress-fill"></div>
+                </div>
+                <p class="progress-text">Total progress: <span id="global-progress-count">0</span> / 16 gaps completed</p>
+            </div>
+
+            <!-- TEXT 1 -->
+            <div class="text-card">
+                <div class="progress-bar-bg" style="height: 3px; margin-bottom: 1.5rem;">
+                    <div class="progress-bar-fill" id="t1-progress-fill"></div>
+                </div>
+                <h3 class="text-title">The Restoration of the Grand Theatre</h3>
+                <div class="text-content">
+                    The Grand Theatre, which <span class="inline-gap-wrapper"><sup class="gap-num">1</sup><input type="text" class="gap-input" id="gap-1" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-1" onclick="checkGap(1)">✓</button><span class="feedback-inline" id="fb-1"></span></span> built in the late nineteenth century, has recently undergone a major restoration. The project, which took three years to complete, <span class="inline-gap-wrapper"><sup class="gap-num">2</sup><input type="text" class="gap-input" id="gap-2" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-2" onclick="checkGap(2)">✓</button><span class="feedback-inline" id="fb-2"></span></span> been funded entirely by the city council. During the works, several previously unknown architectural features were discovered beneath layers of paint that <span class="inline-gap-wrapper"><sup class="gap-num">3</sup><input type="text" class="gap-input" id="gap-3" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-3" onclick="checkGap(3)">✓</button><span class="feedback-inline" id="fb-3"></span></span> been applied over the decades. These features, which include an elaborate set of ceiling murals, are now <span class="inline-gap-wrapper"><sup class="gap-num">4</sup><input type="text" class="gap-input" id="gap-4" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-4" onclick="checkGap(4)">✓</button><span class="feedback-inline" id="fb-4"></span></span> carefully restored by a team of specialist conservators. The theatre's original wooden stage, <span class="inline-gap-wrapper"><sup class="gap-num">5</sup><input type="text" class="gap-input" id="gap-5" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-5" onclick="checkGap(5)">✓</button><span class="feedback-inline" id="fb-5"></span></span> had been badly damaged by a fire in 1962, has also been replaced. The restoration has <span class="inline-gap-wrapper"><sup class="gap-num">6</sup><input type="text" class="gap-input" id="gap-6" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-6" onclick="checkGap(6)">✓</button><span class="feedback-inline" id="fb-6"></span></span> widely praised by heritage organisations, who consider the building to be one of the finest examples of late Victorian civic architecture in the country. It is expected that the theatre will <span class="inline-gap-wrapper"><sup class="gap-num">7</sup><input type="text" class="gap-input" id="gap-7" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-7" onclick="checkGap(7)">✓</button><span class="feedback-inline" id="fb-7"></span></span> reopened to the public in the spring, when a series of inaugural performances will <span class="inline-gap-wrapper"><sup class="gap-num">8</sup><input type="text" class="gap-input" id="gap-8" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-8" onclick="checkGap(8)">✓</button><span class="feedback-inline" id="fb-8"></span></span> held to mark the occasion.
+                </div>
+                <div id="summary-1" class="text-summary"></div>
+            </div>
+
+            <!-- TEXT 2 -->
+            <div class="text-card">
+                <div class="progress-bar-bg" style="height: 3px; margin-bottom: 1.5rem;">
+                    <div class="progress-bar-fill" id="t2-progress-fill"></div>
+                </div>
+                <h3 class="text-title">Urban Farming and the Future of Food</h3>
+                <div class="text-content">
+                    Urban farming, once <span class="inline-gap-wrapper"><sup class="gap-num">9</sup><input type="text" class="gap-input" id="gap-9" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-9" onclick="checkGap(9)">✓</button><span class="feedback-inline" id="fb-9"></span></span> regarded as a marginal activity practised only by enthusiasts, has recently <span class="inline-gap-wrapper"><sup class="gap-num">10</sup><input type="text" class="gap-input" id="gap-10" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-10" onclick="checkGap(10)">✓</button><span class="feedback-inline" id="fb-10"></span></span> recognised as a serious solution to growing food security concerns in cities. Projects that <span class="inline-gap-wrapper"><sup class="gap-num">11</sup><input type="text" class="gap-input" id="gap-11" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-11" onclick="checkGap(11)">✓</button><span class="feedback-inline" id="fb-11"></span></span> previously been dismissed as impractical are now <span class="inline-gap-wrapper"><sup class="gap-num">12</sup><input type="text" class="gap-input" id="gap-12" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-12" onclick="checkGap(12)">✓</button><span class="feedback-inline" id="fb-12"></span></span> replicated on a large scale in metropolitan areas across the world. In Singapore, for instance, entire floors of commercial buildings <span class="inline-gap-wrapper"><sup class="gap-num">13</sup><input type="text" class="gap-input" id="gap-13" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-13" onclick="checkGap(13)">✓</button><span class="feedback-inline" id="fb-13"></span></span> been converted into hydroponic farms capable of supplying local restaurants and supermarkets. Critics argue that urban farming can never fully replace conventional agriculture, and that its benefits have <span class="inline-gap-wrapper"><sup class="gap-num">14</sup><input type="text" class="gap-input" id="gap-14" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-14" onclick="checkGap(14)">✓</button><span class="feedback-inline" id="fb-14"></span></span> exaggerated by those with a financial interest in the technology. Nevertheless, it is widely acknowledged that the pressure on existing food systems will only increase, and that new approaches must <span class="inline-gap-wrapper"><sup class="gap-num">15</sup><input type="text" class="gap-input" id="gap-15" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-15" onclick="checkGap(15)">✓</button><span class="feedback-inline" id="fb-15"></span></span> found if cities are to <span class="inline-gap-wrapper"><sup class="gap-num">16</sup><input type="text" class="gap-input" id="gap-16" autocomplete="off" spellcheck="false"><button class="btn-inline" id="btn-16" onclick="checkGap(16)">✓</button><span class="feedback-inline" id="fb-16"></span></span> fed sustainably in the decades ahead.
+                </div>
+                <div id="summary-2" class="text-summary"></div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>Before you close this — three questions to answer out loud</h2>
+            <ul class="wrap-up-list">
+                <li>In Text 1, what was the grammatical signal that told you gap 4 needed "being" rather than "been"?</li>
+                <li>Was there any gap in either text where you wrote a passive word but the correct answer was something else? What does that tell you?</li>
+                <li>When you see a past participle in a Part 2 text, what's the first thing you look for?</li>
+            </ul>
+            <p class="wrap-up-note">These aren't comprehension questions. They're about the grammar — explain the system, not the story.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // Exercise Data
+        const answers = {
+            1: ["was"],
+            2: ["has"],
+            3: ["had"],
+            4: ["being"],
+            5: ["which"],
+            6: ["been"],
+            7: ["be"],
+            8: ["be"],
+            9: ["widely"],
+            10: ["been"],
+            11: ["had"],
+            12: ["being"],
+            13: ["have"],
+            14: ["been"],
+            15: ["be"],
+            16: ["be"]
+        };
+
+        // State tracking
+        const attemptedGaps = new Set();
+        let correctT1 = 0;
+        let correctT2 = 0;
+
+        // Setup Event Listeners for Enter Key
+        document.addEventListener('DOMContentLoaded', () => {
+            for (let i = 1; i <= 16; i++) {
+                const inputEl = document.getElementById(`gap-${i}`);
+                if (inputEl) {
+                    inputEl.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            checkGap(i);
+                        }
+                    });
+                }
+            }
+        });
+
+        function checkGap(id) {
+            if (attemptedGaps.has(id)) return;
+
+            const inputEl = document.getElementById(`gap-${id}`);
+            const btnEl = document.getElementById(`btn-${id}`);
+            const fbEl = document.getElementById(`fb-${id}`);
+            
+            const userVal = inputEl.value.trim().toLowerCase();
+            if (userVal === "") return; // Don't submit empty
+
+            const isCorrect = answers[id].includes(userVal);
+
+            // Update State
+            attemptedGaps.add(id);
+            
+            if (id <= 8 && isCorrect) correctT1++;
+            if (id > 8 && isCorrect) correctT2++;
+
+            // Update Progress Bars
+            const totalAttempted = attemptedGaps.size;
+            const t1Attempted = Array.from(attemptedGaps).filter(x => x <= 8).length;
+            const t2Attempted = Array.from(attemptedGaps).filter(x => x > 8).length;
+
+            document.getElementById('global-progress-count').innerText = totalAttempted;
+            document.getElementById('global-progress-fill').style.width = `${(totalAttempted / 16) * 100}%`;
+            document.getElementById('t1-progress-fill').style.width = `${(t1Attempted / 8) * 100}%`;
+            document.getElementById('t2-progress-fill').style.width = `${(t2Attempted / 8) * 100}%`;
+
+            // UI Updates
+            inputEl.disabled = true;
+            btnEl.style.display = 'none';
+            fbEl.classList.add('visible');
+
+            if (isCorrect) {
+                inputEl.classList.add('correct');
+                fbEl.innerHTML = `<span class="icon-correct">✓</span>`;
+            } else {
+                inputEl.classList.add('incorrect');
+                fbEl.innerHTML = `<span class="icon-incorrect">✗</span><span class="correction-text">${answers[id][0]}</span>`;
+            }
+
+            // Check if texts are complete
+            if (t1Attempted === 8) {
+                const sum1 = document.getElementById('summary-1');
+                sum1.innerText = `Text 1 complete — ${correctT1}/8 correct.`;
+                sum1.classList.add('visible');
+            }
+            if (t2Attempted === 8) {
+                const sum2 = document.getElementById('summary-2');
+                sum2.innerText = `Text 2 complete — ${correctT2}/8 correct.`;
+                sum2.classList.add('visible');
+            }
+        }
+    </script>
+</body>
+</html>

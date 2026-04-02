@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 1: Passive Constructions</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #4a9eff;
+            --accent-hover: #73b5ff;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            /* Highlight Colors for Grammar Mapping */
+            --hl-tense: #f59e0b; /* Amber - for active verb / passive auxiliary */
+            --hl-part: #c084fc;  /* Purple - for past participle */
+
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 {
+            top: -10%;
+            right: -5%;
+            width: 400px;
+            height: 400px;
+        }
+        .orb-2 {
+            bottom: -10%;
+            left: -5%;
+            width: 500px;
+            height: 500px;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--text-pri);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section {
+            margin-bottom: 5rem;
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Grammar Highlights */
+        .hl-tense { color: var(--hl-tense); font-weight: 600; }
+        .hl-part { color: var(--hl-part); font-weight: 600; }
+
+        .grammar-key {
+            display: inline-flex;
+            gap: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Section 1: Onboarding */
+        .onboarding-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .onboarding-card p {
+            font-size: 1.1rem;
+            color: var(--text-pri);
+        }
+
+        /* Section 2: Accordion */
+        .acc-wrapper {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        .acc-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-pri);
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .acc-header:hover {
+            background: var(--surface-alt);
+        }
+        .acc-header .chevron {
+            font-size: 1.5rem;
+            transition: transform 0.35s ease;
+            color: var(--accent);
+        }
+        .acc-wrapper.open > .acc-header .chevron {
+            transform: rotate(180deg);
+        }
+        
+        /* Grid transition for smooth open/close */
+        .acc-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s ease;
+        }
+        .acc-wrapper.open > .acc-content {
+            grid-template-rows: 1fr;
+        }
+        .acc-content > .acc-inner {
+            overflow: hidden;
+        }
+        
+        .acc-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+        
+        .sub-acc { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); margin-top: 1rem; }
+        .sub-acc .acc-header { padding: 1rem 1.5rem; }
+        
+        .grammar-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .grammar-item {
+            background: rgba(255,255,255,0.02);
+            padding: 1.25rem;
+            border-radius: 6px;
+        }
+        .grammar-item .form { color: var(--accent); font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
+        .grammar-item .structure { font-size: 0.85rem; color: var(--text-sec); margin-bottom: 1rem; font-family: monospace; }
+        
+        .example-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-pri);
+        }
+        .example-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .example-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sec);
+            background: rgba(255,255,255,0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            align-self: flex-start;
+            margin-top: 2px;
+        }
+
+        .trap-callout {
+            background: rgba(248, 113, 113, 0.1);
+            border-left: 3px solid var(--incorrect);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.9rem;
+        }
+        .trap-callout strong { color: var(--incorrect); }
+
+        /* Section 3: Exercises */
+        .progress-wrapper {
+            margin-bottom: 2rem;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-alt);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text { font-size: 0.9rem; color: var(--text-sec); text-align: right; }
+
+        .exercise-instruction {
+            font-style: italic;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 6px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .card.correct { border-left-color: var(--correct); background: rgba(52, 211, 153, 0.05); }
+        .card.incorrect { border-left-color: var(--incorrect); background: rgba(248, 113, 113, 0.05); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .item-number { font-family: var(--font-display); color: var(--text-sec); font-weight: 700; }
+        .trans-type {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sec);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .trans-type.visible { opacity: 1; }
+
+        .original-sentence {
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            color: var(--text-pri);
+        }
+        .keyword-row {
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-sec);
+        }
+        .keyword-badge {
+            background: rgba(74, 158, 255, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-left: 0.5rem;
+        }
+
+        .transform-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.05rem;
+            line-height: 2;
+        }
+        .gap-input {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-pri);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 280px;
+            transition: all 0.2s;
+        }
+        .gap-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+        }
+        .gap-input:disabled { opacity: 1; }
+        .card.correct .gap-input:disabled { border-color: var(--correct); color: var(--correct); background: rgba(52, 211, 153, 0.1); }
+        .card.incorrect .gap-input:disabled { border-color: var(--incorrect); color: var(--incorrect); background: rgba(248, 113, 113, 0.1); }
+
+        .action-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .btn-check {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-check:hover { background: var(--accent-hover); }
+        .btn-check:disabled { background: var(--surface-alt); color: var(--text-sec); cursor: not-allowed; }
+        
+        .feedback-container {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+        }
+        .feedback-container.visible { display: block; }
+        
+        .feedback-text { font-size: 0.95rem; margin-bottom: 1rem; }
+        .text-green { color: var(--correct); }
+        .text-red { color: var(--incorrect); }
+        .correct-answer-highlight { color: var(--text-pri); font-weight: 600; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
+        .alt-answers { display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-sec); }
+
+        .mapping-box {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: var(--text-pri);
+        }
+        .mapping-box strong { color: var(--text-sec); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-right: 0.5rem; }
+
+        /* Section 4: Wrap-up */
+        .wrap-up-list {
+            list-style: none;
+            counter-reset: wrapup-counter;
+        }
+        .wrap-up-list li {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        .wrap-up-list li::before {
+            counter-increment: wrapup-counter;
+            content: counter(wrapup-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            background: rgba(74, 158, 255, 0.15);
+            color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .wrap-up-note {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--text-sec);
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 2rem 1rem; }
+            h1 { font-size: 2rem; }
+            .gap-input { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <!-- SECTION 1: ONBOARDING -->
+        <section id="onboarding">
+            <h1>Welcome to CAE</h1>
+            <div class="onboarding-card">
+                <p>You passed FCE. That proves your English works out in the real world. But CAE is a different kind of challenge.</p><br>
+                <p>FCE tested whether you could <strong>use</strong> English to get your point across. CAE tests whether you can <strong>control</strong> it. At B2, you could often find the right answer just by "feel"—because it sounded right. At C1, that instinct stops working. The structures are more complex, the traps are subtler, and the examiner expects deliberate manipulation of the language, not just good guessing.</p><br>
+                <p>Our main job for these first two months is to build the system behind the language. When you see a structure, you shouldn't just guess; you need to be able to name it and know exactly what to do with it.</p><br>
+                <p>We're starting today with passive constructions. Not because they're easy, but because they are everywhere in the exam and form the absolute foundation of formal written English. Let's get to work.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: GRAMMAR REFERENCE -->
+        <section id="grammar">
+            <h2>The Passive System</h2>
+            
+            <div class="acc-wrapper" id="main-grammar-acc">
+                <button class="acc-header" onclick="toggleAcc('main-grammar-acc')">
+                    <h3>Grammar Reference — open after attempting the exercises, or use for review.</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        
+                        <div class="grammar-key">
+                            <span>Key: <span class="hl-tense">Active Verb / Passive Auxiliary</span></span>
+                            <span><span class="hl-part">Past Participle</span></span>
+                        </div>
+
+                        <!-- Panel 1 -->
+                        <div class="acc-wrapper sub-acc" id="panel-1">
+                            <button class="acc-header" onclick="toggleAcc('panel-1')">
+                                <h4>Core passive forms (simple tenses)</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <div class="grammar-grid">
+                                        <div class="grammar-item">
+                                            <div class="form">Present simple passive</div>
+                                            <div class="structure">am/is/are + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>They <span class="hl-tense">publish</span> the results every year.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The results <span class="hl-tense">are</span> <span class="hl-part">published</span> every year.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Past simple passive</div>
+                                            <div class="structure">was/were + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>They <span class="hl-tense">built</span> the bridge in 1987.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The bridge <span class="hl-tense">was</span> <span class="hl-part">built</span> in 1987.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Present perfect passive</div>
+                                            <div class="structure">have/has + been + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>She <span class="hl-tense">has submitted</span> the report.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The report <span class="hl-tense">has been</span> <span class="hl-part">submitted</span>.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Past perfect passive</div>
+                                            <div class="structure">had + been + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>Someone <span class="hl-tense">had destroyed</span> the evidence.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The evidence <span class="hl-tense">had been</span> <span class="hl-part">destroyed</span>.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Future passive (will)</div>
+                                            <div class="structure">will + be + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>They <span class="hl-tense">will announce</span> the results tomorrow.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The results <span class="hl-tense">will be</span> <span class="hl-part">announced</span> tomorrow.</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2 -->
+                        <div class="acc-wrapper sub-acc" id="panel-2">
+                            <button class="acc-header" onclick="toggleAcc('panel-2')">
+                                <h4>Continuous and modal passives</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <div class="grammar-grid">
+                                        <div class="grammar-item">
+                                            <div class="form">Present continuous passive</div>
+                                            <div class="structure">am/is/are + being + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>They <span class="hl-tense">are analysing</span> the data.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The data <span class="hl-tense">is being</span> <span class="hl-part">analysed</span>.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Past continuous passive</div>
+                                            <div class="structure">was/were + being + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>They <span class="hl-tense">were renovating</span> the building.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The building <span class="hl-tense">was being</span> <span class="hl-part">renovated</span>.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Modal passive</div>
+                                            <div class="structure">modal + be + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>We <span class="hl-tense">must address</span> the issue.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The issue <span class="hl-tense">must be</span> <span class="hl-part">addressed</span>.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Modal perfect passive</div>
+                                            <div class="structure">modal + have + been + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>They <span class="hl-tense">should have caught</span> the error.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The error <span class="hl-tense">should have been</span> <span class="hl-part">caught</span>.</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="trap-callout">
+                                        <strong>⚠️ CAE Trap:</strong> Modal perfect passives have three auxiliaries in a row (modal + have + been + participle). Students frequently drop 'been' in Part 4 transformations. Don't be that student.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3 -->
+                        <div class="acc-wrapper sub-acc" id="panel-3">
+                            <button class="acc-header" onclick="toggleAcc('panel-3')">
+                                <h4>Impersonal passives</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>These two structures are interchangeable in meaning. CAE Part 4 will frequently ask you to convert between them. Common reporting verbs used: <em>believe, say, report, consider, know, expect, claim, think, allege.</em></p>
+                                    <div class="grammar-grid">
+                                        <div class="grammar-item">
+                                            <div class="form">Structure A (It-clause)</div>
+                                            <div class="structure">It + passive reporting verb + that-clause</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>People <span class="hl-tense">believe</span> that the policy has failed.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>It <span class="hl-tense">is</span> <span class="hl-part">believed</span> that the policy has failed.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Structure B (Infinitive)</div>
+                                            <div class="structure">Subject + passive reporting verb + to-infinitive</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The policy <span class="hl-tense">is</span> <span class="hl-part">believed</span> to have failed.</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 4 -->
+                        <div class="acc-wrapper sub-acc" id="panel-4">
+                            <button class="acc-header" onclick="toggleAcc('panel-4')">
+                                <h4>Causative and phrasal verb passives</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <div class="grammar-grid">
+                                        <div class="grammar-item">
+                                            <div class="form">Causative have</div>
+                                            <div class="structure">have + object + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>A mechanic <span class="hl-tense">repaired</span> her car.</span></div>
+                                                <div class="example-row"><span class="example-label">Causative</span> <span>She <span class="hl-tense">had</span> her car <span class="hl-part">repaired</span>.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Causative get</div>
+                                            <div class="structure">get + object + past participle</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>Someone <span class="hl-tense">stole</span> his phone.</span></div>
+                                                <div class="example-row"><span class="example-label">Causative</span> <span>He <span class="hl-tense">got</span> his phone <span class="hl-part">stolen</span>.</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Passive of phrasal verbs</div>
+                                            <div class="structure">Object becomes subject; particle stays attached</div>
+                                            <div class="example-group">
+                                                <div class="example-row"><span class="example-label">Active</span> <span>They <span class="hl-tense">called off</span> the meeting.</span></div>
+                                                <div class="example-row"><span class="example-label">Passive</span> <span>The meeting <span class="hl-tense">was</span> <span class="hl-part">called off</span>.</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="trap-callout">
+                                        <strong>⚠️ CAE Trap:</strong> When transforming a phrasal verb into the passive, the most common error is forgetting to include the particle (e.g., writing "was called" instead of "was called off").
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            <h2>Part 4: Key Word Transformations</h2>
+            
+            <div class="progress-wrapper">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text"><span id="progress-count">0</span> / 12 attempted</p>
+            </div>
+
+            <p class="exercise-instruction">Complete the second sentence so that it has a similar meaning to the first sentence, using the word given. Do not change the word given. You must use between three and six words, including the word given.</p>
+
+            <div id="exercise-container">
+                <!-- Cards injected via JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li>What are the three passive forms you're most likely to confuse?</li>
+                <li>What does an impersonal passive do that a normal passive doesn't?</li>
+                <li>When you see a Part 4 item that involves a passive, what's your first move?</li>
+            </ul>
+            <p class="wrap-up-note">These are not trick questions. There are no wrong answers — the point is to hear yourself explain the system.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // Exercise Data
+        const exercises = [
+            {
+                original: "The council will announce the results of the investigation next Friday.",
+                keyword: "ANNOUNCED",
+                prefix: "The results of the investigation",
+                suffix: "next Friday.",
+                answers: ["will be announced"],
+                type: "FUTURE PASSIVE",
+                mapping: `<span class="hl-tense">will announce</span> → <span class="hl-tense">will be</span> <span class="hl-part">announced</span>`
+            },
+            {
+                original: "People generally consider that excessive screen time damages children's concentration.",
+                keyword: "CONSIDERED",
+                prefix: "Excessive screen time",
+                suffix: "children's concentration.",
+                answers: ["is generally considered to damage"],
+                type: "PERSONAL IMPERSONAL PASSIVE",
+                mapping: `<span class="hl-tense">consider</span> → <span class="hl-tense">is</span> generally <span class="hl-part">considered</span>`
+            },
+            {
+                original: "A specialist restored the painting before the exhibition opened.",
+                keyword: "HAD",
+                prefix: "They",
+                suffix: "before the exhibition opened.",
+                answers: ["had the painting restored"],
+                type: "CAUSATIVE HAVE",
+                mapping: `<span class="hl-tense">restored</span> → <span class="hl-tense">had</span> the painting <span class="hl-part">restored</span>`
+            },
+            {
+                original: "Somebody should have informed the committee about the change in schedule.",
+                keyword: "BEEN",
+                prefix: "The committee",
+                suffix: "about the change in schedule.",
+                answers: ["should have been informed"],
+                type: "MODAL PERFECT PASSIVE",
+                mapping: `<span class="hl-tense">should have informed</span> → <span class="hl-tense">should have been</span> <span class="hl-part">informed</span>`
+            },
+            {
+                original: "Workers are currently carrying out repairs on the eastern section of the motorway.",
+                keyword: "BEING",
+                prefix: "Repairs",
+                suffix: "on the eastern section of the motorway.",
+                answers: ["are currently being carried out", "are being carried out at present", "are currently being carried out at present"],
+                type: "PRESENT CONTINUOUS PASSIVE",
+                mapping: `<span class="hl-tense">are</span> currently <span class="hl-tense">carrying out</span> → <span class="hl-tense">are</span> currently <span class="hl-tense">being</span> <span class="hl-part">carried out</span>`
+            },
+            {
+                original: "Experts widely believe that the new regulations will reduce carbon emissions significantly.",
+                keyword: "BELIEVED",
+                prefix: "It",
+                suffix: "the new regulations will reduce carbon emissions significantly.",
+                answers: ["is widely believed that"],
+                type: "IMPERSONAL PASSIVE (IT-STRUCTURE)",
+                mapping: `<span class="hl-tense">believe</span> → <span class="hl-tense">is</span> widely <span class="hl-part">believed</span>`
+            },
+            {
+                original: "The authorities had already called off the rescue operation by the time more volunteers arrived.",
+                keyword: "BEEN",
+                prefix: "The rescue operation",
+                suffix: "by the time more volunteers arrived.",
+                answers: ["had already been called off"],
+                type: "PASSIVE OF PHRASAL VERB (PAST PERFECT)",
+                mapping: `<span class="hl-tense">had</span> already <span class="hl-tense">called off</span> → <span class="hl-tense">had</span> already <span class="hl-tense">been</span> <span class="hl-part">called off</span>`
+            },
+            {
+                original: "Someone must have tampered with the security system during the night.",
+                keyword: "BEEN",
+                prefix: "The security system",
+                suffix: "during the night.",
+                answers: ["must have been tampered with"],
+                type: "MODAL PERFECT PASSIVE",
+                mapping: `<span class="hl-tense">must have tampered</span> → <span class="hl-tense">must have been</span> <span class="hl-part">tampered</span>`
+            },
+            {
+                original: "A leading architect is currently designing the new civic centre.",
+                keyword: "BEING",
+                prefix: "The new civic centre",
+                suffix: "a leading architect.",
+                answers: ["is currently being designed by"],
+                type: "PRESENT CONTINUOUS PASSIVE (WITH AGENT)",
+                mapping: `<span class="hl-tense">is</span> currently <span class="hl-tense">designing</span> → <span class="hl-tense">is</span> currently <span class="hl-tense">being</span> <span class="hl-part">designed</span>`
+            },
+            {
+                original: "They say that the suspect handed himself in to police early this morning.",
+                keyword: "SAID",
+                prefix: "The suspect",
+                suffix: "himself in to police early this morning.",
+                answers: ["is said to have handed"],
+                type: "PERSONAL IMPERSONAL PASSIVE (PERFECT INFINITIVE)",
+                mapping: `<span class="hl-tense">say</span> ... <span class="hl-tense">handed</span> → <span class="hl-tense">is</span> <span class="hl-part">said</span> to have <span class="hl-part">handed</span>`
+            },
+            {
+                original: "The company didn't take on any new staff during the economic downturn.",
+                keyword: "TAKEN",
+                prefix: "No new staff",
+                suffix: "by the company during the economic downturn.",
+                answers: ["were taken on"],
+                type: "PASSIVE OF PHRASAL VERB (SIMPLE PAST)",
+                mapping: `<span class="hl-tense">take on</span> → <span class="hl-tense">were</span> <span class="hl-part">taken on</span>`
+            },
+            {
+                original: "A local photographer had taken the prize-winning image the previous winter.",
+                keyword: "BEEN",
+                prefix: "The prize-winning image",
+                suffix: "a local photographer the previous winter.",
+                answers: ["had been taken by"],
+                type: "PAST PERFECT PASSIVE (WITH AGENT)",
+                mapping: `<span class="hl-tense">had taken</span> → <span class="hl-tense">had been</span> <span class="hl-part">taken</span>`
+            }
+        ];
+
+        const container = document.getElementById('exercise-container');
+        let attemptedCount = 0;
+        const attemptedItems = new Set();
+
+        // Render Exercises
+        exercises.forEach((ex, index) => {
+            const cardHTML = `
+                <div class="card" id="card-${index}">
+                    <div class="card-header">
+                        <span class="item-number">Item ${index + 1}</span>
+                        <span class="trans-type" id="type-${index}">${ex.type}</span>
+                    </div>
+                    <div class="original-sentence">${ex.original}</div>
+                    <div class="keyword-row">Key word: <span class="keyword-badge">${ex.keyword}</span></div>
+                    <div class="transform-area">
+                        <span>${ex.prefix}</span>
+                        <input type="text" id="input-${index}" class="gap-input" autocomplete="off" autocorrect="off" spellcheck="false" />
+                        <span>${ex.suffix}</span>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-check" id="btn-${index}" onclick="checkAnswer(${index})">Check Answer</button>
+                    </div>
+                    <div class="feedback-container" id="feedback-container-${index}">
+                        <div class="feedback-text" id="feedback-text-${index}"></div>
+                        <div class="mapping-box"><strong>Mapping:</strong> ${ex.mapping}</div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHTML);
+
+            // Add Enter key listener
+            const inputEl = document.getElementById(`input-${index}`);
+            inputEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    checkAnswer(index);
+                }
+            });
+        });
+
+        // Check Answer Logic
+        function checkAnswer(index) {
+            if (attemptedItems.has(index)) return;
+
+            const inputEl = document.getElementById(`input-${index}`);
+            const btnEl = document.getElementById(`btn-${index}`);
+            const cardEl = document.getElementById(`card-${index}`);
+            const feedbackContainerEl = document.getElementById(`feedback-container-${index}`);
+            const feedbackTextEl = document.getElementById(`feedback-text-${index}`);
+            const typeEl = document.getElementById(`type-${index}`);
+            
+            const userVal = inputEl.value.trim().toLowerCase();
+            const exercise = exercises[index];
+            const isCorrect = exercise.answers.some(a => a.toLowerCase() === userVal);
+
+            // Update State
+            attemptedItems.add(index);
+            attemptedCount++;
+            document.getElementById('progress-count').innerText = attemptedCount;
+            document.getElementById('progress-fill').style.width = `${(attemptedCount / exercises.length) * 100}%`;
+
+            // UI Updates
+            inputEl.disabled = true;
+            btnEl.disabled = true;
+            btnEl.innerText = isCorrect ? "✓ Checked" : "✗ Checked";
+            typeEl.classList.add('visible');
+            feedbackContainerEl.classList.add('visible');
+
+            if (isCorrect) {
+                cardEl.classList.add('correct');
+                feedbackTextEl.classList.add('text-green');
+                feedbackTextEl.innerHTML = `<strong>Spot on.</strong> Well done.`;
+            } else {
+                cardEl.classList.add('incorrect');
+                feedbackTextEl.classList.add('text-red');
+                let feedbackHTML = `<strong>Not quite.</strong> The correct answer is: <span class="correct-answer-highlight">${exercise.answers[0]}</span>`;
+                if (exercise.answers.length > 1) {
+                    feedbackHTML += `<span class="alt-answers">Also accepted: ${exercise.answers.slice(1).join(' / ')}</span>`;
+                }
+                feedbackTextEl.innerHTML = feedbackHTML;
+            }
+        }
+    </script>
+</body>
+</html>
