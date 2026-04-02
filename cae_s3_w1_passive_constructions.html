@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 3: Word Formation & Phrasal Verbs</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #4a9eff;
+            --accent-hover: #73b5ff;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            --surface-scenario: rgba(255, 255, 255, 0.06);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 {
+            top: -10%;
+            right: -5%;
+            width: 400px;
+            height: 400px;
+        }
+        .orb-2 {
+            bottom: -10%;
+            left: -5%;
+            width: 500px;
+            height: 500px;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-btn:hover {
+            color: var(--accent);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--text-pri);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section {
+            margin-bottom: 5rem;
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Section 1: Orientation */
+        .orientation-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .orientation-card p {
+            font-size: 1.1rem;
+            color: var(--text-pri);
+        }
+
+        /* Section 2: Accordion */
+        .acc-wrapper {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        .acc-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-pri);
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .acc-header:hover {
+            background: var(--surface-alt);
+        }
+        .acc-header .chevron {
+            font-size: 1.5rem;
+            transition: transform 0.35s ease;
+            color: var(--accent);
+        }
+        .acc-wrapper.open > .acc-header .chevron {
+            transform: rotate(180deg);
+        }
+        
+        .acc-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s ease;
+        }
+        .acc-wrapper.open > .acc-content {
+            grid-template-rows: 1fr;
+        }
+        .acc-content > .acc-inner {
+            overflow: hidden;
+        }
+        
+        .acc-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+        
+        .sub-acc { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); margin-top: 1rem; }
+        .sub-acc .acc-header { padding: 1rem 1.5rem; }
+
+        .grammar-note {
+            background: rgba(74, 158, 255, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.95rem;
+            color: var(--text-pri);
+        }
+        
+        .morph-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        .morph-list li {
+            margin-bottom: 0.75rem;
+            color: var(--text-pri);
+            font-size: 1.05rem;
+        }
+        .morph-suffix {
+            color: var(--accent);
+            font-weight: 700;
+            font-family: var(--font-display);
+            display: inline-block;
+            width: 100px;
+        }
+        .morph-example {
+            color: var(--text-sec);
+        }
+
+        /* Section 3: Part 3 Exercises */
+        .progress-wrapper {
+            margin-bottom: 2rem;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-alt);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text { font-size: 0.9rem; color: var(--text-sec); text-align: right; }
+
+        .card {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .card.correct { border-left-color: var(--correct); background: rgba(52, 211, 153, 0.05); }
+        .card.incorrect { border-left-color: var(--incorrect); background: rgba(248, 113, 113, 0.05); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .item-number { font-family: var(--font-display); color: var(--text-sec); font-weight: 700; }
+        .deriv-type {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sec);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .deriv-type.visible { opacity: 1; }
+
+        .sentence-row {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-pri);
+            line-height: 1.6;
+        }
+        .base-word-badge {
+            display: inline-block;
+            background: rgba(74, 158, 255, 0.15);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-left: 0.75rem;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .gap-input {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-pri);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            width: 100%;
+            max-width: 300px;
+            transition: all 0.2s;
+        }
+        .gap-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+        }
+        .gap-input:disabled { opacity: 1; }
+        .card.correct .gap-input:disabled { border-color: var(--correct); color: var(--correct); background: rgba(52, 211, 153, 0.1); }
+        .card.incorrect .gap-input:disabled { border-color: var(--incorrect); color: var(--incorrect); background: rgba(248, 113, 113, 0.1); }
+
+        .btn-check {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .btn-check:hover { background: var(--accent-hover); }
+        .btn-check:disabled { background: var(--surface-alt); color: var(--text-sec); cursor: not-allowed; }
+
+        .feedback-text {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            display: none;
+            padding-top: 1rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+        }
+        .feedback-text.visible { display: block; }
+        .text-green { color: var(--correct); }
+        .text-red { color: var(--incorrect); }
+        .correct-answer-highlight { color: var(--text-pri); font-weight: 600; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; }
+
+        /* Section 4: Phrasal Verbs */
+        .pv-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        @media (min-width: 700px) {
+            .pv-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .pv-card {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .pv-title {
+            font-size: 1.6rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .pv-example {
+            font-size: 1.05rem;
+            color: var(--text-pri);
+            margin-bottom: 1.25rem;
+            font-style: italic;
+        }
+        .pv-toggle {
+            align-self: flex-start;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+        }
+        .pv-toggle:hover {
+            background: rgba(74, 158, 255, 0.1);
+        }
+        .pv-hidden {
+            display: none;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .pv-hidden.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pv-meaning {
+            font-size: 0.95rem;
+            color: var(--text-pri);
+            margin-bottom: 0.75rem;
+        }
+        .pv-meaning strong { color: var(--text-sec); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; margin-right: 4px; }
+        .pv-example-2 {
+            font-size: 0.95rem;
+            color: var(--text-sec);
+            font-style: italic;
+        }
+
+        /* Section 5: Scenario */
+        .scenario-block {
+            background: var(--surface-scenario);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 2rem;
+            margin-top: 1.5rem;
+        }
+        .scenario-text {
+            font-size: 1.15rem;
+            color: var(--text-pri);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+        .verb-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .verb-pill {
+            background: color-mix(in srgb, var(--accent) 15%, transparent);
+            color: var(--accent);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .scenario-note {
+            font-size: 0.9rem;
+            color: var(--text-sec);
+            font-style: italic;
+            margin: 0;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 1.5rem 1rem 4rem 1rem; }
+            h1 { font-size: 2rem; }
+            .input-row { flex-direction: column; align-items: stretch; }
+            .gap-input { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: ORIENTATION -->
+        <section id="orientation">
+            <h1>Session 3: Words & Movement</h1>
+            <div class="orientation-card">
+                <p>In Sessions 1 and 2, we looked at the passive system from two angles: structural manipulation (Part 4) and recognition in running text (Part 2).</p>
+                <p>Today, we add a third angle: the morphological one. The words that surround passive constructions in formal writing — the nouns and adjectives derived from verbs — are what make academic register possible. Without them, the passive sounds clunky. With them, it sounds controlled.</p>
+                <p>This session also introduces our first phrasal verb block. This will be a standing feature of every Session 3 from now on. Today's semantic field is movement and direction — six verbs that will end in a production task that is more demanding than it looks.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: GRAMMAR REFERENCE -->
+        <section id="grammar">
+            <div class="acc-wrapper" id="main-grammar-acc">
+                <button class="acc-header" onclick="toggleAcc('main-grammar-acc')">
+                    <h3>Grammar Reference — Derivational Morphology (open for review)</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        
+                        <!-- Panel 1 -->
+                        <div class="acc-wrapper sub-acc" id="panel-1">
+                            <button class="acc-header" onclick="toggleAcc('panel-1')">
+                                <h4>Verbs to abstract nouns</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>The most productive suffixes at CAE level:</p>
+                                    <ul class="morph-list">
+                                        <li><span class="morph-suffix">-tion / -sion</span> <span class="morph-example">construct → construction, restore → restoration, divide → division</span></li>
+                                        <li><span class="morph-suffix">-ment</span> <span class="morph-example">develop → development, employ → employment</span></li>
+                                        <li><span class="morph-suffix">-ance / -ence</span> <span class="morph-example">perform → performance, refer → reference</span></li>
+                                        <li><span class="morph-suffix">-al</span> <span class="morph-example">arrive → arrival, refuse → refusal, approve → approval</span></li>
+                                        <li><span class="morph-suffix">-ure</span> <span class="morph-example">fail → failure, expose → exposure</span></li>
+                                        <li><span class="morph-suffix">-y</span> <span class="morph-example">discover → discovery, deliver → delivery</span></li>
+                                    </ul>
+                                    <div class="grammar-note">
+                                        <strong>Note:</strong> The suffix cannot always be predicted from the verb. When two suffixes seem possible (e.g. -ment vs -tion), check which one produces a real word. Both <em>refusal</em> and <em>refusement</em> feel possible — but only <em>refusal</em> actually exists.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2 -->
+                        <div class="acc-wrapper sub-acc" id="panel-2">
+                            <button class="acc-header" onclick="toggleAcc('panel-2')">
+                                <h4>Verbs to adjectives</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <ul class="morph-list">
+                                        <li><span class="morph-suffix">-ive</span> <span class="morph-example">construct → constructive, innovate → innovative, protect → protective</span></li>
+                                        <li><span class="morph-suffix">-able / -ible</span> <span class="morph-example">achieve → achievable, rely → reliable, access → accessible</span></li>
+                                        <li><span class="morph-suffix">-ed / -ing</span> <span class="morph-example">damage → damaged (the damaged building), convince → convincing (a convincing argument)</span></li>
+                                    </ul>
+                                    <div class="grammar-note">
+                                        <strong>Note:</strong> -able and -ible are not interchangeable — the choice depends on the root. Verbs ending in -ate usually take -able (innovate → innovative is an exception, taking -ive). When unsure, eliminate: ask yourself which form you have actually seen in real texts.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3 -->
+                        <div class="acc-wrapper sub-acc" id="panel-3">
+                            <button class="acc-header" onclick="toggleAcc('panel-3')">
+                                <h4>Negative prefixes on derived forms</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>At CAE, the trap is often a negative prefix layered on top of a derivation:</p>
+                                    <ul class="morph-list">
+                                        <li><span class="morph-suffix">un-</span> <span class="morph-example">unreliable, unprotected, underdeveloped</span></li>
+                                        <li><span class="morph-suffix">in-/im-/ir-/il-</span> <span class="morph-example">inadequate, impractical, irreversible, illegible</span></li>
+                                    </ul>
+                                    <p style="margin-top: 1rem; color: var(--text-pri);">The prefix choice depends on the first letter of the base: <strong>im-</strong> before b/m/p, <strong>ir-</strong> before r, <strong>il-</strong> before l, <strong>in-</strong> elsewhere.</p>
+                                    <div class="grammar-note">
+                                        <strong>Important:</strong> The prefix attaches to the DERIVED form, not the base verb. You must derive the word first, then add the prefix. Example: EMPLOY → unemploy (wrong) → unemployment (correct).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            <h2>Part 3: Word Formation</h2>
+            
+            <div class="progress-wrapper">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text"><span id="progress-count">0</span> / 8 attempted</p>
+            </div>
+
+            <div id="exercise-container">
+                <!-- Cards injected via JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 4: PHRASAL VERBS -->
+        <section id="phrasal-verbs">
+            <h2>Phrasal Verbs — Week 1: Movement & Direction</h2>
+            <p>Six verbs. Read the example, work out the meaning, then click to confirm.</p>
+            
+            <div class="pv-grid">
+                
+                <div class="pv-card">
+                    <h3 class="pv-title">set off</h3>
+                    <p class="pv-example">The delegation set off for Brussels early on Monday morning.</p>
+                    <button class="pv-toggle" onclick="togglePV(this, 'pv-1')">Reveal</button>
+                    <div id="pv-1" class="pv-hidden">
+                        <p class="pv-meaning"><strong>Meaning:</strong> To begin a journey or depart for a destination.</p>
+                        <p class="pv-example-2">"The protesters' march set off a chain of events that would last for months."</p>
+                    </div>
+                </div>
+
+                <div class="pv-card">
+                    <h3 class="pv-title">break away</h3>
+                    <p class="pv-example">A group of senior MPs broke away from the party following the leadership crisis.</p>
+                    <button class="pv-toggle" onclick="togglePV(this, 'pv-2')">Reveal</button>
+                    <div id="pv-2" class="pv-hidden">
+                        <p class="pv-meaning"><strong>Meaning:</strong> To separate from a larger group, organisation, or system — often implying disagreement or independence.</p>
+                        <p class="pv-example-2">"She broke away from the crowd and headed towards the exit."</p>
+                    </div>
+                </div>
+
+                <div class="pv-card">
+                    <h3 class="pv-title">get through</h3>
+                    <p class="pv-example">After three attempts, she finally got through to the minister's office.</p>
+                    <button class="pv-toggle" onclick="togglePV(this, 'pv-3')">Reveal</button>
+                    <div id="pv-3" class="pv-hidden">
+                        <p class="pv-meaning"><strong>Meaning:</strong> (1) To successfully make contact with someone. (2) To survive or complete something difficult.</p>
+                        <p class="pv-example-2">"I don't know how he got through the first year of the programme — it was relentless."</p>
+                    </div>
+                </div>
+
+                <div class="pv-card">
+                    <h3 class="pv-title">move on</h3>
+                    <p class="pv-example">The committee agreed it was time to move on and consider the next item on the agenda.</p>
+                    <button class="pv-toggle" onclick="togglePV(this, 'pv-4')">Reveal</button>
+                    <div id="pv-4" class="pv-hidden">
+                        <p class="pv-meaning"><strong>Meaning:</strong> To progress past something — a topic, a situation, a place, or an experience.</p>
+                        <p class="pv-example-2">"It took her years to move on after the company collapsed."</p>
+                    </div>
+                </div>
+
+                <div class="pv-card">
+                    <h3 class="pv-title">pull out</h3>
+                    <p class="pv-example">The investment firm pulled out of the project citing regulatory concerns.</p>
+                    <button class="pv-toggle" onclick="togglePV(this, 'pv-5')">Reveal</button>
+                    <div id="pv-5" class="pv-hidden">
+                        <p class="pv-meaning"><strong>Meaning:</strong> To withdraw from a commitment, agreement, plan, or location.</p>
+                        <p class="pv-example-2">"The troops began to pull out of the region after the ceasefire was declared."</p>
+                    </div>
+                </div>
+
+                <div class="pv-card">
+                    <h3 class="pv-title">head off</h3>
+                    <p class="pv-example">The prime minister headed off the criticism by announcing an independent inquiry.</p>
+                    <button class="pv-toggle" onclick="togglePV(this, 'pv-6')">Reveal</button>
+                    <div id="pv-6" class="pv-hidden">
+                        <p class="pv-meaning"><strong>Meaning:</strong> (1) To leave or set out in a particular direction. (2) To intercept or prevent something from developing.</p>
+                        <p class="pv-example-2">"We decided to head off before the traffic got too bad."</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 5: SCENARIO -->
+        <section id="scenario">
+            <h2>Production Task</h2>
+            <p>Use all six phrasal verbs from this session to tell the following story. You can speak or write. The verbs can appear in any order. The story must make sense as a coherent narrative — dropping verbs in mechanically won't work.</p>
+            
+            <div class="scenario-block">
+                <div class="scenario-text">
+                    "A political party is falling apart. Its leader has just announced a controversial decision. Some members are unhappy. A journalist is trying to reach someone for comment. The party conference is tomorrow."
+                </div>
+                <div class="verb-pills">
+                    <span class="verb-pill">set off</span>
+                    <span class="verb-pill">break away</span>
+                    <span class="verb-pill">get through</span>
+                    <span class="verb-pill">move on</span>
+                    <span class="verb-pill">pull out</span>
+                    <span class="verb-pill">head off</span>
+                </div>
+                <p class="scenario-note">The test is not whether you used all six verbs. The test is whether the story is coherent and the verbs are semantically accurate — meaning the right thing in the right context.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // Phrasal Verb Toggle Logic
+        function togglePV(btn, targetId) {
+            const target = document.getElementById(targetId);
+            if (target.classList.contains('visible')) {
+                target.classList.remove('visible');
+                btn.innerText = "Reveal";
+            } else {
+                target.classList.add('visible');
+                btn.innerText = "Hide";
+            }
+        }
+
+        // Part 3 Exercise Data
+        const p3Data = [
+            {
+                sentence: "The government's decision to close the factory led to widespread __________ among the local workforce.",
+                base: "EMPLOY",
+                answers: ["unemployment"],
+                type: "NEGATIVE PREFIX + NOUN (-ment)"
+            },
+            {
+                sentence: "The report highlighted the __________ of the current waste management system, calling for urgent reform.",
+                base: "ADEQUATE",
+                answers: ["inadequacy"],
+                type: "NEGATIVE PREFIX + NOUN (-acy)"
+            },
+            {
+                sentence: "Several __________ measures have been introduced to reduce the environmental impact of the new development.",
+                base: "PROTECT",
+                answers: ["protective"],
+                type: "VERB → ADJECTIVE (-ive)"
+            },
+            {
+                sentence: "The committee expressed serious doubts about the __________ of the proposed solution given the available budget.",
+                base: "ACHIEVE",
+                answers: ["achievability"],
+                type: "VERB → NOUN (-ability)"
+            },
+            {
+                sentence: "The __________ of the ancient manuscripts took over two years and required highly specialised equipment.",
+                base: "RESTORE",
+                answers: ["restoration"],
+                type: "VERB → NOUN (-ation)"
+            },
+            {
+                sentence: "His __________ to accept any form of compromise made negotiations extremely difficult.",
+                base: "REFUSE",
+                answers: ["refusal"],
+                type: "VERB → NOUN (-al)"
+            },
+            {
+                sentence: "The new legislation has been widely praised for its __________ approach to environmental regulation.",
+                base: "INNOVATE",
+                answers: ["innovative"],
+                type: "VERB → ADJECTIVE (-ive)"
+            },
+            {
+                sentence: "The __________ of responsibilities between the two departments has caused considerable confusion.",
+                base: "DIVIDE",
+                answers: ["division"],
+                type: "VERB → NOUN (-sion)"
+            }
+        ];
+
+        const container = document.getElementById('exercise-container');
+        let attemptedCount = 0;
+        const attemptedItems = new Set();
+
+        // Render Part 3 Exercises
+        p3Data.forEach((ex, index) => {
+            const cardHTML = `
+                <div class="card" id="card-${index}">
+                    <div class="card-header">
+                        <span class="item-number">Item ${index + 1}</span>
+                        <span class="deriv-type" id="type-${index}">${ex.type}</span>
+                    </div>
+                    <div class="sentence-row">
+                        ${ex.sentence} <span class="base-word-badge">${ex.base}</span>
+                    </div>
+                    <div class="input-row">
+                        <input type="text" id="input-${index}" class="gap-input" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Type your answer..." />
+                        <button class="btn-check" id="btn-${index}" onclick="checkAnswer(${index})">Check Answer</button>
+                    </div>
+                    <div class="feedback-text" id="feedback-${index}"></div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHTML);
+
+            // Add Enter key listener
+            const inputEl = document.getElementById(`input-${index}`);
+            inputEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    checkAnswer(index);
+                }
+            });
+        });
+
+        // Check Answer Logic for Part 3
+        function checkAnswer(index) {
+            if (attemptedItems.has(index)) return;
+
+            const inputEl = document.getElementById(`input-${index}`);
+            const btnEl = document.getElementById(`btn-${index}`);
+            const cardEl = document.getElementById(`card-${index}`);
+            const feedbackEl = document.getElementById(`feedback-${index}`);
+            const typeEl = document.getElementById(`type-${index}`);
+            
+            const userVal = inputEl.value.trim().toLowerCase();
+            if (userVal === "") return; // Prevent empty submission
+
+            const exercise = p3Data[index];
+            const isCorrect = exercise.answers.some(a => a.toLowerCase() === userVal);
+
+            // Update State
+            attemptedItems.add(index);
+            attemptedCount++;
+            document.getElementById('progress-count').innerText = attemptedCount;
+            document.getElementById('progress-fill').style.width = `${(attemptedCount / p3Data.length) * 100}%`;
+
+            // UI Updates
+            inputEl.disabled = true;
+            btnEl.disabled = true;
+            btnEl.innerText = isCorrect ? "✓ Correct" : "✗ Incorrect";
+            typeEl.classList.add('visible');
+            feedbackEl.classList.add('visible');
+
+            if (isCorrect) {
+                cardEl.classList.add('correct');
+                feedbackEl.classList.add('text-green');
+                feedbackEl.innerHTML = `<strong>Spot on.</strong> Well done.`;
+            } else {
+                cardEl.classList.add('incorrect');
+                feedbackEl.classList.add('text-red');
+                let feedbackHTML = `<strong>Not quite.</strong> The correct answer is: <span class="correct-answer-highlight">${exercise.answers[0]}</span>`;
+                if (exercise.answers.length > 1) {
+                    feedbackHTML += `<br><span style="font-size: 0.85rem; color: var(--text-sec); margin-top: 4px; display: block;">Also accepted: ${exercise.answers.slice(1).join(' / ')}</span>`;
+                }
+                feedbackEl.innerHTML = feedbackHTML;
+            }
+        }
+    </script>
+</body>
+</html>
