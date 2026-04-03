@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 2: Modal Verbs (Part 2)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #a78bfa; /* Purple for Week 2 */
+            --accent-hover: #bba4fc;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 {
+            top: -10%;
+            right: -5%;
+            width: 400px;
+            height: 400px;
+        }
+        .orb-2 {
+            bottom: -10%;
+            left: -5%;
+            width: 500px;
+            height: 500px;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-btn:hover {
+            color: var(--accent);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--text-pri);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section {
+            margin-bottom: 5rem;
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Section 1: Onboarding */
+        .onboarding-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .onboarding-card p {
+            font-size: 1.1rem;
+            color: var(--text-pri);
+        }
+
+        /* Section 2: Accordions */
+        .reference-label {
+            font-size: 1.1rem;
+            color: var(--text-sec);
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+        .acc-wrapper {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        .acc-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-pri);
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .acc-header:hover {
+            background: var(--surface-alt);
+        }
+        .acc-header .chevron {
+            font-size: 1.5rem;
+            transition: transform 0.35s ease;
+            color: var(--accent);
+        }
+        .acc-wrapper.open > .acc-header .chevron {
+            transform: rotate(180deg);
+        }
+        
+        .acc-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s ease;
+        }
+        .acc-wrapper.open > .acc-content {
+            grid-template-rows: 1fr;
+        }
+        .acc-content > .acc-inner {
+            overflow: hidden;
+        }
+        
+        .acc-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        .sub-acc { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); margin-top: 1rem; }
+        .sub-acc .acc-header { padding: 1rem 1.5rem; }
+
+        .guide-list {
+            list-style: none;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .guide-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-pri);
+        }
+        .guide-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .trap-callout {
+            background: rgba(167, 139, 250, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.95rem;
+            color: var(--text-pri);
+        }
+
+        /* Section 3: Exercises */
+        .exercise-instruction {
+            font-style: italic;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 6px;
+            color: var(--text-pri);
+        }
+
+        .text-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .text-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--text-pri);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .text-content {
+            font-size: 1.1rem;
+            line-height: 2.4; /* Generous line height for inline inputs */
+            color: var(--text-pri);
+        }
+
+        /* Inline Input Styling */
+        .inline-gap-wrapper {
+            display: inline-block;
+            position: relative;
+            margin: 0 4px;
+            white-space: nowrap;
+        }
+        .gap-num {
+            font-size: 0.75rem;
+            color: var(--text-sec);
+            margin-right: 2px;
+            font-weight: 600;
+            vertical-align: super;
+        }
+        .gap-input {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-bottom: 2px solid var(--accent);
+            color: var(--text-pri);
+            padding: 4px 8px;
+            border-radius: 4px 4px 0 0;
+            font-family: inherit;
+            font-size: 1.05rem;
+            text-align: center;
+            width: 120px;
+            transition: all 0.2s;
+        }
+        .gap-input:focus {
+            outline: none;
+            border-bottom-color: var(--accent-hover);
+            background: #0d1117;
+            box-shadow: 0 2px 8px rgba(167, 139, 250, 0.15);
+        }
+        .gap-input:disabled {
+            opacity: 1;
+        }
+        .gap-input.correct {
+            border-bottom-color: var(--correct);
+            color: var(--correct);
+            background: rgba(52, 211, 153, 0.1);
+        }
+        .gap-input.incorrect {
+            border-bottom-color: var(--incorrect);
+            color: var(--incorrect);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .feedback-inline {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--correct);
+            margin-top: 2px;
+            display: none;
+            pointer-events: none;
+        }
+        .feedback-inline.visible {
+            display: block;
+        }
+
+        /* Actions & Progress */
+        .action-area {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-main {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-main:hover {
+            background: var(--accent-hover);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+        .btn-outline:hover {
+            background: rgba(167, 139, 250, 0.1);
+        }
+
+        .score-display {
+            display: none;
+            margin-bottom: 1.5rem;
+        }
+        .score-display.visible {
+            display: block;
+        }
+        .score-text {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--text-pri);
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            max-width: 400px;
+            height: 6px;
+            background: var(--surface-alt);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+
+        /* Section 4: Wrap-up */
+        .wrap-up-list {
+            list-style: none;
+            counter-reset: wrapup-counter;
+        }
+        .wrap-up-list li {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        .wrap-up-list li::before {
+            counter-increment: wrapup-counter;
+            content: counter(wrapup-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            background: rgba(167, 139, 250, 0.15);
+            color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .wrap-up-note {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--text-sec);
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 1.5rem 1rem 4rem 1rem; }
+            h1 { font-size: 2rem; }
+            .text-card { padding: 1.5rem; }
+            .text-content { font-size: 1.05rem; line-height: 2.2; }
+            .gap-input { width: 100px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: ONBOARDING -->
+        <section id="onboarding">
+            <h1>Session 2: Removing the Scaffolding</h1>
+            <div class="onboarding-card">
+                <p>Session 1 built the system: names, forms, and distinctions. Session 2 tests something different — whether you can read a sentence, sense what's missing, and produce the exact form with no options, no scaffolding, and no key word to prompt you.</p>
+                <p>This is Part 2: open cloze. One word per gap. The examiner has removed it deliberately. The job is to figure out what it is and write it — nothing more.</p>
+                <p>The traps here are not about vocabulary. They are about assumption. The biggest mistake students make in Part 2 is deciding what they expect the gap to be before they have read the full sentence. That is The Movie in your head. The answer is in The Ink.</p>
+                <p>Not every gap in these texts is a modal. Some are not. That is deliberate. The examiner does the same thing in the real exam. Read the whole sentence first, every time.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: REFERENCE ACCORDIONS -->
+        <section id="references">
+            <div class="reference-label">References — open if needed, or use for review after the exercise.</div>
+            
+            <!-- Accordion A: Part 2 Strategy -->
+            <div class="acc-wrapper" id="acc-strategy">
+                <button class="acc-header" onclick="toggleAcc('acc-strategy')">
+                    <h3>Part 2 — Reading and gap strategy</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        <h4>WHAT PART 2 TESTS</h4>
+                        <p>Part 2 tests grammatical awareness at the word level: auxiliary verbs, modal verbs, prepositions, pronouns, conjunctions, relative pronouns, determiners, and discourse markers. It does not test vocabulary. The missing word is almost always a function word or a grammatical form.</p>
+                        
+                        <h4 style="margin-top: 1.5rem;">HOW TO WORK THROUGH IT</h4>
+                        <ul class="guide-list">
+                            <li><strong>Step 1</strong> — Read the whole text first. Do not stop at gaps. Get the meaning and register of the full passage before writing anything.</li>
+                            <li><strong>Step 2</strong> — Return to gap 1. Read the full sentence containing the gap — not just the words on either side.</li>
+                            <li><strong>Step 3</strong> — Identify the grammatical slot: what part of speech is missing? What structure surrounds the gap?</li>
+                            <li><strong>Step 4</strong> — Write one word only. No two-word answers are accepted in Part 2 — except contracted forms, which count as one word (e.g. couldn't). Note: semi-modals like "be able to" span multiple words — in Part 2 these are typically gapped one word at a time within a pre-given frame, not as a full phrase.</li>
+                            <li><strong>Step 5</strong> — Check: does your word fit the grammar of the whole sentence, not just the gap?</li>
+                        </ul>
+
+                        <h4>WHAT THE EXAMINER REMOVES</h4>
+                        <p>The examiner tends to remove: auxiliary verbs in complex tenses (have, be, been), modal verbs (must, might, ought, should, need), prepositions after fixed expressions, relative pronouns (which, whose, whom), conjunctions and discourse markers (although, despite, however), and determiners (such, both, either).</p>
+
+                        <h4 style="margin-top: 1.5rem;">COMMON ERRORS</h4>
+                        <ul class="guide-list" style="margin-bottom: 0;">
+                            <li>Writing two words when only one is allowed</li>
+                            <li>Choosing a word that fits the immediate gap but breaks the grammar of the full sentence</li>
+                            <li>Assuming every gap in a modal-themed exercise is a modal — some are not</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accordion B: Modal Quick-Reference -->
+            <div class="acc-wrapper" id="acc-modals">
+                <button class="acc-header" onclick="toggleAcc('acc-modals')">
+                    <h3>Modal quick-reference — forms from Session 1</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        
+                        <!-- Panel B1 -->
+                        <div class="acc-wrapper sub-acc" id="panel-b1">
+                            <button class="acc-header" onclick="toggleAcc('panel-b1')">
+                                <h4>Core modals and modal perfects</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p><strong>CORE MODALS</strong> (one word — gap-eligible as single words):<br>
+                                    must / can / could / may / might / will / would / should / ought / need / shall</p>
+                                    
+                                    <p style="margin-top: 1rem;"><strong>Modal meanings at a glance:</strong></p>
+                                    <ul class="guide-list">
+                                        <li><strong>must</strong> → strong deduction (positive) or strong obligation</li>
+                                        <li><strong>can't</strong> → strong deduction (negative) — note: in a gap, this is two words; as "cannot" it is one word</li>
+                                        <li><strong>might / may</strong> → possibility (might = lower certainty)</li>
+                                        <li><strong>should</strong> → advice, recommendation, or past criticism (with have)</li>
+                                        <li><strong>ought</strong> → formal equivalent of should (followed by to)</li>
+                                        <li><strong>need</strong> → negated necessity (need not / needn't); in Part 2 typically gapped as "need" within a fixed frame</li>
+                                        <li><strong>will</strong> → confident prediction or habitual action</li>
+                                        <li><strong>would</strong> → past habit, politeness, or conditional</li>
+                                    </ul>
+
+                                    <p style="margin-top: 1.5rem;"><strong>MODAL PERFECTS</strong> — the auxiliary "have" is frequently the gapped word:</p>
+                                    <ul class="guide-list">
+                                        <li><strong>must have [pp]</strong> → past deduction (positive)</li>
+                                        <li><strong>can't have [pp]</strong> → past deduction (negative) — "have" is the gappable element</li>
+                                        <li><strong>might have [pp]</strong> → past possibility</li>
+                                        <li><strong>should have [pp]</strong> → past criticism / unfulfilled obligation</li>
+                                        <li><strong>ought to have [pp]</strong> → formal equivalent of should have</li>
+                                        <li><strong>needn't have [pp]</strong> → unnecessary completed action</li>
+                                    </ul>
+                                    <div class="trap-callout">
+                                        <strong>Note:</strong> In a Part 2 gap testing a modal perfect, the gapped word is most commonly "have" — the modal itself is already given in the surrounding text. Recognising this pattern is a key Part 2 skill.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel B2 -->
+                        <div class="acc-wrapper sub-acc" id="panel-b2">
+                            <button class="acc-header" onclick="toggleAcc('panel-b2')">
+                                <h4>Semi-modals: gappable elements</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>Semi-modals appear in Part 2 when one word of the multi-word form is removed. The surrounding text provides the rest. Common patterns:</p>
+                                    <ul class="guide-list">
+                                        <li><strong>be able to</strong> → gapped as "able" (within "is/was ___ to")</li>
+                                        <li><strong>be supposed to</strong> → gapped as "supposed" (within "is/was ___ to")</li>
+                                        <li><strong>be bound to</strong> → gapped as "bound" (within "is ___ to")</li>
+                                        <li><strong>be likely to</strong> → gapped as "likely" (within "is ___ to")</li>
+                                        <li><strong>be due to</strong> → gapped as "due" (within "is ___ to")</li>
+                                        <li><strong>be set to</strong> → gapped as "set" (within "is ___ to")</li>
+                                    </ul>
+                                    <div class="trap-callout">
+                                        <strong>Note:</strong> The verb "be" and the particle "to" are given — only the adjective/participle is gapped. This is the standard Part 2 treatment of semi-modals.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            <h2>Part 2: Open Cloze</h2>
+            
+            <p class="exercise-instruction">For questions 1–16, read the texts below and think of the word which best fits each gap. Use only ONE word in each gap. There is an example at the beginning (0).</p>
+
+            <!-- TEXT 1 -->
+            <div class="text-card">
+                <h3 class="text-title">Text 1: The Future of Urban Mobility</h3>
+                <div class="text-content">
+                    Cities around the world are under growing pressure to rethink how people move. Private car use <span class="inline-gap-wrapper"><sup class="gap-num">1</sup><input type="text" class="gap-input" id="gap-1" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-1"></span></span> no longer be seen as a sustainable solution — the evidence against it is overwhelming. Urban planners now agree that public transport networks <span class="inline-gap-wrapper"><sup class="gap-num">2</sup><input type="text" class="gap-input" id="gap-2" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-2"></span></span> be expanded and integrated if cities are to meet their climate targets within the next decade.
+                    <br><br>
+                    Several major European cities have already demonstrated what <span class="inline-gap-wrapper"><sup class="gap-num">3</sup><input type="text" class="gap-input" id="gap-3" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-3"></span></span> be achieved when cycling infrastructure is properly funded. Copenhagen, for instance, is <span class="inline-gap-wrapper"><sup class="gap-num">4</sup><input type="text" class="gap-input" id="gap-4" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-4"></span></span> to become fully carbon-neutral in its transport sector by 2030, a target that <span class="inline-gap-wrapper"><sup class="gap-num">5</sup><input type="text" class="gap-input" id="gap-5" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-5"></span></span> have seemed impossible just twenty years ago. <span class="inline-gap-wrapper"><sup class="gap-num">6</sup><input type="text" class="gap-input" id="gap-6" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-6"></span></span>, many cities in the developing world face a different challenge: they <span class="inline-gap-wrapper"><sup class="gap-num">7</sup><input type="text" class="gap-input" id="gap-7" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-7"></span></span> build entire transit systems from scratch, without the luxury of adapting existing infrastructure. What is clear in both contexts is that investment in public transport is <span class="inline-gap-wrapper"><sup class="gap-num">8</sup><input type="text" class="gap-input" id="gap-8" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-8"></span></span> to deliver long-term benefits that private vehicle use simply cannot match.
+                </div>
+            </div>
+
+            <p class="exercise-instruction">Now read the second text and complete the gaps in the same way.</p>
+
+            <!-- TEXT 2 -->
+            <div class="text-card">
+                <h3 class="text-title">Text 2: The Ethics of Artificial Intelligence</h3>
+                <div class="text-content">
+                    The rapid development of artificial intelligence has raised profound questions about accountability. When an AI system causes harm, it is often unclear who <span class="inline-gap-wrapper"><sup class="gap-num">9</sup><input type="text" class="gap-input" id="gap-9" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-9"></span></span> be held responsible — the developer, the user, or the organisation that deployed it. Regulators argue that companies <span class="inline-gap-wrapper"><sup class="gap-num">10</sup><input type="text" class="gap-input" id="gap-10" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-10"></span></span> have anticipated these risks long before their systems were released to the public, and that the current lack of oversight is simply unacceptable.
+                    <br><br>
+                    Many experts believe that a binding international framework <span class="inline-gap-wrapper"><sup class="gap-num">11</sup><input type="text" class="gap-input" id="gap-11" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-11"></span></span> to be established within the next five years if meaningful regulation is to take effect. Without it, the situation is <span class="inline-gap-wrapper"><sup class="gap-num">12</sup><input type="text" class="gap-input" id="gap-12" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-12"></span></span> to worsen significantly. Individual governments, meanwhile, are under pressure to act: in several jurisdictions, new legislation is <span class="inline-gap-wrapper"><sup class="gap-num">13</sup><input type="text" class="gap-input" id="gap-13" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-13"></span></span> to come into force before the end of the year. The technology, <span class="inline-gap-wrapper"><sup class="gap-num">14</sup><input type="text" class="gap-input" id="gap-14" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-14"></span></span> some analysts have warned, <span class="inline-gap-wrapper"><sup class="gap-num">15</sup><input type="text" class="gap-input" id="gap-15" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-15"></span></span> already have outpaced the legal systems designed to govern it — a fact <span class="inline-gap-wrapper"><sup class="gap-num">16</sup><input type="text" class="gap-input" id="gap-16" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-16"></span></span> raises urgent questions about democratic accountability.
+                </div>
+            </div>
+
+            <div class="action-area">
+                <div class="score-display" id="score-display">
+                    <div class="score-text">You scored <span id="score-count">0</span> / 16</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="score-fill"></div>
+                    </div>
+                </div>
+                <button class="btn-main" id="btn-check" onclick="checkAll()">Check all answers</button>
+                <button class="btn-outline" id="btn-reset" onclick="resetAll()">Try again</button>
+            </div>
+
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li>In Text 1, gap 6 and in Text 2, gaps 14 and 16 were not modals. Did you notice before or after you checked? What does that tell you about how you were reading?</li>
+                <li>Several gaps were the word "have" inside a modal perfect frame — the modal itself was already in the text. How do you recognise that pattern quickly?</li>
+                <li>What is the difference between "must" and "should" when both could fill an obligation gap? What does the context tell you about which one to use?</li>
+            </ul>
+            <p class="wrap-up-note">These are not trick questions. There are no wrong answers — the point is to hear yourself explain the system.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // Exercise Data
+        const answers = {
+            1: ["can", "cannot"],
+            2: ["must", "should"],
+            3: ["can"],
+            4: ["set"],
+            5: ["would"],
+            6: ["however", "nevertheless", "nonetheless"],
+            7: ["must"],
+            8: ["bound"],
+            9: ["should"],
+            10: ["should"],
+            11: ["needs", "ought", "has"],
+            12: ["likely"],
+            13: ["due"],
+            14: ["however", "though"],
+            15: ["may", "might", "could"],
+            16: ["which"]
+        };
+
+        // Add Enter key listener to all inputs to move to next or submit
+        document.addEventListener('DOMContentLoaded', () => {
+            for (let i = 1; i <= 16; i++) {
+                const inputEl = document.getElementById(`gap-${i}`);
+                if (inputEl) {
+                    inputEl.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (i < 16) {
+                                document.getElementById(`gap-${i+1}`).focus();
+                            } else {
+                                checkAll();
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+        function checkAll() {
+            let score = 0;
+
+            for (let i = 1; i <= 16; i++) {
+                const inputEl = document.getElementById(`gap-${i}`);
+                const fbEl = document.getElementById(`fb-${i}`);
+                const userVal = inputEl.value.trim().toLowerCase();
+                
+                // Check if correct
+                const isCorrect = answers[i].includes(userVal);
+
+                inputEl.disabled = true;
+
+                if (isCorrect) {
+                    inputEl.classList.add('correct');
+                    score++;
+                } else {
+                    inputEl.classList.add('incorrect');
+                    fbEl.innerText = answers[i][0]; // Show primary correct answer
+                    fbEl.classList.add('visible');
+                }
+            }
+
+            // Update UI
+            document.getElementById('btn-check').style.display = 'none';
+            document.getElementById('btn-reset').style.display = 'inline-block';
+            
+            const scoreDisplay = document.getElementById('score-display');
+            document.getElementById('score-count').innerText = score;
+            document.getElementById('score-fill').style.width = `${(score / 16) * 100}%`;
+            scoreDisplay.classList.add('visible');
+        }
+
+        function resetAll() {
+            for (let i = 1; i <= 16; i++) {
+                const inputEl = document.getElementById(`gap-${i}`);
+                const fbEl = document.getElementById(`fb-${i}`);
+                
+                inputEl.value = '';
+                inputEl.disabled = false;
+                inputEl.classList.remove('correct', 'incorrect');
+                
+                fbEl.innerText = '';
+                fbEl.classList.remove('visible');
+            }
+
+            // Update UI
+            document.getElementById('btn-check').style.display = 'inline-block';
+            document.getElementById('btn-reset').style.display = 'none';
+            document.getElementById('score-display').classList.remove('visible');
+            document.getElementById('score-fill').style.width = '0%';
+            
+            // Focus first input
+            document.getElementById('gap-1').focus();
+        }
+    </script>
+</body>
+</html>
