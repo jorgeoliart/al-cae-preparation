@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 3: Reading Part 5</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #4a9eff;
+            --accent-hover: #73b5ff;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { top: -10%; right: -5%; width: 400px; height: 400px; }
+        .orb-2 { bottom: -10%; left: -5%; width: 500px; height: 500px; }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-btn:hover { color: var(--accent); }
+
+        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; color: var(--text-pri); }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section { margin-bottom: 5rem; }
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Section 1: Onboarding */
+        .onboarding-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .onboarding-card p { font-size: 1.1rem; color: var(--text-pri); }
+
+        /* Section 2: Accordion */
+        .reference-label { font-size: 1.1rem; color: var(--text-sec); margin-bottom: 1rem; font-style: italic; }
+        .acc-wrapper {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        .acc-header {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; background: transparent; border: none;
+            color: var(--text-pri); cursor: pointer; text-align: left; transition: background 0.2s;
+        }
+        .acc-header:hover { background: var(--surface-alt); }
+        .acc-header .chevron { font-size: 1.5rem; transition: transform 0.35s ease; color: var(--accent); }
+        .acc-wrapper.open > .acc-header .chevron { transform: rotate(180deg); }
+        
+        .acc-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .acc-wrapper.open > .acc-content { grid-template-rows: 1fr; }
+        .acc-content > .acc-inner { overflow: hidden; }
+        .acc-body { padding: 0 1.5rem 1.5rem 1.5rem; }
+
+        .guide-list { list-style: none; margin-top: 1rem; margin-bottom: 1.5rem; }
+        .guide-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.75rem; color: var(--text-pri); }
+        .guide-list li::before { content: '•'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
+        .trap-list { list-style: none; margin-top: 1rem; }
+        .trap-list li { margin-bottom: 1rem; color: var(--text-pri); }
+        .trap-name { color: var(--incorrect); font-weight: 600; display: inline-block; margin-bottom: 0.25rem; }
+
+        /* Section 3: Exercises */
+        .exam-instruction {
+            font-style: italic;
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-pri);
+        }
+
+        .teacher-note {
+            background: rgba(74, 158, 255, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 2.5rem;
+            color: var(--text-sec);
+        }
+        .teacher-note-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Reading Text Panel */
+        .reading-panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .reading-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .reading-text {
+            font-family: var(--font-body);
+            font-size: 1.05rem;
+            line-height: 1.85;
+            color: var(--text-pri);
+        }
+        .reading-text p {
+            margin-bottom: 1.2em;
+        }
+        .reading-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 4rem 0;
+            border: none;
+        }
+
+        /* MCQ Cards */
+        .question-card {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        .question-stem {
+            font-family: var(--font-body);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-pri);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        .q-num {
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .mcq-option {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            font-size: 1.05rem;
+            color: var(--text-pri);
+        }
+        .mcq-option:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .mcq-option.selected {
+            background: rgba(74, 158, 255, 0.1);
+            border-color: var(--accent);
+        }
+        .opt-letter {
+            font-weight: 700;
+            color: var(--text-sec);
+            margin-right: 1rem;
+            min-width: 20px;
+        }
+        .mcq-option.selected .opt-letter {
+            color: var(--accent);
+        }
+
+        /* Post-submission states */
+        .mcq-option.correct-reveal {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--correct);
+        }
+        .mcq-option.correct-reveal .opt-letter { color: var(--correct); }
+        
+        .mcq-option.incorrect-reveal {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--incorrect);
+            opacity: 0.7;
+        }
+        .mcq-option.incorrect-reveal .opt-letter { color: var(--incorrect); }
+
+        .question-card.state-correct { border-left-color: var(--correct); }
+        .question-card.state-incorrect { border-left-color: var(--incorrect); }
+
+        /* Feedback Panel */
+        .feedback-panel {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .feedback-panel.visible {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .gap-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sec);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .explanation-text {
+            font-size: 0.95rem;
+            color: var(--text-sec);
+            line-height: 1.6;
+        }
+        .explanation-text strong {
+            color: var(--text-pri);
+        }
+
+        /* Actions & Progress */
+        .action-area {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+        }
+        .btn-main {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 14px 36px;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-main:hover { background: var(--accent-hover); }
+        .btn-main:disabled { background: var(--surface-alt); color: var(--text-sec); cursor: not-allowed; }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+        .btn-outline:hover { background: rgba(74, 158, 255, 0.1); }
+
+        .score-display {
+            display: none;
+            margin-bottom: 2rem;
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .score-display.visible { display: block; }
+        .score-text {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: var(--text-pri);
+            margin-bottom: 1rem;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            max-width: 400px;
+            height: 8px;
+            background: var(--surface-alt);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+
+        /* Section 4: Wrap-up */
+        .wrap-up-list { list-style: none; counter-reset: wrapup-counter; }
+        .wrap-up-list li { position: relative; padding-left: 2.5rem; margin-bottom: 1.5rem; font-size: 1.1rem; }
+        .wrap-up-list li::before {
+            counter-increment: wrapup-counter; content: counter(wrapup-counter); position: absolute; left: 0; top: 0;
+            width: 28px; height: 28px; background: rgba(74, 158, 255, 0.15); color: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+        }
+        .wrap-up-note { font-size: 0.9rem; font-style: italic; color: var(--text-sec); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        @media (max-width: 700px) {
+            .container { padding: 1.5rem 1rem 4rem 1rem; }
+            h1 { font-size: 2rem; }
+            .reading-panel { padding: 1.5rem; }
+            .question-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: ONBOARDING -->
+        <section id="onboarding">
+            <h1>Session 3: Reading the Code</h1>
+            <div class="onboarding-card">
+                <p>Sessions 1 and 2 this week were about production: building and supplying passive forms under controlled conditions. This session is different. The passive constructions are still here — but now they are the examiner's tool, not yours. They are embedded in a long, dense text, and they are being used to hide meaning, create ambiguity, and build traps into the answer options.</p>
+                <p>CAE Part 5 is a multiple choice reading task. One long text, six questions, four options each. Three of those options will be wrong. The examiner has constructed each wrong option carefully — it will use words from the text, it will feel plausible, and it will be precisely, specifically incorrect.</p>
+                <p>The single most important skill in Part 5 is not reading speed. It is the discipline to go back to the text and find the exact evidence before committing to an answer. The answer is always in the ink — not in what seems likely, not in what makes a good story, not in general knowledge about the topic. The text. Every time.</p>
+                <p>Before reading for comprehension today, there is a two-minute task: scan the first two paragraphs and identify every passive construction. Name the form. This is not a comprehension task — it is a grammar awareness task. It trains the eye to see structure before it sees meaning.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: REFERENCE ACCORDION -->
+        <section id="reference">
+            <div class="reference-label">Part 5 strategy — open before you begin, or use for review.</div>
+            
+            <div class="acc-wrapper" id="acc-strategy">
+                <button class="acc-header" onclick="toggleAcc('acc-strategy')">
+                    <h3>Part 5 — How to read and how to choose</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        <h4>WHAT PART 5 TESTS</h4>
+                        <p>Part 5 tests detailed reading comprehension at C1 level. Questions may target: specific factual detail, inference (what the writer implies without stating directly), the writer's attitude or opinion, the meaning of a word or phrase in context, how a text is organised or structured, and the writer's overall purpose. The text is typically argumentative or analytical — a long article, essay, or review of approximately 600–700 words.</p>
+                        
+                        <h4 style="margin-top: 1.5rem;">HOW TO WORK THROUGH IT</h4>
+                        <ul class="guide-list">
+                            <li><strong>Step 1</strong> — Read the whole text without stopping. Do not look at the questions first. Get the shape, register, and argument of the text clearly in mind before you engage with any question.</li>
+                            <li><strong>Step 2</strong> — Read question 1. Identify exactly what it is asking: a specific detail, an inference, an attitude, a vocabulary item, or a global point.</li>
+                            <li><strong>Step 3</strong> — Go back to the relevant part of the text. Find the exact sentence or clause that answers the question. Do not answer from memory — return to the text every time.</li>
+                            <li><strong>Step 4</strong> — Read all four options before selecting. Eliminate the ones that are clearly wrong. For the remaining options, identify precisely why each one is wrong before committing to your answer.</li>
+                            <li><strong>Step 5</strong> — Check: can you point to a specific phrase in the text that proves your chosen answer is correct? If not, you are not ready to select it.</li>
+                        </ul>
+
+                        <h4>THE EXAMINER'S TRAPS IN PART 5</h4>
+                        <ul class="trap-list">
+                            <li><span class="trap-name">Trap 1 — The Copycat:</span> a wrong option uses words or phrases taken directly from the text, giving the impression of accuracy. The words match but the meaning does not. Always check that the option says what the text says — not merely that it uses the same words.</li>
+                            <li><span class="trap-name">Trap 2 — The Movie:</span> a wrong option describes something that seems likely or logical given the topic, but is not stated or implied in the text. General knowledge about the subject is irrelevant. Only the text counts.</li>
+                            <li><span class="trap-name">Trap 3 — The Exaggeration:</span> a wrong option takes a qualified claim in the text and removes the qualification, making it absolute. Words like "always", "never", "all", "conclusively", and "definitively" in an option are warning signs.</li>
+                            <li><span class="trap-name">Trap 4 — The Agent Swap:</span> particularly relevant to passive constructions. A wrong option attributes an action or claim to a different agent than the one specified in the text — or introduces an agent where the text deliberately omitted one. Check who did what.</li>
+                            <li><span class="trap-name">Trap 5 — The Tense Shift:</span> a wrong option changes when something happened, or presents an uncertain future event as a confirmed past one, or vice versa. Passive constructions are especially vulnerable to this — "had been done" and "was being done" are not the same claim.</li>
+                        </ul>
+
+                        <h4 style="margin-top: 1.5rem;">PASSIVE CONSTRUCTIONS IN PART 5 — WHAT TO WATCH FOR</h4>
+                        <p>When you see a passive construction in the text, ask:</p>
+                        <ul class="guide-list" style="margin-bottom: 0;">
+                            <li><strong>(a) Who is the agent?</strong> Is the agent stated (by + noun) or omitted?</li>
+                            <li><strong>(b) What tense?</strong> The form carries precise information about time and aspect.</li>
+                            <li><strong>(c) Is a modal involved?</strong> Modal perfect passives (should have been, could have been, might have been) make specific logical claims — unfulfilled obligation, past possibility, past criticism. These are frequently the basis of inference questions.</li>
+                            <li><strong>(d) Is the passive impersonal?</strong> (It is claimed / it has been argued / it is widely believed) — if so, the writer is attributing the claim to an unspecified source. They are not endorsing it.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            <h2>Part 5: Multiple Choice</h2>
+            
+            <p class="exam-instruction">You are going to read an article about urban conservation policy. For questions 1–6, choose the answer (A, B, C or D) which you think fits best according to the text.</p>
+
+            <div class="teacher-note">
+                <span class="teacher-note-label">Teacher Note</span>
+                Before you read for comprehension: scan the first two paragraphs and identify every passive construction. For each one, name the form (e.g. past simple passive, modal perfect passive) and note whether the agent is stated or omitted. Two minutes — then read the full text.
+            </div>
+
+            <!-- READING TEXT -->
+            <div class="reading-panel">
+                <div class="reading-title">The Battle for the Built Environment</div>
+                <div class="reading-text">
+                    <p>The question of what a city owes its past has never been straightforward. In Britain, the postwar decades were characterised by a confidence — some would say arrogance — in the power of new construction to solve old problems. Slums were cleared, Victorian terraces demolished, and their inhabitants rehoused in tower blocks that were celebrated at the time as models of rational planning. It was not until the damage had been done that the architectural and social costs of this approach were widely acknowledged. By then, entire neighbourhoods that might have been preserved had vanished, and the communities that had inhabited them had been dispersed beyond any possibility of reassembly.</p>
+                    
+                    <p>The legislative framework designed to prevent such losses was introduced piecemeal over several decades. Listed building status, first established in the 1940s, was intended to protect structures of special architectural or historic interest from demolition or unsympathetic alteration. Conservation areas followed in 1967, offering a broader form of protection to groups of buildings whose collective character was considered worth preserving. Yet the system has always been criticised for being reactive rather than preventive. Buildings are listed after their significance has been recognised — often only after a demolition threat has been identified. By the time statutory protection is granted, irreversible damage may already have been inflicted.</p>
+                    
+                    <p>Critics of the current framework argue that local authorities have been given insufficient powers to act decisively. When a developer applies for permission to demolish a listed building, the burden of proof rests with the planning authority to demonstrate why demolition should be refused — not with the applicant to justify why it should be permitted. This imbalance has been exploited repeatedly, and conservationists have long argued that it should have been corrected at the point when the legislation was last substantially revised, in the 1990s. The opportunity was not taken.</p>
+                    
+                    <p>The counterargument, made with equal conviction by developers and some economists, is that conservation legislation has itself become an obstacle to necessary change. Historic designations, they contend, are too frequently applied to buildings of marginal significance, effectively sterilising land that could be used to address acute housing shortages. The designation process, it is claimed, is sometimes driven less by genuine heritage value than by local resistance to development — a form of nimbyism dressed in architectural language. These arguments have found a receptive audience in certain parts of government, and proposals to streamline the designation process have been floated at regular intervals.</p>
+                    
+                    <p>What both sides tend to underestimate is the economic case for conservation. Research conducted over the past two decades has consistently shown that well-maintained historic environments attract tourism, stimulate local economies, and command property premiums that generate substantial tax revenues. Cities that invested in their built heritage during the 1990s and 2000s — Glasgow, Liverpool, and Manchester among them — have seen returns that were not anticipated by those who originally resisted the expenditure. The argument that conservation and development are inherently opposed has been challenged by this evidence, though it has not been definitively settled.</p>
+                    
+                    <p>What seems clear is that the current framework, designed for a different era of development pressure, is no longer adequate. The question is not whether reform is needed but what form it should take. Conservationists argue for stronger presumptions in favour of retention and greater penalties for deliberate neglect — a tactic sometimes used by developers to make a building's condition deteriorate to the point where demolition becomes unavoidable. Developers counter that the planning system needs to be made more predictable and less susceptible to last-minute objections. Both positions contain legitimate concerns. Whether a political consensus capable of addressing them will be reached remains, for now, an open question.</p>
+                </div>
+            </div>
+
+            <hr class="section-divider">
+
+            <!-- QUESTIONS -->
+            <div id="questions-container">
+                <!-- Q1 -->
+                <div class="question-card" id="q-1">
+                    <div class="question-stem"><span class="q-num">1</span>In the first paragraph, the writer suggests that the demolition of Victorian neighbourhoods</div>
+                    <div class="options-grid" id="opts-1">
+                        <div class="mcq-option" onclick="selectOption(1, 'A', this)"><span class="opt-letter">A</span> was opposed at the time by the majority of those rehoused in tower blocks</div>
+                        <div class="mcq-option" onclick="selectOption(1, 'B', this)"><span class="opt-letter">B</span> was only recognised as a mistake after its full consequences had become apparent</div>
+                        <div class="mcq-option" onclick="selectOption(1, 'C', this)"><span class="opt-letter">C</span> had been predicted by critics of the postwar planning consensus</div>
+                        <div class="mcq-option" onclick="selectOption(1, 'D', this)"><span class="opt-letter">D</span> resulted primarily from commercial pressure applied by property developers</div>
+                    </div>
+                    <div class="feedback-panel" id="fb-1">
+                        <div class="gap-label">DETAIL — SEQUENCE OF RECOGNITION</div>
+                        <div class="explanation-text">The text states "it was not until the damage had been done that the architectural and social costs of this approach were widely acknowledged" — the passive construction "had been done" / "were widely acknowledged" makes clear that recognition came after the fact. Option A is not supported — the text mentions inhabitants were rehoused but makes no claim about their opposition. Option C inverts the meaning — no prior prediction is mentioned. Option D introduces developers as an agent the text does not name.</div>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="question-card" id="q-2">
+                    <div class="question-stem"><span class="q-num">2</span>The writer implies in the third paragraph that the legislation governing listed buildings</div>
+                    <div class="options-grid" id="opts-2">
+                        <div class="mcq-option" onclick="selectOption(2, 'A', this)"><span class="opt-letter">A</span> was deliberately weakened by developers during its most recent revision</div>
+                        <div class="mcq-option" onclick="selectOption(2, 'B', this)"><span class="opt-letter">B</span> failed to address a structural flaw that conservationists had long identified</div>
+                        <div class="mcq-option" onclick="selectOption(2, 'C', this)"><span class="opt-letter">C</span> placed an unreasonable burden of proof on planning applicants</div>
+                        <div class="mcq-option" onclick="selectOption(2, 'D', this)"><span class="opt-letter">D</span> was most recently revised earlier than conservationists had recommended</div>
+                    </div>
+                    <div class="feedback-panel" id="fb-2">
+                        <div class="gap-label">INFERENCE — UNFULFILLED OBLIGATION (MODAL PERFECT PASSIVE)</div>
+                        <div class="explanation-text">"It should have been corrected at the point when the legislation was last substantially revised" — the modal perfect passive expresses unfulfilled obligation: there was a known problem, a moment when it could have been fixed, and the opportunity was not taken. Option A misreads "has been exploited" as implying deliberate legislative weakening; the exploitation is of the imbalance, not of the revision process. Option C inverts the argument — the burden rests with the authority, not the applicant. Option D is not supported.</div>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="question-card" id="q-3">
+                    <div class="question-stem"><span class="q-num">3</span>When the writer describes local resistance to development as "nimbyism dressed in architectural language", the primary purpose is to</div>
+                    <div class="options-grid" id="opts-3">
+                        <div class="mcq-option" onclick="selectOption(3, 'A', this)"><span class="opt-letter">A</span> express personal agreement with the view that conservation arguments are frequently disingenuous</div>
+                        <div class="mcq-option" onclick="selectOption(3, 'B', this)"><span class="opt-letter">B</span> report a position held by development interests without indicating whether the writer endorses it</div>
+                        <div class="mcq-option" onclick="selectOption(3, 'C', this)"><span class="opt-letter">C</span> suggest that architectural expertise is rarely the true basis for opposing development</div>
+                        <div class="mcq-option" onclick="selectOption(3, 'D', this)"><span class="opt-letter">D</span> acknowledge that local communities have legitimate grounds for resisting unwanted construction</div>
+                    </div>
+                    <div class="feedback-panel" id="fb-3">
+                        <div class="gap-label">ATTITUDE — IMPERSONAL PASSIVE AS DISTANCING DEVICE</div>
+                        <div class="explanation-text">The phrase is introduced by "it is claimed" — an impersonal passive that attributes the claim to an unnamed source (developers and economists, as stated earlier) rather than to the writer. The writer is reporting, not endorsing. Option A conflates reported view with writer's position. Option C goes further than the text — the writer reports the claim but does not validate it as a general truth. Option D contradicts the reported view being summarised.</div>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="question-card" id="q-4">
+                    <div class="question-stem"><span class="q-num">4</span>What does the writer say about the cities that invested in built heritage during the 1990s and 2000s?</div>
+                    <div class="options-grid" id="opts-4">
+                        <div class="mcq-option" onclick="selectOption(4, 'A', this)"><span class="opt-letter">A</span> They were motivated primarily by the economic returns that conservation was projected to deliver</div>
+                        <div class="mcq-option" onclick="selectOption(4, 'B', this)"><span class="opt-letter">B</span> Their experience has provided conclusive proof that development and conservation are incompatible</div>
+                        <div class="mcq-option" onclick="selectOption(4, 'C', this)"><span class="opt-letter">C</span> They achieved financial outcomes that had not been foreseen by those who originally opposed the investment</div>
+                        <div class="mcq-option" onclick="selectOption(4, 'D', this)"><span class="opt-letter">D</span> Their success has convinced most governments to adopt conservation as an economic development strategy</div>
+                    </div>
+                    <div class="feedback-panel" id="fb-4">
+                        <div class="gap-label">DETAIL — PASSIVE WITH AGENT / AVOIDING INVERSION TRAP</div>
+                        <div class="explanation-text">"Returns that were not anticipated by those who originally resisted the expenditure" — the passive construction with agent (<em>by those who</em>) identifies who failed to foresee the returns. Option A inverts the meaning — the returns were not anticipated, meaning economic motivation was not the driver. Option B misreads "has not been definitively settled". Option D overstates the conclusion — "most governments" is not supported.</div>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="question-card" id="q-5">
+                    <div class="question-stem"><span class="q-num">5</span>The phrase "sterilising land" in the fourth paragraph most closely suggests that historic designations</div>
+                    <div class="options-grid" id="opts-5">
+                        <div class="mcq-option" onclick="selectOption(5, 'A', this)"><span class="opt-letter">A</span> make it legally impossible to develop land regardless of its architectural significance</div>
+                        <div class="mcq-option" onclick="selectOption(5, 'B', this)"><span class="opt-letter">B</span> deprive land of its potential to be put to productive use</div>
+                        <div class="mcq-option" onclick="selectOption(5, 'C', this)"><span class="opt-letter">C</span> cause lasting environmental harm to areas subject to conservation restrictions</div>
+                        <div class="mcq-option" onclick="selectOption(5, 'D', this)"><span class="opt-letter">D</span> result in the compulsory transfer of land to public heritage bodies</div>
+                    </div>
+                    <div class="feedback-panel" id="fb-5">
+                        <div class="gap-label">VOCABULARY IN CONTEXT</div>
+                        <div class="explanation-text">In context, "sterilising" is used metaphorically to mean rendering land incapable of producing anything useful — it cannot be developed and therefore cannot address housing needs. Option A overstates — "legally impossible regardless of significance" is stronger than the text supports. Option C imports a physical/environmental meaning that is not present. Option D introduces a legal mechanism the text does not mention.</div>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="question-card" id="q-6">
+                    <div class="question-stem"><span class="q-num">6</span>Which of the following best describes the writer's overall purpose in this article?</div>
+                    <div class="options-grid" id="opts-6">
+                        <div class="mcq-option" onclick="selectOption(6, 'A', this)"><span class="opt-letter">A</span> To make the case that existing conservation legislation should be substantially strengthened</div>
+                        <div class="mcq-option" onclick="selectOption(6, 'B', this)"><span class="opt-letter">B</span> To demonstrate that the economic evidence in favour of conservation outweighs the arguments for development</div>
+                        <div class="mcq-option" onclick="selectOption(6, 'C', this)"><span class="opt-letter">C</span> To examine the competing positions in an ongoing policy debate and suggest that neither side has fully resolved it</div>
+                        <div class="mcq-option" onclick="selectOption(6, 'D', this)"><span class="opt-letter">D</span> To explain why postwar planning decisions caused damage that can no longer be remedied</div>
+                    </div>
+                    <div class="feedback-panel" id="fb-6">
+                        <div class="gap-label">GLOBAL — WRITER'S PURPOSE AND PASSIVE REGISTER</div>
+                        <div class="explanation-text">Throughout the article, the writer uses impersonal passives and hedged formulations — "it is claimed", "has been challenged", "has not been definitively settled", "remains, for now, an open question" — to maintain studied neutrality between the two positions. The final paragraph explicitly acknowledges legitimate concerns on both sides. Option A represents one side of the debate. Option B overstates the economic conclusion. Option D focuses only on the first paragraph.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <div class="score-display" id="score-display">
+                    <div class="score-text">You scored <span id="score-count">0</span> / 6</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="score-fill"></div>
+                    </div>
+                </div>
+                <button class="btn-main" id="btn-check" onclick="checkAll()">Check all answers</button>
+                <button class="btn-outline" id="btn-reset" onclick="resetAll()">Try again</button>
+            </div>
+
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li>In question 3, the answer depended on noticing "it is claimed" in the text. Did you notice that construction before or after you checked? What kind of claim does an impersonal passive make — and what does it tell you about the writer's position?</li>
+                <li>Questions 2 and 4 both involved passive constructions with precise logical meaning. In question 2, "should have been corrected" — what exactly does that form claim? In question 4, what would have changed if the text had said "returns that were anticipated" instead of "were not anticipated"?</li>
+                <li>Look at option D in question 1 and option D in question 4. Both introduce information that is not in the text. What is the name for this type of distractor — and what is the rule for dealing with it?</li>
+            </ul>
+            <p class="wrap-up-note">These are not trick questions. There are no wrong answers — the point is to hear yourself explain the system.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // MCQ Data and State
+        const correctAnswers = {
+            1: 'B',
+            2: 'B',
+            3: 'B',
+            4: 'C',
+            5: 'B',
+            6: 'C'
+        };
+        
+        let selectedAnswers = {
+            1: null,
+            2: null,
+            3: null,
+            4: null,
+            5: null,
+            6: null
+        };
+
+        let isSubmitted = false;
+
+        function selectOption(qNum, letter, element) {
+            if (isSubmitted) return; // Prevent changing answers after submission
+
+            // Update state
+            selectedAnswers[qNum] = letter;
+
+            // Update UI
+            const optionsContainer = document.getElementById(`opts-${qNum}`);
+            const allOptions = optionsContainer.querySelectorAll('.mcq-option');
+            
+            allOptions.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+        }
+
+        function checkAll() {
+            // Ensure all questions are answered before allowing check
+            const unanswered = Object.values(selectedAnswers).filter(val => val === null).length;
+            if (unanswered > 0) {
+                alert(`Please answer all questions before checking. You have ${unanswered} question(s) left.`);
+                return;
+            }
+
+            isSubmitted = true;
+            let score = 0;
+
+            for (let i = 1; i <= 6; i++) {
+                const selected = selectedAnswers[i];
+                const correct = correctAnswers[i];
+                const cardEl = document.getElementById(`q-${i}`);
+                const optionsContainer = document.getElementById(`opts-${i}`);
+                const allOptions = optionsContainer.querySelectorAll('.mcq-option');
+                const fbEl = document.getElementById(`fb-${i}`);
+
+                let isCorrect = (selected === correct);
+                if (isCorrect) score++;
+
+                // Apply states to card
+                cardEl.classList.add(isCorrect ? 'state-correct' : 'state-incorrect');
+
+                // Apply states to options
+                allOptions.forEach(opt => {
+                    const optLetter = opt.querySelector('.opt-letter').innerText;
+                    opt.classList.remove('selected'); // remove generic selected state
+                    
+                    if (optLetter === correct) {
+                        opt.classList.add('correct-reveal');
+                    } else if (optLetter === selected && !isCorrect) {
+                        opt.classList.add('incorrect-reveal');
+                    }
+                });
+
+                // Show feedback
+                fbEl.classList.add('visible');
+            }
+
+            // Update Action Area
+            document.getElementById('btn-check').style.display = 'none';
+            document.getElementById('btn-reset').style.display = 'inline-block';
+            
+            const scoreDisplay = document.getElementById('score-display');
+            document.getElementById('score-count').innerText = score;
+            document.getElementById('score-fill').style.width = `${(score / 6) * 100}%`;
+            scoreDisplay.classList.add('visible');
+        }
+
+        function resetAll() {
+            isSubmitted = false;
+            
+            // Reset state
+            selectedAnswers = { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null };
+
+            for (let i = 1; i <= 6; i++) {
+                const cardEl = document.getElementById(`q-${i}`);
+                const optionsContainer = document.getElementById(`opts-${i}`);
+                const allOptions = optionsContainer.querySelectorAll('.mcq-option');
+                const fbEl = document.getElementById(`fb-${i}`);
+
+                cardEl.classList.remove('state-correct', 'state-incorrect');
+                
+                allOptions.forEach(opt => {
+                    opt.classList.remove('selected', 'correct-reveal', 'incorrect-reveal');
+                });
+
+                fbEl.classList.remove('visible');
+            }
+
+            // Update Action Area
+            document.getElementById('btn-check').style.display = 'inline-block';
+            document.getElementById('btn-reset').style.display = 'none';
+            document.getElementById('score-display').classList.remove('visible');
+            document.getElementById('score-fill').style.width = '0%';
+            
+            // Scroll to top of exercise
+            document.getElementById('exercises').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
