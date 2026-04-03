@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 4: Reading Part 6 (Gapped Text)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #4a9eff;
+            --accent-hover: #73b5ff;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Background texture and Orbs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+        .orb {
+            position: fixed; border-radius: 50%; background: var(--accent);
+            opacity: 0.12; filter: blur(130px); z-index: -1; pointer-events: none;
+        }
+        .orb-1 { top: -10%; right: -5%; width: 400px; height: 400px; }
+        .orb-2 { bottom: -10%; left: -5%; width: 500px; height: 500px; }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        .back-btn {
+            display: inline-flex; align-items: center; color: var(--text-sec);
+            text-decoration: none; font-size: 0.95rem; font-weight: 500;
+            margin-bottom: 2.5rem; transition: color 0.2s ease;
+        }
+        .back-btn:hover { color: var(--accent); }
+
+        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; color: var(--text-pri); }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+
+        section { margin-bottom: 5rem; }
+        p { margin-bottom: 1rem; }
+
+        /* Section 1: Onboarding */
+        .onboarding-card {
+            background: var(--surface); border-radius: 12px; padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .onboarding-card p { font-size: 1.1rem; color: var(--text-pri); }
+
+        /* Section 2: Accordion */
+        .acc-wrapper {
+            background: var(--surface); border-radius: 8px; margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+        }
+        .acc-header {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; background: transparent; border: none;
+            color: var(--text-pri); cursor: pointer; text-align: left;
+        }
+        .acc-header:hover { background: var(--surface-alt); }
+        .acc-header .chevron { font-size: 1.5rem; transition: transform 0.35s ease; color: var(--accent); }
+        .acc-wrapper.open > .acc-header .chevron { transform: rotate(180deg); }
+        .acc-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .acc-wrapper.open > .acc-content { grid-template-rows: 1fr; }
+        .acc-content > .acc-inner { overflow: hidden; }
+        .acc-body { padding: 0 1.5rem 1.5rem 1.5rem; color: var(--text-sec); }
+
+        .guide-list { list-style: none; margin-top: 1rem; }
+        .guide-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.75rem; color: var(--text-pri); }
+        .guide-list li::before { content: '•'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
+        /* Section 3: Exercise Layout */
+        .exam-instruction { font-style: italic; color: var(--text-pri); margin-bottom: 1.5rem; }
+        
+        .teacher-note {
+            background: rgba(74, 158, 255, 0.08); border-left: 4px solid var(--accent);
+            padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin-bottom: 2rem; color: var(--text-sec);
+        }
+
+        .pre-reading-check {
+            display: flex; align-items: center; gap: 0.75rem; background: var(--surface);
+            padding: 1rem; border-radius: 8px; margin-bottom: 3rem; cursor: pointer;
+        }
+        .pre-reading-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+        /* Paragraph Options Panel */
+        .options-panel {
+            background: var(--surface-alt); padding: 1.5rem; border-radius: 12px;
+            margin-bottom: 3rem; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .options-header { font-family: var(--font-display); font-size: 1rem; color: var(--text-sec); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .options-container { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .para-card {
+            background: var(--bg); border: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid var(--accent); padding: 1.25rem; border-radius: 6px;
+            cursor: grab; transition: all 0.2s; position: relative;
+        }
+        .para-card:active { cursor: grabbing; }
+        .para-card.placed { opacity: 0.4; cursor: default; }
+        .para-card .para-letter {
+            font-family: var(--font-display); font-size: 1.4rem; font-weight: 700;
+            color: var(--accent); margin-bottom: 0.5rem; display: block;
+        }
+        .para-card p { font-size: 0.95rem; line-height: 1.6; color: var(--text-pri); margin: 0; }
+
+        /* Base Text & Gaps */
+        .base-text-card { background: var(--surface); padding: 3rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .reading-title { font-family: var(--font-display); font-size: 2rem; color: var(--accent); text-align: center; margin-bottom: 2.5rem; }
+        .article-body { font-size: 1.05rem; line-height: 1.85; color: var(--text-pri); }
+
+        .gap-slot {
+            margin: 2.5rem 0; padding: 2rem; border: 2px dashed var(--accent);
+            border-radius: 12px; transition: all 0.3s; background: rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .gap-slot.over { background: rgba(74, 158, 255, 0.1); border-style: solid; }
+        .gap-slot.filled { border-style: solid; background: var(--bg); }
+        
+        .gap-label {
+            position: absolute; top: -12px; left: 20px; background: var(--accent);
+            color: #000; font-family: var(--font-display); font-size: 0.75rem;
+            font-weight: 700; padding: 2px 10px; border-radius: 4px;
+        }
+        .gap-placeholder { color: var(--text-sec); font-style: italic; text-align: center; }
+        
+        .fallback-container { margin-top: 1.5rem; text-align: right; }
+        .fallback-label { font-size: 0.8rem; color: var(--text-sec); margin-right: 8px; }
+        .fallback-select {
+            background: var(--bg); color: var(--text-pri); border: 1px solid var(--text-sec);
+            padding: 4px 8px; border-radius: 4px; font-family: inherit;
+        }
+
+        /* Post Submission Styles */
+        .gap-slot.correct { border-color: var(--correct); }
+        .gap-slot.incorrect { border-color: var(--incorrect); }
+        .cohesion-note {
+            margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.02);
+            border-left: 3px solid var(--accent); font-size: 0.9rem; color: var(--text-sec);
+            display: none; animation: fadeIn 0.5s ease;
+        }
+        .correct-answer-reveal { color: var(--correct); font-weight: 700; margin-top: 0.5rem; display: none; }
+
+        /* Actions */
+        .action-area { text-align: center; margin-top: 4rem; }
+        .score-display { display: none; margin-bottom: 2rem; }
+        .score-text { font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 1rem; }
+        .progress-bar { width: 100%; max-width: 400px; height: 8px; background: var(--surface-alt); border-radius: 4px; margin: 0 auto; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.6s ease; }
+        
+        .btn-main {
+            background: var(--accent); color: #000; border: none; padding: 14px 36px;
+            border-radius: 6px; font-family: var(--font-body); font-size: 1.1rem;
+            font-weight: 600; cursor: pointer;
+        }
+        .btn-outline {
+            background: transparent; color: var(--accent); border: 1px solid var(--accent);
+            padding: 10px 24px; border-radius: 6px; cursor: pointer; margin-left: 1rem; display: none;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .base-text-card { padding: 1.5rem; }
+            .reading-title { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: ONBOARDING -->
+        <section id="onboarding">
+            <h1>Session 4: Cohesion Surgery</h1>
+            <div class="onboarding-card">
+                <p>Yesterday was about extracting meaning. Today is about understanding how a text is built. CAE Part 6 is not about comprehension in the traditional sense—it is about following the threads of language that connect one paragraph to the next.</p>
+                <p>Those threads are exactly what we have been building this week: <strong>passive constructions</strong>. When a passive omits the agent, the missing paragraph often supplies it. When a pronoun refers back to a noun that was only introduced as the object of a passive clause, the chain only holds if the correct paragraph is in place.</p>
+                <p>Before you start, scan the base text. Mark every passive construction and every pronoun. Two minutes. The grammar is the map.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: STRATEGY -->
+        <section id="strategy">
+            <div class="acc-wrapper" id="acc-strat">
+                <button class="acc-header" onclick="toggleAcc('acc-strat')">
+                    <h3>Part 6 strategy — open before you begin, or use for review.</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        <h4>WHAT PART 6 TESTS</h4>
+                        <p>Identification of precise linguistic connections between the base text and missing paragraphs. Topic matching is not enough.</p>
+                        
+                        <h4 style="margin-top: 1.5rem;">COHESION SIGNALS</h4>
+                        <ul class="guide-list">
+                            <li><strong>Reference words:</strong> it, they, this, these, such approach, those findings.</li>
+                            <li><strong>Passive Continuity:</strong> If a sentence begins with "This", the thing it refers to might be the object of a passive clause in the previous paragraph.</li>
+                            <li><strong>Agent Chain:</strong> When an agent is omitted (e.g., "The tools were repurposed..."), the next paragraph often clarifies who did it or how.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISE -->
+        <section id="exercise">
+            <h2>Part 6: Gapped Text</h2>
+            <p class="exam-instruction">You are going to read an article about the development of synthetic biology. Six paragraphs have been removed from the article. Choose from the paragraphs A–G the one which fits each gap (1–6). There is one extra paragraph which you do not need to use.</p>
+
+            <div class="teacher-note">
+                <span class="teacher-note-label">Teacher Note</span>
+                Before you attempt the exercise: read through the base text and mark every passive construction and every pronoun. Note where the agent is omitted. Note where a pronoun has an unclear antecedent.
+            </div>
+
+            <label class="pre-reading-check">
+                <input type="checkbox">
+                <span>I have scanned the base text for passive constructions and pronouns.</span>
+            </label>
+
+            <!-- Paragraph Options Panel -->
+            <div class="options-panel">
+                <div class="options-header">Paragraph options</div>
+                <div class="options-container" id="options-bin">
+                    <!-- Paragraphs A-G -->
+                    <div class="para-card" draggable="true" id="para-A" data-letter="A">
+                        <span class="para-letter">A</span>
+                        <p>Its roots lie in molecular biology and genetics, disciplines that had spent decades mapping the mechanisms by which cells replicate, repair, and express genetic information. The tools developed in those fields — restriction enzymes, gene sequencing, and eventually CRISPR — were gradually repurposed and refined until they became the instruments of deliberate biological construction rather than mere observation.</p>
+                    </div>
+                    <div class="para-card" draggable="true" id="para-B" data-letter="B">
+                        <span class="para-letter">B</span>
+                        <p>This vision was heavily influenced by the work being done at the time in computer science and electrical engineering, where modular design had already transformed the development of complex systems. Biological components — promoters, repressors, coding sequences — were reconceptualised as analogous to electronic components that could be combined and recombined in predictable ways.</p>
+                    </div>
+                    <div class="para-card" draggable="true" id="para-C" data-letter="C">
+                        <span class="para-letter">C</span>
+                        <p>The process by which this was achieved took years of iterative refinement. The genes responsible for the compound's biosynthesis had to be identified, extracted, and successfully inserted into the yeast genome — a procedure that had previously been considered beyond the reach of available techniques. When the engineered yeast was finally produced at scale, it was celebrated as a proof of concept for the entire field.</p>
+                    </div>
+                    <div class="para-card" draggable="true" id="para-D" data-letter="D">
+                        <span class="para-letter">D</span>
+                        <p>These concerns were not confined to the scientific community. Policymakers, ethicists, and security analysts found themselves confronted with questions for which existing legal and regulatory categories offered no adequate answers. What constituted a weapon in a biological context, who bore responsibility for organisms that escaped laboratory containment, and how research conducted in one country could be governed by another were among the issues that had to be addressed.</p>
+                    </div>
+                    <div class="para-card" draggable="true" id="para-E" data-letter="E">
+                        <span class="para-letter">E</span>
+                        <p>The organisms that proved most productive in controlled settings often exhibited what researchers termed metabolic burden — the additional energy demands of producing a foreign compound interfered with normal cellular processes, reducing yields and stability. Solutions have been proposed and tested, but none has yet been adopted universally, and the path from bench to factory floor remains longer and more expensive than early projections suggested.</p>
+                    </div>
+                    <div class="para-card" draggable="true" id="para-F" data-letter="F">
+                        <span class="para-letter">F</span>
+                        <p>This enthusiasm has not been uniformly shared. Critics have pointed to the concentration of investment in a small number of well-funded companies as evidence that the field's benefits are likely to be captured by private interests rather than distributed across society. The question of who owns the organisms that are engineered — and who profits from their outputs — has been raised repeatedly in academic and policy circles, without having been definitively answered.</p>
+                    </div>
+                    <div class="para-card" draggable="true" id="para-G" data-letter="G">
+                        <span class="para-letter">G</span>
+                        <p>The distinction between synthetic biology and genetic modification is not always clearly drawn, and the two terms are sometimes used interchangeably in public discourse. Genetic modification typically refers to the insertion or deletion of specific genes, whereas synthetic biology involves the design of entire genetic circuits or organisms from standardised components. The conflation of the two has contributed to public confusion and, in some cases, to regulatory inconsistency.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Base Reading Text -->
+            <div class="base-text-card">
+                <div class="reading-title">Building Life from Scratch</div>
+                <div class="article-body">
+                    <p>Synthetic biology is one of the most consequential scientific developments of the past quarter-century, yet it remains poorly understood outside specialist circles. At its simplest, it involves the design and construction of new biological parts, devices, and systems — or the redesign of existing ones — for purposes that range from the production of medicines to the creation of organisms capable of breaking down environmental pollutants. The field did not emerge fully formed.</p>
+                    
+                    <div class="gap-slot" id="slot-1" data-correct="A">
+                        <span class="gap-label">GAP 1</span>
+                        <div class="gap-placeholder">Drag a paragraph here</div>
+                        <div class="cohesion-note" id="note-1"><strong>Cohesion Note:</strong> "Its roots" (Para A) refers back to "the field". Passives like "were gradually repurposed" provide the backstory leading into the "early 2000s" in the next paragraph.</div>
+                    </div>
+
+                    <p>The term itself was coined in the early 2000s, though the conceptual groundwork had been laid considerably earlier. What distinguished synthetic biology from its predecessors was not merely its technical ambition but its explicit adoption of engineering principles. Biological systems were to be treated as designable, modular, and — in theory — predictable.</p>
+                    
+                    <div class="gap-slot" id="slot-2" data-correct="B">
+                        <span class="gap-label">GAP 2</span>
+                        <div class="gap-placeholder">Drag a paragraph here</div>
+                        <div class="cohesion-note" id="note-2"><strong>Cohesion Note:</strong> "This vision" (Para B) refers to "designable, modular, and predictable". The base text then picks up in the next sentence with "The assumption... has since been qualified".</div>
+                    </div>
+
+                    <p>The assumption that living systems could be engineered with the precision of electronic circuits has since been substantially qualified, but it gave the field its early momentum and attracted the attention of funding bodies on both sides of the Atlantic. The practical applications that followed were remarkable in their range. Among the earliest and most celebrated was the engineering of yeast cells to produce artemisinin, an antimalarial compound previously extractable only from a plant grown in limited quantities.</p>
+                    
+                    <div class="gap-slot" id="slot-3" data-correct="C">
+                        <span class="gap-label">GAP 3</span>
+                        <div class="gap-placeholder">Drag a paragraph here</div>
+                        <div class="cohesion-note" id="note-3"><strong>Cohesion Note:</strong> "The process" (Para C) refers to the yeast cell engineering. The paragraph uses a dense chain of passives to describe the procedure.</div>
+                    </div>
+
+                    <p>The project demonstrated that synthetic biology could address global health challenges at scale — a claim that had previously been made only theoretically. Not all developments in the field have been welcomed with equal enthusiasm. The possibility of engineering pathogens — whether for legitimate research purposes or otherwise — attracted the attention of biosecurity experts almost immediately.</p>
+                    
+                    <div class="gap-slot" id="slot-4" data-correct="D">
+                        <span class="gap-label">GAP 4</span>
+                        <div class="gap-placeholder">Drag a paragraph here</div>
+                        <div class="cohesion-note" id="note-4"><strong>Cohesion Note:</strong> "These concerns" (Para D) points back to the "biosecurity experts". Para G is about definition, not "concerns".</div>
+                    </div>
+
+                    <p>The resulting regulatory frameworks vary considerably between jurisdictions, and the question of how to govern a technology that is simultaneously global in its reach and local in its application has not been resolved. Progress has also been complicated by the gap between laboratory results and commercial viability. Many of the organisms engineered to produce valuable compounds have performed well under controlled conditions but proved difficult to scale.</p>
+                    
+                    <div class="gap-slot" id="slot-5" data-correct="E">
+                        <span class="gap-label">GAP 5</span>
+                        <div class="gap-placeholder">Drag a paragraph here</div>
+                        <div class="cohesion-note" id="note-5"><strong>Cohesion Note:</strong> "The organisms that proved most productive..." (Para E) is a direct lexical echo of "performed well under controlled conditions" in the base text.</div>
+                    </div>
+
+                    <p>The challenge is not merely technical — it also involves navigating intellectual property regimes that were not designed with biological systems in mind. Despite these difficulties, the field has continued to attract substantial investment. Venture capital has flowed into synthetic biology companies at a pace that has surprised even optimistic observers, driven in part by the growing recognition that biological manufacturing may offer more sustainable alternatives to petrochemical processes.</p>
+                    
+                    <div class="gap-slot" id="slot-6" data-correct="F">
+                        <span class="gap-label">GAP 6</span>
+                        <div class="gap-placeholder">Drag a paragraph here</div>
+                        <div class="cohesion-note" id="note-6"><strong>Cohesion Note:</strong> "This enthusiasm" (Para F) refers to the "optimistic observers" and "investment" mentioned before the gap.</div>
+                    </div>
+
+                    <p>Whether the technology will fulfil its most ambitious promises remains genuinely uncertain. What is no longer in doubt is that it has permanently altered the boundaries of what can be made from living matter.</p>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <div class="score-display" id="score-display">
+                    <div class="score-text">You scored <span id="score-val">0</span> / 6</div>
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                </div>
+                <button class="btn-main" id="check-btn" onclick="checkAnswers()">Check all answers</button>
+                <button class="btn-outline" id="reset-btn" onclick="resetExercise()">Try again</button>
+            </div>
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li style="margin-bottom:1.5rem">Find the lexical echoes in gaps 3 and 5. What exactly was repeated?</li>
+                <li style="margin-bottom:1.5rem">Paragraph G was the extra. Why didn't it fit? What specific signal was missing?</li>
+                <li style="margin-bottom:1.5rem">Paragraph C is almost all passive. Why is that appropriate for a scientific process?</li>
+            </ul>
+            <p class="wrap-up-note">These are not trick questions. The point is to hear yourself explain the system.</p>
+        </section>
+    </div>
+
+    <script>
+        // Accordion
+        function toggleAcc(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+
+        // Logic for Drag & Drop and Fallback Selectors
+        const slots = document.querySelectorAll('.gap-slot');
+        const cards = document.querySelectorAll('.para-card');
+        const bin = document.getElementById('options-bin');
+        let currentDrag = null;
+
+        // Initialize slots with dropdowns
+        slots.forEach(slot => {
+            const slotId = slot.id.split('-')[1];
+            const fallback = document.createElement('div');
+            fallback.className = 'fallback-container';
+            fallback.innerHTML = `
+                <span class="fallback-label">Or select:</span>
+                <select class="fallback-select" onchange="handleSelect(this, '${slot.id}')">
+                    <option value="">— select —</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                </select>
+            `;
+            slot.appendChild(fallback);
+        });
+
+        // Drag events
+        cards.forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                if (card.classList.contains('placed')) {
+                    e.preventDefault();
+                    return;
+                }
+                currentDrag = card;
+                e.dataTransfer.setData('text/plain', card.dataset.letter);
+                card.style.opacity = '0.4';
+            });
+
+            card.addEventListener('dragend', () => {
+                card.style.opacity = '';
+                currentDrag = null;
+            });
+        });
+
+        slots.forEach(slot => {
+            slot.addEventListener('dragover', (e) => e.preventDefault());
+            slot.addEventListener('dragenter', () => slot.classList.add('over'));
+            slot.addEventListener('dragleave', () => slot.classList.remove('over'));
+            
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.classList.remove('over');
+                const letter = e.dataTransfer.getData('text/plain');
+                placeParagraph(letter, slot.id);
+            });
+        });
+
+        function handleSelect(select, slotId) {
+            placeParagraph(select.value, slotId);
+        }
+
+        function placeParagraph(letter, slotId) {
+            const slot = document.getElementById(slotId);
+            const placeholder = slot.querySelector('.gap-placeholder');
+            const select = slot.querySelector('.fallback-select');
+            
+            // If already filled, return old card to bin
+            const existingLetter = slot.dataset.placed;
+            if (existingLetter) {
+                document.getElementById(`para-${existingLetter}`).classList.remove('placed');
+            }
+
+            if (!letter) {
+                slot.classList.remove('filled');
+                placeholder.innerHTML = "Drag a paragraph here";
+                slot.dataset.placed = "";
+                select.value = "";
+                return;
+            }
+
+            // Update slot
+            slot.classList.add('filled');
+            slot.dataset.placed = letter;
+            const paraText = document.getElementById(`para-${letter}`).querySelector('p').innerText;
+            placeholder.innerHTML = `<strong>Paragraph ${letter}</strong><br>${paraText}`;
+            
+            // Mark card as placed
+            document.getElementById(`para-${letter}`).classList.add('placed');
+            
+            // Sync select
+            select.value = letter;
+
+            // Clear other slots that had this letter
+            slots.forEach(otherSlot => {
+                if (otherSlot.id !== slotId && otherSlot.dataset.placed === letter) {
+                    otherSlot.classList.remove('filled');
+                    otherSlot.querySelector('.gap-placeholder').innerHTML = "Drag a paragraph here";
+                    otherSlot.dataset.placed = "";
+                    otherSlot.querySelector('.fallback-select').value = "";
+                }
+            });
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            let allAnswered = true;
+
+            slots.forEach(slot => {
+                if (!slot.dataset.placed) allAnswered = false;
+            });
+
+            if (!allAnswered) {
+                alert("Please place all 6 paragraphs before checking.");
+                return;
+            }
+
+            slots.forEach(slot => {
+                const isCorrect = slot.dataset.placed === slot.dataset.correct;
+                if (isCorrect) score++;
+
+                slot.classList.add(isCorrect ? 'correct' : 'incorrect');
+                slot.querySelector('.cohesion-note').style.display = 'block';
+                
+                if (!isCorrect) {
+                    const reveal = document.createElement('div');
+                    reveal.className = 'correct-answer-reveal';
+                    reveal.innerHTML = `Correct Paragraph: ${slot.dataset.correct}`;
+                    reveal.style.display = 'block';
+                    slot.appendChild(reveal);
+                }
+            });
+
+            // Score
+            const display = document.getElementById('score-display');
+            display.style.display = 'block';
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('progress-fill').style.width = (score / 6) * 100 + '%';
+
+            document.getElementById('check-btn').disabled = true;
+            document.getElementById('reset-btn').style.display = 'inline-block';
+            
+            // Dim bin
+            document.getElementById('options-bin').style.opacity = '0.5';
+            document.getElementById('options-bin').style.pointerEvents = 'none';
+        }
+
+        function resetExercise() {
+            location.reload(); // Simplest way to reset complex D&D state
+        }
+
+        // Simple Touch support for iPad
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.para-card')) {
+                // We let them use the dropdowns on mobile/touch if D&D is too finicky
+                // but we keep the UI consistent.
+            }
+        });
+    </script>
+</body>
+</html>
