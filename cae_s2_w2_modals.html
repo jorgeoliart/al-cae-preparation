@@ -214,6 +214,29 @@
         }
 
         /* Section 3: Exercises */
+        .global-progress {
+            margin-bottom: 3rem;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-alt);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text { font-size: 0.9rem; color: var(--text-sec); text-align: right; margin: 0; }
+
         .exercise-instruction {
             font-style: italic;
             margin-bottom: 2rem;
@@ -239,141 +262,139 @@
         }
         
         .text-content {
-            font-size: 1.1rem;
-            line-height: 2.4; /* Generous line height for inline inputs */
+            font-size: 1.15rem;
+            line-height: 2.4;
             color: var(--text-pri);
         }
 
         /* Inline Input Styling */
         .inline-gap-wrapper {
-            display: inline-block;
-            position: relative;
+            display: inline-flex;
+            align-items: center;
             margin: 0 4px;
+            position: relative;
             white-space: nowrap;
         }
         .gap-num {
             font-size: 0.75rem;
             color: var(--text-sec);
-            margin-right: 2px;
+            margin-right: 4px;
             font-weight: 600;
-            vertical-align: super;
+            transform: translateY(-8px);
+            display: inline-block;
         }
         .gap-input {
-            background: rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.3);
             border: none;
             border-bottom: 2px solid var(--accent);
             color: var(--text-pri);
             padding: 4px 8px;
             border-radius: 4px 4px 0 0;
             font-family: inherit;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             text-align: center;
-            width: 120px;
+            width: 110px;
             transition: all 0.2s;
         }
         .gap-input:focus {
             outline: none;
-            border-bottom-color: var(--accent-hover);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
             background: #0d1117;
-            box-shadow: 0 2px 8px rgba(167, 139, 250, 0.15);
+            box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
         }
         .gap-input:disabled {
             opacity: 1;
+            border-radius: 4px;
         }
         .gap-input.correct {
-            border-bottom-color: var(--correct);
+            border: 1px solid var(--correct);
             color: var(--correct);
             background: rgba(52, 211, 153, 0.1);
         }
         .gap-input.incorrect {
-            border-bottom-color: var(--incorrect);
+            border: 1px solid var(--incorrect);
             color: var(--incorrect);
             background: rgba(248, 113, 113, 0.1);
         }
 
-        .feedback-inline {
-            position: absolute;
-            left: 0;
-            top: 100%;
-            width: 100%;
-            text-align: center;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--correct);
-            margin-top: 2px;
-            display: none;
-            pointer-events: none;
-        }
-        .feedback-inline.visible {
-            display: block;
-        }
-
-        /* Actions & Progress */
-        .action-area {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .btn-main {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 6px;
-            font-family: var(--font-body);
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-main:hover {
-            background: var(--accent-hover);
-        }
-        .btn-outline {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 10px 24px;
-            border-radius: 6px;
-            font-family: var(--font-body);
-            font-size: 1rem;
-            font-weight: 600;
+        .btn-inline {
+            background: var(--surface-alt);
+            color: var(--text-sec);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            display: none;
+            font-size: 0.9rem;
         }
-        .btn-outline:hover {
-            background: rgba(167, 139, 250, 0.1);
+        .btn-inline:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
         }
 
-        .score-display {
+        .feedback-inline {
+            margin-left: 8px;
+            font-weight: 600;
+            font-size: 1rem;
             display: none;
-            margin-bottom: 1.5rem;
+            align-items: center;
         }
-        .score-display.visible {
-            display: block;
+        .feedback-inline.visible {
+            display: inline-flex;
         }
-        .score-text {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            color: var(--text-pri);
+        .icon-correct { color: var(--correct); }
+        .icon-incorrect { color: var(--incorrect); }
+        .correction-text {
+            color: var(--correct);
+            margin-left: 6px;
+            font-size: 1rem;
+            background: rgba(52, 211, 153, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        /* Explanations Box */
+        .explanations-box {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: none;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .explanations-box.visible {
+            display: flex;
+        }
+        .explanations-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sec);
             margin-bottom: 0.5rem;
         }
-        .progress-bar-bg {
-            width: 100%;
-            max-width: 400px;
-            height: 6px;
-            background: var(--surface-alt);
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 0 auto;
+        .exp-item {
+            background: rgba(0,0,0,0.2);
+            border-left: 3px solid var(--accent);
+            padding: 0.75rem 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.95rem;
+            color: var(--text-pri);
+            animation: fadeIn 0.3s ease;
         }
-        .progress-bar-fill {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.6s ease;
+        .exp-item strong {
+            color: var(--accent);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Section 4: Wrap-up */
@@ -419,7 +440,7 @@
             h1 { font-size: 2rem; }
             .text-card { padding: 1.5rem; }
             .text-content { font-size: 1.05rem; line-height: 2.2; }
-            .gap-input { width: 100px; }
+            .gap-input { width: 90px; }
         }
     </style>
 </head>
@@ -561,15 +582,31 @@
         <section id="exercises">
             <h2>Part 2: Open Cloze</h2>
             
-            <p class="exercise-instruction">For questions 1–16, read the texts below and think of the word which best fits each gap. Use only ONE word in each gap. There is an example at the beginning (0).</p>
+            <div class="global-progress">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="global-progress-fill"></div>
+                </div>
+                <p class="progress-text">Total progress: <span id="global-progress-count">0</span> / 16 gaps completed</p>
+            </div>
+
+            <p class="exercise-instruction">For questions 1–16, read the texts below and think of the word which best fits each gap. Use only ONE word in each gap.</p>
 
             <!-- TEXT 1 -->
             <div class="text-card">
+                <div class="progress-bar-bg" style="height: 3px; margin-bottom: 1.5rem;">
+                    <div class="progress-bar-fill" id="t1-progress-fill"></div>
+                </div>
                 <h3 class="text-title">Text 1: The Future of Urban Mobility</h3>
                 <div class="text-content">
-                    Cities around the world are under growing pressure to rethink how people move. Private car use <span class="inline-gap-wrapper"><sup class="gap-num">1</sup><input type="text" class="gap-input" id="gap-1" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-1"></span></span> no longer be seen as a sustainable solution — the evidence against it is overwhelming. Urban planners now agree that public transport networks <span class="inline-gap-wrapper"><sup class="gap-num">2</sup><input type="text" class="gap-input" id="gap-2" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-2"></span></span> be expanded and integrated if cities are to meet their climate targets within the next decade.
+                    Cities around the world are under growing pressure to rethink how people move. Private car use <span class="inline-gap-wrapper"><sup class="gap-num">1</sup><input type="text" class="gap-input" id="gap-1" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-1" onclick="checkGap(1)">✓</button><span class="feedback-inline" id="fb-1"></span></span> no longer be seen as a sustainable solution — the evidence against it is overwhelming. Urban planners now agree that public transport networks <span class="inline-gap-wrapper"><sup class="gap-num">2</sup><input type="text" class="gap-input" id="gap-2" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-2" onclick="checkGap(2)">✓</button><span class="feedback-inline" id="fb-2"></span></span> be expanded and integrated if cities are to meet their climate targets within the next decade.
                     <br><br>
-                    Several major European cities have already demonstrated what <span class="inline-gap-wrapper"><sup class="gap-num">3</sup><input type="text" class="gap-input" id="gap-3" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-3"></span></span> be achieved when cycling infrastructure is properly funded. Copenhagen, for instance, is <span class="inline-gap-wrapper"><sup class="gap-num">4</sup><input type="text" class="gap-input" id="gap-4" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-4"></span></span> to become fully carbon-neutral in its transport sector by 2030, a target that <span class="inline-gap-wrapper"><sup class="gap-num">5</sup><input type="text" class="gap-input" id="gap-5" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-5"></span></span> have seemed impossible just twenty years ago. <span class="inline-gap-wrapper"><sup class="gap-num">6</sup><input type="text" class="gap-input" id="gap-6" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-6"></span></span>, many cities in the developing world face a different challenge: they <span class="inline-gap-wrapper"><sup class="gap-num">7</sup><input type="text" class="gap-input" id="gap-7" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-7"></span></span> build entire transit systems from scratch, without the luxury of adapting existing infrastructure. What is clear in both contexts is that investment in public transport is <span class="inline-gap-wrapper"><sup class="gap-num">8</sup><input type="text" class="gap-input" id="gap-8" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-8"></span></span> to deliver long-term benefits that private vehicle use simply cannot match.
+                    Several major European cities have already demonstrated what <span class="inline-gap-wrapper"><sup class="gap-num">3</sup><input type="text" class="gap-input" id="gap-3" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-3" onclick="checkGap(3)">✓</button><span class="feedback-inline" id="fb-3"></span></span> be achieved when cycling infrastructure is properly funded. Copenhagen, for instance, is <span class="inline-gap-wrapper"><sup class="gap-num">4</sup><input type="text" class="gap-input" id="gap-4" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-4" onclick="checkGap(4)">✓</button><span class="feedback-inline" id="fb-4"></span></span> to become fully carbon-neutral in its transport sector by 2030, a target that <span class="inline-gap-wrapper"><sup class="gap-num">5</sup><input type="text" class="gap-input" id="gap-5" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-5" onclick="checkGap(5)">✓</button><span class="feedback-inline" id="fb-5"></span></span> have seemed impossible just twenty years ago. <span class="inline-gap-wrapper"><sup class="gap-num">6</sup><input type="text" class="gap-input" id="gap-6" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-6" onclick="checkGap(6)">✓</button><span class="feedback-inline" id="fb-6"></span></span>, many cities in the developing world face a different challenge: they <span class="inline-gap-wrapper"><sup class="gap-num">7</sup><input type="text" class="gap-input" id="gap-7" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-7" onclick="checkGap(7)">✓</button><span class="feedback-inline" id="fb-7"></span></span> build entire transit systems from scratch, without the luxury of adapting existing infrastructure. What is clear in both contexts is that investment in public transport is <span class="inline-gap-wrapper"><sup class="gap-num">8</sup><input type="text" class="gap-input" id="gap-8" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-8" onclick="checkGap(8)">✓</button><span class="feedback-inline" id="fb-8"></span></span> to deliver long-term benefits that private vehicle use simply cannot match.
+                </div>
+                
+                <!-- Explanations Container for Text 1 -->
+                <div class="explanations-box" id="exp-box-t1">
+                    <div class="explanations-title">Feedback & Explanations</div>
+                    <div id="exp-list-t1"></div>
                 </div>
             </div>
 
@@ -577,23 +614,21 @@
 
             <!-- TEXT 2 -->
             <div class="text-card">
+                <div class="progress-bar-bg" style="height: 3px; margin-bottom: 1.5rem;">
+                    <div class="progress-bar-fill" id="t2-progress-fill"></div>
+                </div>
                 <h3 class="text-title">Text 2: The Ethics of Artificial Intelligence</h3>
                 <div class="text-content">
-                    The rapid development of artificial intelligence has raised profound questions about accountability. When an AI system causes harm, it is often unclear who <span class="inline-gap-wrapper"><sup class="gap-num">9</sup><input type="text" class="gap-input" id="gap-9" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-9"></span></span> be held responsible — the developer, the user, or the organisation that deployed it. Regulators argue that companies <span class="inline-gap-wrapper"><sup class="gap-num">10</sup><input type="text" class="gap-input" id="gap-10" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-10"></span></span> have anticipated these risks long before their systems were released to the public, and that the current lack of oversight is simply unacceptable.
+                    The rapid development of artificial intelligence has raised profound questions about accountability. When an AI system causes harm, it is often unclear who <span class="inline-gap-wrapper"><sup class="gap-num">9</sup><input type="text" class="gap-input" id="gap-9" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-9" onclick="checkGap(9)">✓</button><span class="feedback-inline" id="fb-9"></span></span> be held responsible — the developer, the user, or the organisation that deployed it. Regulators argue that companies <span class="inline-gap-wrapper"><sup class="gap-num">10</sup><input type="text" class="gap-input" id="gap-10" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-10" onclick="checkGap(10)">✓</button><span class="feedback-inline" id="fb-10"></span></span> have anticipated these risks long before their systems were released to the public, and that the current lack of oversight is simply unacceptable.
                     <br><br>
-                    Many experts believe that a binding international framework <span class="inline-gap-wrapper"><sup class="gap-num">11</sup><input type="text" class="gap-input" id="gap-11" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-11"></span></span> to be established within the next five years if meaningful regulation is to take effect. Without it, the situation is <span class="inline-gap-wrapper"><sup class="gap-num">12</sup><input type="text" class="gap-input" id="gap-12" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-12"></span></span> to worsen significantly. Individual governments, meanwhile, are under pressure to act: in several jurisdictions, new legislation is <span class="inline-gap-wrapper"><sup class="gap-num">13</sup><input type="text" class="gap-input" id="gap-13" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-13"></span></span> to come into force before the end of the year. The technology, <span class="inline-gap-wrapper"><sup class="gap-num">14</sup><input type="text" class="gap-input" id="gap-14" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-14"></span></span> some analysts have warned, <span class="inline-gap-wrapper"><sup class="gap-num">15</sup><input type="text" class="gap-input" id="gap-15" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-15"></span></span> already have outpaced the legal systems designed to govern it — a fact <span class="inline-gap-wrapper"><sup class="gap-num">16</sup><input type="text" class="gap-input" id="gap-16" autocomplete="off" spellcheck="false" /><span class="feedback-inline" id="fb-16"></span></span> raises urgent questions about democratic accountability.
+                    Many experts believe that a binding international framework <span class="inline-gap-wrapper"><sup class="gap-num">11</sup><input type="text" class="gap-input" id="gap-11" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-11" onclick="checkGap(11)">✓</button><span class="feedback-inline" id="fb-11"></span></span> to be established within the next five years if meaningful regulation is to take effect. Without it, the situation is <span class="inline-gap-wrapper"><sup class="gap-num">12</sup><input type="text" class="gap-input" id="gap-12" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-12" onclick="checkGap(12)">✓</button><span class="feedback-inline" id="fb-12"></span></span> to worsen significantly. Individual governments, meanwhile, are under pressure to act: in several jurisdictions, new legislation is <span class="inline-gap-wrapper"><sup class="gap-num">13</sup><input type="text" class="gap-input" id="gap-13" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-13" onclick="checkGap(13)">✓</button><span class="feedback-inline" id="fb-13"></span></span> to come into force before the end of the year. The technology, <span class="inline-gap-wrapper"><sup class="gap-num">14</sup><input type="text" class="gap-input" id="gap-14" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-14" onclick="checkGap(14)">✓</button><span class="feedback-inline" id="fb-14"></span></span> some analysts have warned, <span class="inline-gap-wrapper"><sup class="gap-num">15</sup><input type="text" class="gap-input" id="gap-15" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-15" onclick="checkGap(15)">✓</button><span class="feedback-inline" id="fb-15"></span></span> already have outpaced the legal systems designed to govern it — a fact <span class="inline-gap-wrapper"><sup class="gap-num">16</sup><input type="text" class="gap-input" id="gap-16" autocomplete="off" spellcheck="false" /><button class="btn-inline" id="btn-16" onclick="checkGap(16)">✓</button><span class="feedback-inline" id="fb-16"></span></span> raises urgent questions about democratic accountability.
                 </div>
-            </div>
-
-            <div class="action-area">
-                <div class="score-display" id="score-display">
-                    <div class="score-text">You scored <span id="score-count">0</span> / 16</div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" id="score-fill"></div>
-                    </div>
+                
+                <!-- Explanations Container for Text 2 -->
+                <div class="explanations-box" id="exp-box-t2">
+                    <div class="explanations-title">Feedback & Explanations</div>
+                    <div id="exp-list-t2"></div>
                 </div>
-                <button class="btn-main" id="btn-check" onclick="checkAll()">Check all answers</button>
-                <button class="btn-outline" id="btn-reset" onclick="resetAll()">Try again</button>
             </div>
 
         </section>
@@ -622,27 +657,29 @@
             }
         }
 
-        // Exercise Data
-        const answers = {
-            1: ["can", "cannot"],
-            2: ["must", "should"],
-            3: ["can"],
-            4: ["set"],
-            5: ["would"],
-            6: ["however", "nevertheless", "nonetheless"],
-            7: ["must"],
-            8: ["bound"],
-            9: ["should"],
-            10: ["should"],
-            11: ["needs", "ought", "has"],
-            12: ["likely"],
-            13: ["due"],
-            14: ["however", "though"],
-            15: ["may", "might", "could"],
-            16: ["which"]
+        // Exercise Data with Explanations
+        const gapData = {
+            1: { answers: ["can", "cannot"], exp: "<strong>Gap 1:</strong> The phrase 'can no longer be seen' expresses a negative logical deduction or inability in the present. 'Cannot' or 'can' fits this passive structure." },
+            2: { answers: ["must", "should"], exp: "<strong>Gap 2:</strong> Strong obligation is required here to meet climate targets. 'Must' is the strongest fit, though 'should' is acceptable for strong advice. ('Need to' is two words, so it fails the Part 2 rule)." },
+            3: { answers: ["can"], exp: "<strong>Gap 3:</strong> Refers to a general theoretical possibility: 'what can be achieved'." },
+            4: { answers: ["set"], exp: "<strong>Gap 4:</strong> The frame is 'is ___ to become'. 'Set' implies something is scheduled or ready to happen, often with a specific timeframe ('by 2030'). 'Bound' means mathematically/logically certain, which doesn't fit the context of a city's policy target." },
+            5: { answers: ["would"], exp: "<strong>Gap 5:</strong> This is a past hypothetical situation ('would have seemed impossible'). The 'have' is already there, so we just need the modal 'would'." },
+            6: { answers: ["however", "nevertheless", "nonetheless"], exp: "<strong>Gap 6:</strong> A contrasting discourse marker is needed to introduce the 'different challenge' faced by the developing world. (A reminder that not every gap is a modal!)" },
+            7: { answers: ["must"], exp: "<strong>Gap 7:</strong> Expresses strong external necessity or obligation: 'they must build'." },
+            8: { answers: ["bound"], exp: "<strong>Gap 8:</strong> The frame is 'is ___ to deliver'. 'Bound' means certain or inevitable. 'Set' wouldn't work as well here because this is a logical conclusion about benefits, not a scheduled event." },
+            9: { answers: ["should"], exp: "<strong>Gap 9:</strong> Expresses obligation or appropriateness in a question: 'who should be held responsible'." },
+            10: { answers: ["should"], exp: "<strong>Gap 10:</strong> Past criticism: 'should have anticipated'. The 'have' is already in the text, leaving 'should' as the missing modal." },
+            11: { answers: ["needs", "ought", "has"], exp: "<strong>Gap 11:</strong> The word 'to' follows the gap, which rules out 'must' or 'should'. We need a semi-modal of necessity: 'needs', 'ought', or 'has'." },
+            12: { answers: ["likely"], exp: "<strong>Gap 12:</strong> The frame 'is ___ to worsen' requires a word expressing probability. 'Likely' fits perfectly here." },
+            13: { answers: ["due"], exp: "<strong>Gap 13:</strong> The frame is 'is ___ to come into force'. 'Due' is the standard formal collocation for scheduled events or deadlines ('before the end of the year')." },
+            14: { answers: ["however", "though"], exp: "<strong>Gap 14:</strong> A concessive discourse marker inserted mid-sentence. 'However' or 'though' fits the punctuation and meaning." },
+            15: { answers: ["may", "might", "could"], exp: "<strong>Gap 15:</strong> Past possibility ('already have outpaced'). The text provides 'already have', so we need the modal of possibility." },
+            16: { answers: ["which"], exp: "<strong>Gap 16:</strong> A non-defining relative clause referring back to the whole previous statement ('a fact which raises...')." }
         };
 
-        // Add Enter key listener to all inputs to move to next or submit
+        const attemptedGaps = new Set();
+
+        // Add Enter key listener
         document.addEventListener('DOMContentLoaded', () => {
             for (let i = 1; i <= 16; i++) {
                 const inputEl = document.getElementById(`gap-${i}`);
@@ -650,71 +687,60 @@
                     inputEl.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
-                            if (i < 16) {
-                                document.getElementById(`gap-${i+1}`).focus();
-                            } else {
-                                checkAll();
-                            }
+                            checkGap(i);
                         }
                     });
                 }
             }
         });
 
-        function checkAll() {
-            let score = 0;
+        function checkGap(id) {
+            if (attemptedGaps.has(id)) return;
 
-            for (let i = 1; i <= 16; i++) {
-                const inputEl = document.getElementById(`gap-${i}`);
-                const fbEl = document.getElementById(`fb-${i}`);
-                const userVal = inputEl.value.trim().toLowerCase();
-                
-                // Check if correct
-                const isCorrect = answers[i].includes(userVal);
+            const inputEl = document.getElementById(`gap-${id}`);
+            const btnEl = document.getElementById(`btn-${id}`);
+            const fbEl = document.getElementById(`fb-${id}`);
+            
+            const userVal = inputEl.value.trim().toLowerCase();
+            if (userVal === "") return; // Don't submit empty
 
-                inputEl.disabled = true;
+            const isCorrect = gapData[id].answers.includes(userVal);
 
-                if (isCorrect) {
-                    inputEl.classList.add('correct');
-                    score++;
-                } else {
-                    inputEl.classList.add('incorrect');
-                    fbEl.innerText = answers[i][0]; // Show primary correct answer
-                    fbEl.classList.add('visible');
-                }
+            // Update State
+            attemptedGaps.add(id);
+
+            // Update Progress Bars
+            const totalAttempted = attemptedGaps.size;
+            const t1Attempted = Array.from(attemptedGaps).filter(x => x <= 8).length;
+            const t2Attempted = Array.from(attemptedGaps).filter(x => x > 8).length;
+
+            document.getElementById('global-progress-count').innerText = totalAttempted;
+            document.getElementById('global-progress-fill').style.width = `${(totalAttempted / 16) * 100}%`;
+            document.getElementById('t1-progress-fill').style.width = `${(t1Attempted / 8) * 100}%`;
+            document.getElementById('t2-progress-fill').style.width = `${(t2Attempted / 8) * 100}%`;
+
+            // UI Updates
+            inputEl.disabled = true;
+            btnEl.style.display = 'none';
+            fbEl.classList.add('visible');
+
+            if (isCorrect) {
+                inputEl.classList.add('correct');
+                fbEl.innerHTML = `<span class="icon-correct">✓</span>`;
+            } else {
+                inputEl.classList.add('incorrect');
+                fbEl.innerHTML = `<span class="icon-incorrect">✗</span><span class="correction-text">${gapData[id].answers[0]}</span>`;
             }
 
-            // Update UI
-            document.getElementById('btn-check').style.display = 'none';
-            document.getElementById('btn-reset').style.display = 'inline-block';
+            // Append Explanation
+            const textId = id <= 8 ? 't1' : 't2';
+            const expBox = document.getElementById(`exp-box-${textId}`);
+            const expList = document.getElementById(`exp-list-${textId}`);
             
-            const scoreDisplay = document.getElementById('score-display');
-            document.getElementById('score-count').innerText = score;
-            document.getElementById('score-fill').style.width = `${(score / 16) * 100}%`;
-            scoreDisplay.classList.add('visible');
-        }
-
-        function resetAll() {
-            for (let i = 1; i <= 16; i++) {
-                const inputEl = document.getElementById(`gap-${i}`);
-                const fbEl = document.getElementById(`fb-${i}`);
-                
-                inputEl.value = '';
-                inputEl.disabled = false;
-                inputEl.classList.remove('correct', 'incorrect');
-                
-                fbEl.innerText = '';
-                fbEl.classList.remove('visible');
-            }
-
-            // Update UI
-            document.getElementById('btn-check').style.display = 'inline-block';
-            document.getElementById('btn-reset').style.display = 'none';
-            document.getElementById('score-display').classList.remove('visible');
-            document.getElementById('score-fill').style.width = '0%';
+            expBox.classList.add('visible');
             
-            // Focus first input
-            document.getElementById('gap-1').focus();
+            const expHTML = `<div class="exp-item">${gapData[id].exp}</div>`;
+            expList.insertAdjacentHTML('beforeend', expHTML);
         }
     </script>
 </body>
