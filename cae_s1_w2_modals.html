@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 1: Modal Verbs</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #a78bfa; /* Purple for Week 2 */
+            --accent-hover: #bba4fc;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 {
+            top: -10%;
+            right: -5%;
+            width: 400px;
+            height: 400px;
+        }
+        .orb-2 {
+            bottom: -10%;
+            left: -5%;
+            width: 500px;
+            height: 500px;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--text-pri);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section {
+            margin-bottom: 5rem;
+        }
+
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Section 1: Onboarding */
+        .onboarding-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .onboarding-card p {
+            font-size: 1.1rem;
+            color: var(--text-pri);
+        }
+
+        /* Section 2: Accordion */
+        .acc-wrapper {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        .acc-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-pri);
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .acc-header:hover {
+            background: var(--surface-alt);
+        }
+        .acc-header .chevron {
+            font-size: 1.5rem;
+            transition: transform 0.35s ease;
+            color: var(--accent);
+        }
+        .acc-wrapper.open > .acc-header .chevron {
+            transform: rotate(180deg);
+        }
+        
+        /* Grid transition for smooth open/close */
+        .acc-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s ease;
+        }
+        .acc-wrapper.open > .acc-content {
+            grid-template-rows: 1fr;
+        }
+        .acc-content > .acc-inner {
+            overflow: hidden;
+        }
+        
+        .acc-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+        
+        .sub-acc { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); margin-top: 1rem; }
+        .sub-acc .acc-header { padding: 1rem 1.5rem; }
+        
+        .grammar-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        @media (min-width: 600px) {
+            .grammar-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .grammar-item {
+            background: rgba(255,255,255,0.02);
+            padding: 1rem;
+            border-radius: 6px;
+        }
+        .grammar-item .form { color: var(--accent); font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; }
+        .grammar-item .structure { font-size: 0.85rem; color: var(--text-sec); margin-bottom: 0.5rem; font-family: monospace; }
+        .grammar-item .example { font-style: italic; color: var(--text-pri); font-size: 0.95rem; }
+
+        .trap-callout {
+            background: rgba(248, 113, 113, 0.1);
+            border-left: 3px solid var(--incorrect);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.9rem;
+            color: var(--text-pri);
+        }
+        .trap-callout strong { color: var(--incorrect); }
+
+        .highlight-box {
+            background: rgba(167, 139, 250, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.95rem;
+            color: var(--text-pri);
+        }
+
+        /* Section 3: Exercises */
+        .progress-wrapper {
+            margin-bottom: 2rem;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--surface-alt);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text { font-size: 0.9rem; color: var(--text-sec); text-align: right; }
+
+        .exercise-instruction {
+            font-style: italic;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 6px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .card.correct { border-left-color: var(--correct); background: rgba(52, 211, 153, 0.05); }
+        .card.incorrect { border-left-color: var(--incorrect); background: rgba(248, 113, 113, 0.05); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .item-number { font-family: var(--font-display); color: var(--text-sec); font-weight: 700; }
+        .trans-type {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sec);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .trans-type.visible { opacity: 1; }
+
+        .original-sentence {
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            color: var(--text-pri);
+        }
+        .keyword-row {
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-sec);
+        }
+        .keyword-badge {
+            background: rgba(167, 139, 250, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-left: 0.5rem;
+        }
+
+        .transform-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.05rem;
+            line-height: 2;
+        }
+        .gap-input {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-pri);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 280px;
+            transition: all 0.2s;
+        }
+        .gap-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+        }
+        .gap-input:disabled { opacity: 1; }
+        .card.correct .gap-input:disabled { border-color: var(--correct); color: var(--correct); background: rgba(52, 211, 153, 0.1); }
+        .card.incorrect .gap-input:disabled { border-color: var(--incorrect); color: var(--incorrect); background: rgba(248, 113, 113, 0.1); }
+
+        .action-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .btn-check {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-check:hover { background: var(--accent-hover); }
+        .btn-check:disabled { background: var(--surface-alt); color: var(--text-sec); cursor: not-allowed; }
+        
+        .feedback-text {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            display: none;
+            padding-top: 1rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+        }
+        .feedback-text.visible { display: block; }
+        .text-green { color: var(--correct); }
+        .text-red { color: var(--incorrect); }
+        .correct-answer-highlight { color: var(--text-pri); font-weight: 600; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; }
+        .alt-answers { display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-sec); }
+
+        /* Section 4: Wrap-up */
+        .wrap-up-list {
+            list-style: none;
+            counter-reset: wrapup-counter;
+        }
+        .wrap-up-list li {
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        .wrap-up-list li::before {
+            counter-increment: wrapup-counter;
+            content: counter(wrapup-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            background: rgba(167, 139, 250, 0.15);
+            color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .wrap-up-note {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--text-sec);
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 2rem 1rem; }
+            h1 { font-size: 2rem; }
+            .gap-input { max-width: 100%; }
+            .grammar-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <!-- SECTION 1: ONBOARDING -->
+        <section id="onboarding">
+            <h1>Week 2: The Modal System</h1>
+            <div class="onboarding-card">
+                <p>Week 1 was about passive constructions — the architecture of formal written English. This week adds the layer that sits on top: modal verbs.</p><br>
+                <p>At FCE, modals were largely a matter of meaning: <em>must</em> means obligation, <em>might</em> means possibility. At CAE, that's not enough. The exam tests whether you can distinguish between forms that are close in meaning but grammatically distinct — and whether you can produce them precisely under pressure.</p><br>
+                <p>The most important shift at C1 is <strong>modal perfects</strong>. <em>Must have done, should have done, needn't have done</em> — these forms carry exact logical claims about the past. The examiner uses them as traps because students confuse them constantly.</p><br>
+                <p>Today's job: map the system clearly. Name every form. Understand what each one actually claims. Then drill the transformations until the logic is automatic.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: GRAMMAR REFERENCE -->
+        <section id="grammar">
+            <h2>The Modal System</h2>
+            
+            <div class="acc-wrapper" id="main-grammar-acc">
+                <button class="acc-header" onclick="toggleAcc('main-grammar-acc')">
+                    <h3>Grammar Reference — open after attempting the exercises, or use for review.</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        
+                        <!-- Panel 1 -->
+                        <div class="acc-wrapper sub-acc" id="panel-1">
+                            <button class="acc-header" onclick="toggleAcc('panel-1')">
+                                <h4>Core modals: present meaning</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <div class="grammar-grid">
+                                        <div class="grammar-item">
+                                            <div class="form">Deduction (positive)</div>
+                                            <div class="structure">must + bare infinitive</div>
+                                            <div class="example">"She must know the answer — she studied for weeks."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Deduction (negative)</div>
+                                            <div class="structure">can't / cannot + bare infinitive</div>
+                                            <div class="example">"He can't be serious. That's completely unrealistic."<br><span style="font-size: 0.8rem; color: var(--text-sec);">Note: cannot is more formal than can't in written CAE contexts.</span></div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Obligation (internal/speaker-imposed)</div>
+                                            <div class="structure">must + bare infinitive</div>
+                                            <div class="example">"You must submit the form before midnight."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Obligation (external)</div>
+                                            <div class="structure">have to + bare infinitive</div>
+                                            <div class="example">"Employees have to wear ID badges at all times."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Advice / mild obligation</div>
+                                            <div class="structure">should / ought to + bare infinitive</div>
+                                            <div class="example">"The report should be more concise." / "Applicants ought to provide two references."<br><span style="font-size: 0.8rem; color: var(--text-sec);">Note: ought to is slightly stronger and more formal.</span></div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Permission / possibility</div>
+                                            <div class="structure">may / might + bare infinitive</div>
+                                            <div class="example">"The results may surprise you." / "It might rain later."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Permission / theoretical possibility</div>
+                                            <div class="structure">can / could + bare infinitive</div>
+                                            <div class="example">"Visitors can park in Zone B." / "This approach could work."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Prediction / habit</div>
+                                            <div class="structure">will / would + bare infinitive</div>
+                                            <div class="example">"The committee will announce its decision next week." / "She would often arrive early."</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2 -->
+                        <div class="acc-wrapper sub-acc" id="panel-2">
+                            <button class="acc-header" onclick="toggleAcc('panel-2')">
+                                <h4>Modal perfects: past reference</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p style="margin-bottom: 1rem;"><strong>Form:</strong> modal + have + past participle.</p>
+                                    <div class="grammar-grid">
+                                        <div class="grammar-item">
+                                            <div class="form">Past deduction (positive)</div>
+                                            <div class="structure">must have + pp</div>
+                                            <div class="example">"They must have left before we arrived — the door was locked."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Past deduction (negative)</div>
+                                            <div class="structure">can't have + pp</div>
+                                            <div class="example">"She can't have read the report — she got every fact wrong."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Past possibility</div>
+                                            <div class="structure">could have / might have + pp</div>
+                                            <div class="example">"He could have taken the earlier train." / "The package might have been delivered while we were out."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Past criticism / unfulfilled obligation</div>
+                                            <div class="structure">should have + pp</div>
+                                            <div class="example">"You should have told me sooner. Now it's too late."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">Formal equivalent (criticism)</div>
+                                            <div class="structure">ought to have + pp</div>
+                                            <div class="example">"The council ought to have consulted residents first."</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="highlight-box">
+                                        <h4 style="margin-top: 0; margin-bottom: 0.5rem;">THE CRITICAL DISTINCTION</h4>
+                                        <p><strong>needn't have vs didn't need to:</strong> These two forms look similar but make different claims. CAE Part 4 tests this distinction regularly.</p>
+                                        <ul style="margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                                            <li><strong>needn't have + past participle</strong> → the action WAS carried out, but it was unnecessary in hindsight.<br>
+                                            <em>Example: "You needn't have booked — there were plenty of tables." (The booking happened.)</em></li>
+                                            <li style="margin-top: 0.5rem;"><strong>didn't need to + bare infinitive</strong> → the action was not required; whether it happened is unspecified.<br>
+                                            <em>Example: "She didn't need to buy flowers because the host had plenty." (Whether she bought them is unknown.)</em></li>
+                                        </ul>
+                                    </div>
+                                    <div class="trap-callout">
+                                        <strong>⚠️ CAE Trap:</strong> The two forms above are close in meaning but grammatically and logically distinct. In Part 4, the source sentence will confirm whether the action was completed. That is the deciding factor.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3 -->
+                        <div class="acc-wrapper sub-acc" id="panel-3">
+                            <button class="acc-header" onclick="toggleAcc('panel-3')">
+                                <h4>Semi-modals and formal equivalents</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>Semi-modals behave like full verbs (conjugated, followed by <em>to + infinitive</em>) but express modal meanings. They are essential at C1 for register flexibility and appear regularly in CAE Part 4 transformations.</p>
+                                    <div class="grammar-grid">
+                                        <div class="grammar-item">
+                                            <div class="form">be able to</div>
+                                            <div class="structure">ability (replaces can)</div>
+                                            <div class="example">"She has never been able to understand his reasoning."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">be supposed to</div>
+                                            <div class="structure">expectation or rule</div>
+                                            <div class="example">"The report was supposed to be submitted last week." (often implies it wasn't met)</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">be bound to</div>
+                                            <div class="structure">strong certainty of future outcome</div>
+                                            <div class="example">"With that level of preparation, he is bound to succeed."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">be likely to</div>
+                                            <div class="structure">probability (formal)</div>
+                                            <div class="example">"Prices are likely to rise following the announcement."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">be due to</div>
+                                            <div class="structure">scheduled/expected event</div>
+                                            <div class="example">"The train is due to arrive at 14:30."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">be set to</div>
+                                            <div class="structure">formal/journalistic prediction</div>
+                                            <div class="example">"The new policy is set to affect thousands of workers."</div>
+                                        </div>
+                                        <div class="grammar-item">
+                                            <div class="form">have to / have got to</div>
+                                            <div class="structure">external obligation</div>
+                                            <div class="example">"We have to leave now." (have to is preferred in formal writing over have got to)</div>
+                                        </div>
+                                    </div>
+                                    <div class="grammar-item" style="margin-top: 1rem; background: rgba(255,255,255,0.05);">
+                                        <strong>Register note:</strong> In CAE Part 4, transformations often require switching between a modal and a semi-modal. The key word will determine the direction. Always check whether the target sentence needs <em>to / bare infinitive / -ing form</em>.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 4 -->
+                        <div class="acc-wrapper sub-acc" id="panel-4">
+                            <button class="acc-header" onclick="toggleAcc('panel-4')">
+                                <h4>CAE Part 4: common traps with modals</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>This panel covers the specific traps the CAE examiner uses with modal verbs in Part 4 transformations.</p>
+                                    
+                                    <div class="highlight-box" style="margin-top: 1rem;">
+                                        <strong>TRAP 1 — needn't have vs didn't need to (most tested distinction):</strong><br>
+                                        The key word NEED can force either form — the source sentence decides which.<br><br>
+                                        <strong>Worked example A:</strong><br>
+                                        Source: <em>He bought a new charger, but his old one still worked.</em><br>
+                                        Key word: <strong>NEEDN'T</strong><br>
+                                        Answer: He <strong>needn't have bought</strong> a new charger.<br>
+                                        <em>Why: The source confirms the charger WAS bought. Use needn't have + pp.</em><br><br>
+                                        <strong>Worked example B:</strong><br>
+                                        Source: <em>It wasn't necessary for her to attend the full session.</em><br>
+                                        Key word: <strong>NEED</strong><br>
+                                        Answer: She <strong>didn't need to attend</strong> the full session.<br>
+                                        <em>Why: No evidence she attended. Not necessary, action unspecified → didn't need to + bare infinitive.</em>
+                                    </div>
+
+                                    <div class="highlight-box">
+                                        <strong>TRAP 2 — must vs must have:</strong><br>
+                                        The key word MUST in a Part 4 item about a past event requires <em>must have + pp</em>, not <em>must + bare infinitive</em>. Three-word string: <em>must have [pp]</em>. Never drop <em>have</em>.
+                                    </div>
+
+                                    <div class="highlight-box">
+                                        <strong>TRAP 3 — should: advice or criticism?</strong><br>
+                                        SHOULD can target present advice ("You should see a doctor") or past criticism ("You should have told me" = you didn't, and it was wrong). The tense of the source sentence decides. Past completed event + failure to act → <em>should have + pp</em>.
+                                    </div>
+
+                                    <div class="highlight-box">
+                                        <strong>TRAP 4 — Word count:</strong><br>
+                                        CAE Part 4 = 2–5 words including the key word. Contractions count as two words: <em>shouldn't = should + not = 2 words</em>. Modal + have + pp phrases are 3 words minimum. Count before writing.
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            <h2>Part 4: Key Word Transformations</h2>
+            
+            <div class="progress-wrapper">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text"><span id="progress-count">0</span> / 12 attempted</p>
+            </div>
+
+            <p class="exercise-instruction">Complete the second sentence so that it has a similar meaning to the first sentence, using the word given. Do not change the word given. You must use between three and six words, including the word given.</p>
+
+            <div id="exercise-container">
+                <!-- Cards injected via JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li>What is the difference between <em>must have done</em> and <em>should have done</em>? Give an example of each.</li>
+                <li>When would you use <em>needn't have done</em> instead of <em>didn't need to do</em>? What does the source sentence tell you?</li>
+                <li>When you see a Part 4 item with the key word <strong>MUST</strong> or <strong>SHOULD</strong>, what's the first thing you check before writing anything?</li>
+            </ul>
+            <p class="wrap-up-note">These are not trick questions. There are no wrong answers — the point is to hear yourself explain the system.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // Exercise Data
+        const exercises = [
+            {
+                original: "I'm certain the director knows about the complaint — his assistant confirmed it.",
+                keyword: "MUST",
+                prefix: "The director",
+                suffix: "about the complaint — his assistant confirmed it.",
+                answers: ["must know"],
+                type: "PRESENT DEDUCTION — POSITIVE"
+            },
+            {
+                original: "It's impossible that the package arrived yesterday — it was only sent this morning.",
+                keyword: "CAN'T",
+                prefix: "The package",
+                suffix: "yesterday — it was only sent this morning.",
+                answers: ["can't have arrived", "cannot have arrived"],
+                type: "PAST DEDUCTION — NEGATIVE"
+            },
+            {
+                original: "I'm sure the committee reached a decision before the announcement was made.",
+                keyword: "MUST",
+                prefix: "The committee",
+                suffix: "a decision before the announcement was made.",
+                answers: ["must have reached"],
+                type: "PAST DEDUCTION — POSITIVE"
+            },
+            {
+                original: "It's not possible that she understood the instructions — her answers make no sense.",
+                keyword: "CAN'T",
+                prefix: "She",
+                suffix: "the instructions — her answers make no sense.",
+                answers: ["can't have understood", "cannot have understood"],
+                type: "PAST DEDUCTION — NEGATIVE"
+            },
+            {
+                original: "It was wrong of the manager not to inform the team about the restructure.",
+                keyword: "SHOULD",
+                prefix: "The manager",
+                suffix: "the team about the restructure.",
+                answers: ["should have informed"],
+                type: "PAST CRITICISM / UNFULFILLED OBLIGATION"
+            },
+            {
+                original: "He drove to the airport unnecessarily — we had already arranged a taxi.",
+                keyword: "NEEDN'T",
+                prefix: "He",
+                suffix: "to the airport — we had already arranged a taxi.",
+                answers: ["needn't have driven"],
+                type: "UNNECESSARY COMPLETED ACTION"
+            },
+            {
+                original: "There was no requirement for the delegates to register in advance, so most of them didn't.",
+                keyword: "NEED",
+                prefix: "The delegates",
+                suffix: "in advance, so most of them didn't.",
+                answers: ["didn't need to register", "did not need to register"],
+                type: "ABSENCE OF NECESSITY — ACTION NOT PERFORMED"
+            },
+            {
+                original: "Despite the power cut, the surgeon managed to complete the operation successfully.",
+                keyword: "ABLE",
+                prefix: "Despite the power cut, the surgeon",
+                suffix: "the operation successfully.",
+                answers: ["was able to complete"],
+                type: "PAST ABILITY — MANAGED TO"
+            },
+            {
+                original: "According to her contract, she was expected to give three months' notice.",
+                keyword: "SUPPOSED",
+                prefix: "According to her contract, she",
+                suffix: "three months' notice.",
+                answers: ["was supposed to give"],
+                type: "FORMAL EXPECTATION — CONTRACTUAL OBLIGATION"
+            },
+            {
+                original: "I'm absolutely certain that the merger will face regulatory scrutiny.",
+                keyword: "BOUND",
+                prefix: "The merger",
+                suffix: "regulatory scrutiny.",
+                answers: ["is bound to face"],
+                type: "STRONG CERTAINTY — FUTURE (BE BOUND TO)"
+            },
+            {
+                original: "Guests are not allowed to bring outside food or drink into the venue.",
+                keyword: "PERMITTED",
+                prefix: "Guests",
+                suffix: "outside food or drink into the venue.",
+                answers: ["are not permitted to bring", "aren't permitted to bring"],
+                type: "FORMAL PROHIBITION"
+            },
+            {
+                original: "It's possible that the signal failure was caused by the severe weather conditions.",
+                keyword: "MIGHT",
+                prefix: "The signal failure",
+                suffix: "by the severe weather conditions.",
+                answers: ["might have been caused"],
+                type: "PAST POSSIBILITY + PASSIVE (COMPOUND ITEM)"
+            }
+        ];
+
+        const container = document.getElementById('exercise-container');
+        let attemptedCount = 0;
+        const attemptedItems = new Set();
+
+        // Render Exercises
+        exercises.forEach((ex, index) => {
+            const cardHTML = `
+                <div class="card" id="card-${index}">
+                    <div class="card-header">
+                        <span class="item-number">Item ${index + 1}</span>
+                        <span class="trans-type" id="type-${index}">${ex.type}</span>
+                    </div>
+                    <div class="original-sentence">${ex.original}</div>
+                    <div class="keyword-row">Key word: <span class="keyword-badge">${ex.keyword}</span></div>
+                    <div class="transform-area">
+                        <span>${ex.prefix}</span>
+                        <input type="text" id="input-${index}" class="gap-input" autocomplete="off" autocorrect="off" spellcheck="false" />
+                        <span>${ex.suffix}</span>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-check" id="btn-${index}" onclick="checkAnswer(${index})">Check Answer</button>
+                    </div>
+                    <div class="feedback-text" id="feedback-${index}"></div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHTML);
+
+            // Add Enter key listener
+            const inputEl = document.getElementById(`input-${index}`);
+            inputEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    checkAnswer(index);
+                }
+            });
+        });
+
+        // Check Answer Logic
+        function checkAnswer(index) {
+            if (attemptedItems.has(index)) return;
+
+            const inputEl = document.getElementById(`input-${index}`);
+            const btnEl = document.getElementById(`btn-${index}`);
+            const cardEl = document.getElementById(`card-${index}`);
+            const feedbackEl = document.getElementById(`feedback-${index}`);
+            const typeEl = document.getElementById(`type-${index}`);
+            
+            const userVal = inputEl.value.trim().toLowerCase();
+            const exercise = exercises[index];
+            const isCorrect = exercise.answers.some(a => a.toLowerCase() === userVal);
+
+            // Update State
+            attemptedItems.add(index);
+            attemptedCount++;
+            document.getElementById('progress-count').innerText = attemptedCount;
+            document.getElementById('progress-fill').style.width = `${(attemptedCount / exercises.length) * 100}%`;
+
+            // UI Updates
+            inputEl.disabled = true;
+            btnEl.disabled = true;
+            btnEl.innerText = isCorrect ? "✓ Correct" : "✗ Incorrect";
+            typeEl.classList.add('visible');
+            feedbackEl.classList.add('visible');
+
+            if (isCorrect) {
+                cardEl.classList.add('correct');
+                feedbackEl.classList.add('text-green');
+                feedbackEl.innerHTML = `<strong>Spot on.</strong> Well done.`;
+            } else {
+                cardEl.classList.add('incorrect');
+                feedbackEl.classList.add('text-red');
+                let feedbackHTML = `<strong>Not quite.</strong> The correct answer is: <span class="correct-answer-highlight">${exercise.answers[0]}</span>`;
+                if (exercise.answers.length > 1) {
+                    feedbackHTML += `<span class="alt-answers">Also accepted: ${exercise.answers.slice(1).join(' / ')}</span>`;
+                }
+                feedbackEl.innerHTML = feedbackHTML;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -9,6 +9,7 @@ export default defineConfig({
         caeS1W1: resolve(__dirname, 'cae_s1_w1_passive_constructions.html'),
         caeS2W1: resolve(__dirname, 'cae_s2_w1_passive_constructions.html'),
         caeS3W1: resolve(__dirname, 'cae_s3_w1_passive_constructions.html'),
+        caeS1W2: resolve(__dirname, 'cae_s1_w2_modals.html'),
         // Add new session entries here
       }
     }
