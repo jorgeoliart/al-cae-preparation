@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 3: Modal Verbs (Part 1 & Phrasal Verbs)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #a78bfa; /* Purple for Week 2 */
+            --accent-hover: #bba4fc;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { top: -10%; right: -5%; width: 400px; height: 400px; }
+        .orb-2 { bottom: -10%; left: -5%; width: 500px; height: 500px; }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-btn:hover { color: var(--accent); }
+
+        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; color: var(--text-pri); }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section { margin-bottom: 5rem; }
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Section 1: Onboarding */
+        .onboarding-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .onboarding-card p { font-size: 1.1rem; color: var(--text-pri); }
+
+        /* Section 2: Accordions */
+        .reference-label { font-size: 1.1rem; color: var(--text-sec); margin-bottom: 1rem; font-style: italic; }
+        .acc-wrapper {
+            background: var(--surface); border-radius: 8px; margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+        }
+        .acc-header {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; background: transparent; border: none;
+            color: var(--text-pri); cursor: pointer; text-align: left; transition: background 0.2s;
+        }
+        .acc-header:hover { background: var(--surface-alt); }
+        .acc-header .chevron { font-size: 1.5rem; transition: transform 0.35s ease; color: var(--accent); }
+        .acc-wrapper.open > .acc-header .chevron { transform: rotate(180deg); }
+        
+        .acc-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .acc-wrapper.open > .acc-content { grid-template-rows: 1fr; }
+        .acc-content > .acc-inner { overflow: hidden; }
+        .acc-body { padding: 0 1.5rem 1.5rem 1.5rem; }
+
+        .guide-list { list-style: none; margin-top: 1rem; margin-bottom: 1.5rem; }
+        .guide-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.75rem; color: var(--text-pri); }
+        .guide-list li::before { content: '•'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
+        .trap-callout {
+            background: rgba(167, 139, 250, 0.1); border-left: 3px solid var(--accent);
+            padding: 1rem; margin-top: 1rem; border-radius: 0 6px 6px 0;
+            font-size: 0.95rem; color: var(--text-pri);
+        }
+
+        /* Section 3: Exercises Global */
+        .global-progress {
+            margin-bottom: 3rem; padding: 1.5rem; background: var(--surface);
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .progress-bar-bg {
+            width: 100%; height: 6px; background: var(--surface-alt);
+            border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem;
+        }
+        .progress-bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.4s ease; }
+        .progress-text { font-size: 0.9rem; color: var(--text-sec); text-align: right; margin: 0; }
+
+        .block-section { margin-bottom: 4rem; }
+        .block-heading { font-family: var(--font-display); font-size: 1.6rem; color: var(--accent); font-weight: 700; margin-bottom: 0.25rem; }
+        .block-subheading { font-size: 1rem; color: var(--text-sec); margin-bottom: 2rem; }
+        .block-divider { border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 4rem 0; }
+
+        .exercise-instruction { font-style: italic; margin-bottom: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 6px; color: var(--text-pri); }
+
+        /* Block A & B: MCQ Styling */
+        .mcq-text-prose { font-size: 1.15rem; line-height: 2; color: var(--text-pri); margin-bottom: 2.5rem; padding: 2rem; background: var(--surface); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .inline-gap-marker { display: inline-block; font-weight: 700; color: var(--accent); background: rgba(167, 139, 250, 0.15); padding: 0 8px; border-radius: 4px; margin: 0 4px; }
+        
+        .mcq-item { margin-bottom: 2rem; padding: 1.5rem; background: var(--surface); border-radius: 8px; border-left: 3px solid var(--accent); transition: border-color 0.3s; }
+        .mcq-item.correct { border-left-color: var(--correct); }
+        .mcq-item.incorrect { border-left-color: var(--incorrect); }
+        
+        .mcq-sentence { font-size: 1.1rem; color: var(--text-pri); margin-bottom: 1rem; }
+        
+        .mcq-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        @media (min-width: 600px) { .mcq-options { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+        
+        .mcq-opt-label {
+            display: flex; align-items: center; padding: 10px 12px; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; transition: all 0.2s;
+            font-size: 1rem; color: var(--text-pri);
+        }
+        .mcq-opt-label:hover { background: rgba(255,255,255,0.08); }
+        .mcq-opt-label input[type="radio"] { display: none; }
+        
+        /* Checked state before submission */
+        .mcq-opt-label:has(input[type="radio"]:checked) { border-color: var(--accent); background: rgba(167, 139, 250, 0.1); }
+        
+        /* States after submission */
+        .mcq-opt-label.opt-correct { border-color: var(--correct); background: rgba(52, 211, 153, 0.15); color: var(--correct); font-weight: 600; }
+        .mcq-opt-label.opt-incorrect { border-color: var(--incorrect); background: rgba(248, 113, 113, 0.15); color: var(--incorrect); text-decoration: line-through; }
+        .mcq-opt-label.disabled { cursor: default; pointer-events: none; }
+
+        .mcq-feedback { margin-top: 1rem; font-size: 0.95rem; display: none; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); }
+        .mcq-feedback.visible { display: block; animation: fadeIn 0.3s ease; }
+        .gap-label-badge { display: inline-block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-sec); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; margin-bottom: 0.5rem; }
+
+        /* Block C: Phrasal Verbs Micro-strand */
+        .pv-ref-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+        @media (min-width: 600px) { .pv-ref-grid { grid-template-columns: 1fr 1fr; } }
+        .pv-ref-card { background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
+        .pv-ref-verb { font-family: var(--font-display); font-size: 1.2rem; color: var(--accent); font-weight: 700; margin-bottom: 0.25rem; }
+        .pv-ref-def { font-size: 0.9rem; color: var(--text-pri); margin-bottom: 0.75rem; }
+        .pv-ref-ex { font-size: 0.9rem; color: var(--text-sec); font-style: italic; }
+
+        .verb-bank { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; justify-content: center; }
+        .verb-pill { background: rgba(167, 139, 250, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 6px 16px; border-radius: 20px; font-size: 0.95rem; font-weight: 600; }
+        
+        .scenario-text { font-size: 1.15rem; line-height: 2.2; color: var(--text-pri); padding: 2rem; background: var(--surface); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 2rem; }
+        
+        .inline-gap-wrapper { display: inline-flex; align-items: center; margin: 0 4px; position: relative; white-space: nowrap; }
+        .gap-num { font-size: 0.75rem; color: var(--text-sec); margin-right: 4px; font-weight: 600; transform: translateY(-8px); display: inline-block; }
+        .gap-input {
+            background: rgba(0,0,0,0.3); border: none; border-bottom: 2px solid var(--accent);
+            color: var(--text-pri); padding: 4px 8px; border-radius: 4px 4px 0 0;
+            font-family: inherit; font-size: 1.05rem; text-align: center; width: 130px; transition: all 0.2s;
+        }
+        .gap-input:focus { outline: none; border-bottom-color: var(--accent-hover); background: #0d1117; box-shadow: 0 2px 8px rgba(167, 139, 250, 0.15); }
+        .gap-input:disabled { opacity: 1; }
+        .gap-input.correct { border-bottom-color: var(--correct); color: var(--correct); background: rgba(52, 211, 153, 0.1); }
+        .gap-input.incorrect { border-bottom-color: var(--incorrect); color: var(--incorrect); background: rgba(248, 113, 113, 0.1); }
+        .correction-text { position: absolute; left: 0; top: 100%; width: 100%; text-align: center; font-size: 0.8rem; font-weight: 600; color: var(--correct); margin-top: 2px; display: none; }
+        .correction-text.visible { display: block; }
+
+        /* Actions */
+        .action-area { display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center; }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 10px 24px; border-radius: 6px; font-family: var(--font-body); font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn-main:hover { background: var(--accent-hover); }
+        .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 10px 24px; border-radius: 6px; font-family: var(--font-body); font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: none; }
+        .btn-outline:hover { background: rgba(167, 139, 250, 0.1); }
+
+        /* Section 4: Wrap-up */
+        .wrap-up-list { list-style: none; counter-reset: wrapup-counter; }
+        .wrap-up-list li { position: relative; padding-left: 2.5rem; margin-bottom: 1.5rem; font-size: 1.1rem; }
+        .wrap-up-list li::before {
+            counter-increment: wrapup-counter; content: counter(wrapup-counter); position: absolute; left: 0; top: 0;
+            width: 28px; height: 28px; background: rgba(167, 139, 250, 0.15); color: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+        }
+        .wrap-up-note { font-size: 0.9rem; font-style: italic; color: var(--text-sec); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .container { padding: 1.5rem 1rem 4rem 1rem; }
+            h1 { font-size: 2rem; }
+            .mcq-text-prose, .scenario-text { padding: 1.5rem; font-size: 1.05rem; }
+            .gap-input { width: 110px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: ONBOARDING -->
+        <section id="onboarding">
+            <h1>Session 3: Recognition & Precision</h1>
+            <div class="onboarding-card">
+                <p>Sessions 1 and 2 this week were about production: transforming structures and supplying missing words. Session 3 is about recognition under pressure — reading a sentence with four plausible options and choosing the one that is actually correct.</p>
+                <p>This is Part 1: multiple choice cloze. Four options per gap. Three of them will look perfectly reasonable. That is the examiner's job. The difference between C1 and lower levels is not whether the answer <em>feels</em> right — it is whether you know precisely <em>why</em> one option is correct and the others are not.</p>
+                <p>Modal verbs are especially dangerous in Part 1 because the distractors are often near-synonyms. The examiner picks four words that are all roughly in the right semantic area — and then tests whether you know the collocation, the register, or the fixed expression that forces one specific answer.</p>
+                <p>Today has three parts: the main Part 1 exercise on modal collocations, a shorter MCQ block on phrasal verb meaning distinctions, and the Week 2 phrasal verb micro-strand on change and development.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: REFERENCE ACCORDIONS -->
+        <section id="references">
+            <div class="reference-label">References — open if needed, or use for review after the exercises.</div>
+            
+            <!-- Accordion A: Part 1 Strategy -->
+            <div class="acc-wrapper" id="acc-strategy">
+                <button class="acc-header" onclick="toggleAcc('acc-strategy')">
+                    <h3>Part 1 — Reading and option strategy</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        <h4>WHAT PART 1 TESTS</h4>
+                        <p>Part 1 tests lexical and lexico-grammatical knowledge: collocations, fixed expressions, phrasal verbs, idioms, and the precise meaning distinctions between near-synonyms. It does not test obscure vocabulary — it tests whether the student knows how words behave in combination with other words.</p>
+                        
+                        <h4 style="margin-top: 1.5rem;">HOW TO WORK THROUGH IT</h4>
+                        <ul class="guide-list">
+                            <li><strong>Step 1</strong> — Read the whole text first, ignoring the gaps. Get the meaning and register before choosing anything.</li>
+                            <li><strong>Step 2</strong> — Return to gap 1. Read the full sentence — not just the words on either side of the gap.</li>
+                            <li><strong>Step 3</strong> — Before looking at the options: decide what kind of word is missing (modal? adjective? verb? fixed expression particle?). Form a hypothesis.</li>
+                            <li><strong>Step 4</strong> — Read all four options. Eliminate the ones that are grammatically or collocationally impossible. Do not stop at the first option that seems right.</li>
+                            <li><strong>Step 5</strong> — Check the surviving option(s) against the full sentence, not just the gap. Fixed expressions and collocations must work across the whole clause, not just locally.</li>
+                        </ul>
+
+                        <h4>THE EXAMINER'S TRAPS IN PART 1</h4>
+                        <div class="trap-callout">
+                            <strong>Trap 1 — Near-synonyms:</strong> all four options have similar meanings but different collocations. The answer depends on which word combines with the surrounding text, not which word is closest in meaning.
+                        </div>
+                        <div class="trap-callout">
+                            <strong>Trap 2 — False friends between options:</strong> the same word can appear in different fixed expressions with completely different meanings. Read the surrounding text every time.
+                        </div>
+                        <div class="trap-callout">
+                            <strong>Trap 3 — Register:</strong> one option is semantically correct but too informal for the text's register, or vice versa. At C1, register precision matters.
+                        </div>
+                        <div class="trap-callout">
+                            <strong>Trap 4 — Familiar words in unfamiliar patterns:</strong> a word the student knows in one context may behave differently in a fixed expression. Trust the expression, not the feeling.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accordion B: Modal Collocations -->
+            <div class="acc-wrapper" id="acc-modals">
+                <button class="acc-header" onclick="toggleAcc('acc-modals')">
+                    <h3>Modal collocations and fixed expressions — Part 1 targets</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        
+                        <h4 style="margin-top: 0.5rem;">CERTAINTY AND PROBABILITY</h4>
+                        <ul class="guide-list">
+                            <li><strong>be bound to + infinitive</strong> → near-certain future outcome (positive)<br><em>"The changes are bound to affect productivity."</em></li>
+                            <li><strong>be likely to + infinitive</strong> → probable future outcome<br><em>"She is likely to be appointed next month."</em></li>
+                            <li><strong>be set to + infinitive</strong> → formal/journalistic certainty (especially written)<br><em>"The new law is set to come into force in January."</em></li>
+                            <li><strong>be due to + infinitive</strong> → scheduled/expected event<br><em>"The report is due to be published next week."</em></li>
+                        </ul>
+
+                        <h4>TENDENCY AND BEHAVIOUR</h4>
+                        <ul class="guide-list">
+                            <li><strong>tend to + infinitive</strong> → general habitual behaviour<br><em>"Students tend to underestimate the difficulty of Part 1."</em></li>
+                            <li><strong>be liable to + infinitive</strong> → tendency toward (often negative) outcomes<br><em>"Overconfidence is liable to cause unnecessary errors."</em></li>
+                            <li><strong>be apt to + infinitive</strong> → natural tendency (more formal/literary)<br><em>"He is apt to rush his answers under pressure."</em></li>
+                        </ul>
+
+                        <h4>EXPECTATION AND OBLIGATION</h4>
+                        <ul class="guide-list">
+                            <li><strong>be supposed to + infinitive</strong> → expectation set by arrangement or rules<br><em>"The results are supposed to be released today."</em></li>
+                            <li><strong>be meant to + infinitive</strong> → intended purpose or expected behaviour<br><em>"This feature is meant to simplify the process."</em></li>
+                            <li><strong>be required to + infinitive</strong> → formal/legal obligation<br><em>"All candidates are required to present valid ID."</em></li>
+                        </ul>
+
+                        <h4>REPORTING AND BELIEF</h4>
+                        <ul class="guide-list">
+                            <li><strong>be said to + infinitive</strong> → impersonal reporting (hearsay/general belief)<br><em>"The method is said to be highly effective."</em></li>
+                            <li><strong>be known to + infinitive</strong> → established fact attributed to general knowledge<br><em>"She is known to have worked on the original design."</em></li>
+                            <li><strong>be thought to + infinitive</strong> → belief attributed to general opinion<br><em>"The practice is thought to date back centuries."</em></li>
+                            <li><strong>be considered to + infinitive</strong> → attributed judgement<br><em>"The decision is considered to have been premature."</em></li>
+                        </ul>
+
+                        <h4>NECESSITY AND PERMISSION</h4>
+                        <ul class="guide-list" style="margin-bottom: 0;">
+                            <li><strong>need not + infinitive</strong> → absence of necessity (formal register)<br><em>"Candidates need not provide additional documentation."</em></li>
+                            <li><strong>be permitted to + infinitive</strong> → formal permission<br><em>"Visitors are not permitted to photograph the exhibits."</em></li>
+                        </ul>
+
+                        <div class="trap-callout" style="margin-top: 1.5rem;">
+                            <strong>Note:</strong> In Part 1, the examiner frequently tests distinctions within a single cluster — e.g. four options all from the CERTAINTY cluster (bound / likely / set / due). The answer depends on the precise meaning and register of the full sentence.
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            
+            <div class="global-progress">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="global-progress-fill"></div>
+                </div>
+                <p class="progress-text">Total progress: <span id="global-progress-count">0</span> / 20 items completed</p>
+            </div>
+
+            <!-- BLOCK A -->
+            <div class="block-section" id="block-a">
+                <div class="block-heading">Block A — Part 1: Multiple choice cloze</div>
+                <div class="block-subheading">Modal collocations and fixed expressions</div>
+                
+                <p class="exercise-instruction">For questions 1–8, read the text below and decide which answer (A, B, C or D) best fits each gap.</p>
+                
+                <div class="mcq-text-prose">
+                    The integration of artificial intelligence into workplace decision-making raises questions that regulators have only recently begun to address. Algorithms used in recruitment, for instance, are <span class="inline-gap-marker">(1)</span> to inherit the biases present in the data on which they were trained, meaning that discriminatory outcomes can emerge without any deliberate intention on the part of developers. Such systems are <span class="inline-gap-marker">(2)</span> to operate transparently, yet in practice the logic behind many decisions remains opaque even to the organisations that deploy them. Critics argue that developers <span class="inline-gap-marker">(3)</span> to have stress-tested their models more rigorously before release — a failure that has already led to litigation in several jurisdictions.
+                    <br><br>
+                    Proponents of AI governance frameworks counter that excessive regulation is <span class="inline-gap-marker">(4)</span> to stifle innovation at precisely the moment when the technology is maturing. The debate is <span class="inline-gap-marker">(5)</span> to intensify over the coming years as AI systems take on more complex roles in healthcare, finance, and the law. One thing that most observers agree on is that a binding international standard for algorithmic accountability is <span class="inline-gap-marker">(6)</span> to emerge from current negotiations — the political will simply does not yet exist. In the meantime, individual companies <span class="inline-gap-marker">(7)</span> not disclose the internal workings of their systems, provided they can demonstrate compliance with applicable data protection law. Whether this provision is sufficient to protect workers and consumers, however, remains a matter of considerable dispute, and one that courts across the world are <span class="inline-gap-marker">(8)</span> to be asked to resolve with increasing frequency.
+                </div>
+
+                <div id="mcq-container-a">
+                    <!-- Injected via JS -->
+                </div>
+
+                <div class="action-area">
+                    <button class="btn-main" id="btn-check-a" onclick="checkBlockA()">Check answers (Block A)</button>
+                    <button class="btn-outline" id="btn-reset-a" onclick="resetBlockA()">Try again</button>
+                </div>
+            </div>
+
+            <hr class="block-divider">
+
+            <!-- BLOCK B -->
+            <div class="block-section" id="block-b">
+                <div class="block-heading">Block B — Phrasal verbs: meaning distinctions</div>
+                <div class="block-subheading">Change and development — recognising the right verb in context</div>
+                
+                <p class="exercise-instruction">For questions 9–14, choose the phrasal verb (A, B, C or D) that best completes each sentence. All options are phrasal verbs of change or development — read carefully for meaning.</p>
+
+                <div id="mcq-container-b">
+                    <!-- Injected via JS -->
+                </div>
+
+                <div class="action-area">
+                    <button class="btn-main" id="btn-check-b" onclick="checkBlockB()">Check answers (Block B)</button>
+                    <button class="btn-outline" id="btn-reset-b" onclick="resetBlockB()">Try again</button>
+                </div>
+            </div>
+
+            <hr class="block-divider">
+
+            <!-- BLOCK C -->
+            <div class="block-section" id="block-c">
+                <div class="block-heading">Block C — Phrasal verbs: change and development</div>
+                <div class="block-subheading">Week 2 micro-strand · 15 minutes</div>
+
+                <div class="pv-ref-grid">
+                    <div class="pv-ref-card">
+                        <div class="pv-ref-verb">turn into</div>
+                        <div class="pv-ref-def">to become something different through a gradual or complete process of change</div>
+                        <div class="pv-ref-ex">"Over the years, the quiet village turned into a busy tourist destination."</div>
+                    </div>
+                    <div class="pv-ref-card">
+                        <div class="pv-ref-verb">grow out of</div>
+                        <div class="pv-ref-def">to stop doing/needing something as you mature; to originate from something</div>
+                        <div class="pv-ref-ex">"His love of adventure grew out of years of travelling with his family."</div>
+                    </div>
+                    <div class="pv-ref-card">
+                        <div class="pv-ref-verb">phase out</div>
+                        <div class="pv-ref-def">to gradually stop using, producing, or doing something over a period of time</div>
+                        <div class="pv-ref-ex">"The airline has announced it will phase out its older aircraft by 2027."</div>
+                    </div>
+                    <div class="pv-ref-card">
+                        <div class="pv-ref-verb">phase in</div>
+                        <div class="pv-ref-def">to gradually introduce something over a period of time</div>
+                        <div class="pv-ref-ex">"The new grading system will be phased in across all year groups."</div>
+                    </div>
+                    <div class="pv-ref-card">
+                        <div class="pv-ref-verb">die out</div>
+                        <div class="pv-ref-def">to disappear completely, especially over time — used of species, traditions, languages</div>
+                        <div class="pv-ref-ex">"Without active preservation efforts, these dialects may die out within decades."</div>
+                    </div>
+                    <div class="pv-ref-card">
+                        <div class="pv-ref-verb">take over</div>
+                        <div class="pv-ref-def">to assume control or responsibility for something, often replacing what came before</div>
+                        <div class="pv-ref-ex">"A larger competitor took over the business after the founder retired."</div>
+                    </div>
+                </div>
+
+                <p class="exercise-instruction">Read the paragraph below. Six phrasal verbs from the Week 2 list have been removed and replaced with gaps. Type the correct verb for each gap. Each verb is used once only. <br><br><strong>Note:</strong> You may need to change the form of the verb (e.g. take over → taken over).</p>
+
+                <div class="verb-bank">
+                    <span class="verb-pill">turn into</span>
+                    <span class="verb-pill">grow out of</span>
+                    <span class="verb-pill">phase out</span>
+                    <span class="verb-pill">phase in</span>
+                    <span class="verb-pill">die out</span>
+                    <span class="verb-pill">take over</span>
+                </div>
+
+                <div class="scenario-text">
+                    For much of the twentieth century, the city of Millhaven was defined by its steel industry. Over several decades, however, the sector began to <span class="inline-gap-wrapper"><sup class="gap-num">C1</sup><input type="text" class="gap-input" id="gap-c1" autocomplete="off" spellcheck="false" /><span class="correction-text" id="fb-c1"></span></span> as cheaper imports made local production uneconomical. Rather than allow the community to collapse, city planners made a bold decision: they would <span class="inline-gap-wrapper"><sup class="gap-num">C2</sup><input type="text" class="gap-input" id="gap-c2" autocomplete="off" spellcheck="false" /><span class="correction-text" id="fb-c2"></span></span> the old industrial model gradually, investing instead in digital infrastructure and creative industries. A new economic identity did not appear overnight — it took almost twenty years for Millhaven to fully <span class="inline-gap-wrapper"><sup class="gap-num">C3</sup><input type="text" class="gap-input" id="gap-c3" autocomplete="off" spellcheck="false" /><span class="correction-text" id="fb-c3"></span></span> a regional hub for technology and design. This ambition <span class="inline-gap-wrapper"><sup class="gap-num">C4</sup><input type="text" class="gap-input" id="gap-c4" autocomplete="off" spellcheck="false" /><span class="correction-text" id="fb-c4"></span></span> decades of frustration at the city's over-reliance on a single industry. New policies were carefully <span class="inline-gap-wrapper"><sup class="gap-num">C5</sup><input type="text" class="gap-input" id="gap-c5" autocomplete="off" spellcheck="false" /><span class="correction-text" id="fb-c5"></span></span> to support retraining and entrepreneurship, giving residents the tools they needed to adapt. Today, a private technology consortium has effectively <span class="inline-gap-wrapper"><sup class="gap-num">C6</sup><input type="text" class="gap-input" id="gap-c6" autocomplete="off" spellcheck="false" /><span class="correction-text" id="fb-c6"></span></span> the role once played by the steel companies, employing thousands and shaping the city's identity for a new generation.
+                </div>
+
+                <div class="action-area">
+                    <button class="btn-main" id="btn-check-c" onclick="checkBlockC()">Check answers (Block C)</button>
+                    <button class="btn-outline" id="btn-reset-c" onclick="resetBlockC()">Try again</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li>In Block A, gaps 5 and 8 both had the answer "bound" — but gap 6 was "unlikely". What did you look for in the sentence to decide between a positive certainty and a negative one?</li>
+                <li>In Block B, what is the difference between "phase in" and "phase out"? In what situation would you use each one? Give a real example.</li>
+                <li>Look at the six phrasal verbs from Block C. Which of them can refer to something positive happening? Which are neutral? Which imply something negative or being lost?</li>
+            </ul>
+            <p class="wrap-up-note">These are not trick questions. There are no wrong answers — the point is to hear yourself explain the system.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // Global Progress Tracking
+        let checkedA = 0;
+        let checkedB = 0;
+        let checkedC = 0;
+
+        function updateGlobalProgress() {
+            const total = checkedA + checkedB + checkedC;
+            document.getElementById('global-progress-count').innerText = total;
+            document.getElementById('global-progress-fill').style.width = `${(total / 20) * 100}%`;
+        }
+
+        // --- BLOCK A DATA ---
+        const dataA = [
+            { id: 1, opts: ["liable", "due", "set", "supposed"], correct: "A", label: "TENDENCY TOWARD NEGATIVE OUTCOME (be liable to)", exp: "<strong>liable to inherit biases</strong> = tendency toward an (undesirable) outcome. 'Due' implies scheduling; 'set' implies formal prediction; 'supposed' implies expectation." },
+            { id: 2, opts: ["meant", "supposed", "required", "bound"], correct: "B", label: "FORMAL EXPECTATION — RULE OR ARRANGEMENT (be supposed to)", exp: "<strong>supposed to operate transparently</strong> = expectation that may not be fulfilled. 'Required' is too strong; 'meant' is informal; 'bound' expresses certainty." },
+            { id: 3, opts: ["should", "ought", "need", "must"], correct: "B", label: "FORMAL PAST CRITICISM (ought to have)", exp: "<strong>ought to have stress-tested</strong> = formal criticism of a past failure. 'Should have' is also grammatically correct but 'ought to have' is the more formal register required here." },
+            { id: 4, opts: ["likely", "liable", "bound", "set"], correct: "A", label: "PROBABILITY — MODERATE CERTAINTY (be likely to)", exp: "<strong>likely to stifle innovation</strong> = probable but not certain outcome. 'Bound' claims near-certainty, which is too strong for a counter-argument." },
+            { id: 5, opts: ["due", "set", "bound", "likely"], correct: "C", label: "NEAR-CERTAIN FUTURE OUTCOME (be bound to)", exp: "<strong>bound to intensify</strong> = strong certainty about a future outcome. The context ('most observers agree') supports near-certainty, not just probability." },
+            { id: 6, opts: ["unlikely", "bound", "set", "due"], correct: "A", label: "NEAR-CERTAIN NEGATIVE OUTCOME (be unlikely to)", exp: "<strong>unlikely to emerge</strong> = negative assessment. The clause 'the political will simply does not yet exist' forces a negative marker." },
+            { id: 7, opts: ["must", "need", "shall", "ought"], correct: "B", label: "NEGATED NECESSITY — FORMAL REGISTER (need not)", exp: "<strong>need not disclose</strong> = no obligation to disclose. 'Must not' means prohibition (forbidden). Only 'need' produces the correct meaning in this legal context." },
+            { id: 8, opts: ["set", "likely", "bound", "due"], correct: "C", label: "NEAR-CERTAIN REPEATED FUTURE OUTCOME (be bound to)", exp: "<strong>bound to be asked</strong> = logical near-certainty based on the trajectory described. 'Due' implies a scheduled event; 'likely' is too weak given 'increasing frequency'." }
+        ];
+
+        const containerA = document.getElementById('mcq-container-a');
+        dataA.forEach((item) => {
+            const html = `
+                <div class="mcq-item" id="item-a${item.id}">
+                    <div class="mcq-sentence" style="font-weight:700; margin-bottom: 0.5rem;">Gap ${item.id}</div>
+                    <div class="mcq-options">
+                        <label class="mcq-opt-label" id="lbl-a${item.id}-A"><input type="radio" name="qa${item.id}" value="A"> A) ${item.opts[0]}</label>
+                        <label class="mcq-opt-label" id="lbl-a${item.id}-B"><input type="radio" name="qa${item.id}" value="B"> B) ${item.opts[1]}</label>
+                        <label class="mcq-opt-label" id="lbl-a${item.id}-C"><input type="radio" name="qa${item.id}" value="C"> C) ${item.opts[2]}</label>
+                        <label class="mcq-opt-label" id="lbl-a${item.id}-D"><input type="radio" name="qa${item.id}" value="D"> D) ${item.opts[3]}</label>
+                    </div>
+                    <div class="mcq-feedback" id="fb-a${item.id}">
+                        <div class="gap-label-badge">${item.label}</div>
+                        <div style="color: var(--text-pri);">${item.exp}</div>
+                    </div>
+                </div>
+            `;
+            containerA.insertAdjacentHTML('beforeend', html);
+        });
+
+        // Add listeners to update progress dynamically (optional, but prompt says total items answered. Let's stick to updating on check for simplicity, as requested by "Each block submitted and marked independently")
+        // Wait, "Tracks total items answered". I'll update progress dynamically when radios change.
+        document.querySelectorAll('#block-a input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const answered = document.querySelectorAll('#block-a input[type="radio"]:checked').length;
+                // Only visual feedback on the radio itself is handled by CSS :checked
+            });
+        });
+
+        function checkBlockA() {
+            checkedA = 8; // Mark block as fully checked
+            updateGlobalProgress();
+
+            dataA.forEach(item => {
+                const selected = document.querySelector(`input[name="qa${item.id}"]:checked`);
+                const allLabels = document.querySelectorAll(`#item-a${item.id} .mcq-opt-label`);
+                
+                // Disable all
+                allLabels.forEach(lbl => lbl.classList.add('disabled'));
+                
+                const correctLabel = document.getElementById(`lbl-a${item.id}-${item.correct}`);
+                
+                if (selected) {
+                    const selectedVal = selected.value;
+                    const selectedLabel = document.getElementById(`lbl-a${item.id}-${selectedVal}`);
+                    
+                    if (selectedVal === item.correct) {
+                        document.getElementById(`item-a${item.id}`).classList.add('correct');
+                        selectedLabel.classList.add('opt-correct');
+                    } else {
+                        document.getElementById(`item-a${item.id}`).classList.add('incorrect');
+                        selectedLabel.classList.add('opt-incorrect');
+                        correctLabel.classList.add('opt-correct'); // Highlight the right one
+                    }
+                } else {
+                    // Unanswered
+                    document.getElementById(`item-a${item.id}`).classList.add('incorrect');
+                    correctLabel.classList.add('opt-correct');
+                }
+                
+                // Show feedback
+                document.getElementById(`fb-a${item.id}`).classList.add('visible');
+            });
+
+            document.getElementById('btn-check-a').style.display = 'none';
+            document.getElementById('btn-reset-a').style.display = 'inline-block';
+        }
+
+        function resetBlockA() {
+            checkedA = 0;
+            updateGlobalProgress();
+
+            dataA.forEach(item => {
+                document.getElementById(`item-a${item.id}`).classList.remove('correct', 'incorrect');
+                document.getElementById(`fb-a${item.id}`).classList.remove('visible');
+                
+                const radios = document.querySelectorAll(`input[name="qa${item.id}"]`);
+                radios.forEach(r => r.checked = false);
+                
+                const labels = document.querySelectorAll(`#item-a${item.id} .mcq-opt-label`);
+                labels.forEach(lbl => {
+                    lbl.classList.remove('disabled', 'opt-correct', 'opt-incorrect');
+                });
+            });
+
+            document.getElementById('btn-check-a').style.display = 'inline-block';
+            document.getElementById('btn-reset-a').style.display = 'none';
+        }
+
+        // --- BLOCK B DATA ---
+        const dataB = [
+            { id: 9, sentence: "The abandoned factory has gradually _____ an arts and cultural centre over the past decade.", opts: ["turned into", "turned out", "turned over", "turned up"], correct: "A", exp: "<strong>turned into</strong> = became something different through a gradual process of change." },
+            { id: 10, sentence: "Most children eventually _____ the habit of interrupting adults mid-conversation.", opts: ["grow into", "grow up", "grow out of", "grow apart"], correct: "C", exp: "<strong>grow out of</strong> = stop doing something as you mature or develop." },
+            { id: 11, sentence: "The government has announced plans to _____ fossil fuel subsidies over the next fifteen years.", opts: ["phase in", "phase out", "wind up", "roll back"], correct: "B", exp: "<strong>phase out</strong> = gradually discontinue or eliminate. 'Wind up' is abrupt; 'roll back' is reverse." },
+            { id: 12, sentence: "The new recycling initiative will be _____ gradually, starting with the three largest cities.", opts: ["phased out", "rolled back", "phased in", "wound down"], correct: "C", exp: "<strong>phased in</strong> = gradually introduced over time. The sentence describes the start of a new initiative." },
+            { id: 13, sentence: "Several regional languages are in danger of _____ entirely within the next generation.", opts: ["fading away", "dying out", "breaking down", "wearing off"], correct: "B", exp: "<strong>dying out</strong> = disappearing entirely over time, established collocation for species, languages, or traditions." },
+            { id: 14, sentence: "Following the acquisition, the smaller firm was quickly _____ by the parent company's management team.", opts: ["taken over", "taken up", "taken on", "taken in"], correct: "A", exp: "<strong>taken over</strong> = control was assumed by another party (standard business/management collocation)." }
+        ];
+
+        const containerB = document.getElementById('mcq-container-b');
+        dataB.forEach((item) => {
+            const html = `
+                <div class="mcq-item" id="item-b${item.id}">
+                    <div class="mcq-sentence"><strong>${item.id}.</strong> ${item.sentence}</div>
+                    <div class="mcq-options">
+                        <label class="mcq-opt-label" id="lbl-b${item.id}-A"><input type="radio" name="qb${item.id}" value="A"> A) ${item.opts[0]}</label>
+                        <label class="mcq-opt-label" id="lbl-b${item.id}-B"><input type="radio" name="qb${item.id}" value="B"> B) ${item.opts[1]}</label>
+                        <label class="mcq-opt-label" id="lbl-b${item.id}-C"><input type="radio" name="qb${item.id}" value="C"> C) ${item.opts[2]}</label>
+                        <label class="mcq-opt-label" id="lbl-b${item.id}-D"><input type="radio" name="qb${item.id}" value="D"> D) ${item.opts[3]}</label>
+                    </div>
+                    <div class="mcq-feedback" id="fb-b${item.id}">
+                        <div style="color: var(--text-pri);">${item.exp}</div>
+                    </div>
+                </div>
+            `;
+            containerB.insertAdjacentHTML('beforeend', html);
+        });
+
+        function checkBlockB() {
+            checkedB = 6;
+            updateGlobalProgress();
+
+            dataB.forEach(item => {
+                const selected = document.querySelector(`input[name="qb${item.id}"]:checked`);
+                const allLabels = document.querySelectorAll(`#item-b${item.id} .mcq-opt-label`);
+                
+                allLabels.forEach(lbl => lbl.classList.add('disabled'));
+                
+                const correctLabel = document.getElementById(`lbl-b${item.id}-${item.correct}`);
+                
+                if (selected) {
+                    const selectedVal = selected.value;
+                    const selectedLabel = document.getElementById(`lbl-b${item.id}-${selectedVal}`);
+                    
+                    if (selectedVal === item.correct) {
+                        document.getElementById(`item-b${item.id}`).classList.add('correct');
+                        selectedLabel.classList.add('opt-correct');
+                    } else {
+                        document.getElementById(`item-b${item.id}`).classList.add('incorrect');
+                        selectedLabel.classList.add('opt-incorrect');
+                        correctLabel.classList.add('opt-correct');
+                    }
+                } else {
+                    document.getElementById(`item-b${item.id}`).classList.add('incorrect');
+                    correctLabel.classList.add('opt-correct');
+                }
+                
+                document.getElementById(`fb-b${item.id}`).classList.add('visible');
+            });
+
+            document.getElementById('btn-check-b').style.display = 'none';
+            document.getElementById('btn-reset-b').style.display = 'inline-block';
+        }
+
+        function resetBlockB() {
+            checkedB = 0;
+            updateGlobalProgress();
+
+            dataB.forEach(item => {
+                document.getElementById(`item-b${item.id}`).classList.remove('correct', 'incorrect');
+                document.getElementById(`fb-b${item.id}`).classList.remove('visible');
+                
+                const radios = document.querySelectorAll(`input[name="qb${item.id}"]`);
+                radios.forEach(r => r.checked = false);
+                
+                const labels = document.querySelectorAll(`#item-b${item.id} .mcq-opt-label`);
+                labels.forEach(lbl => {
+                    lbl.classList.remove('disabled', 'opt-correct', 'opt-incorrect');
+                });
+            });
+
+            document.getElementById('btn-check-b').style.display = 'inline-block';
+            document.getElementById('btn-reset-b').style.display = 'none';
+        }
+
+        // --- BLOCK C DATA ---
+        const dataC = {
+            1: { answers: ["die out", "dying out"] },
+            2: { answers: ["phase out"] },
+            3: { answers: ["turn into"] },
+            4: { answers: ["grew out of"] },
+            5: { answers: ["phased in"] },
+            6: { answers: ["taken over", "take over"] }
+        };
+
+        function checkBlockC() {
+            checkedC = 6;
+            updateGlobalProgress();
+
+            for (let i = 1; i <= 6; i++) {
+                const inputEl = document.getElementById(`gap-c${i}`);
+                const fbEl = document.getElementById(`fb-c${i}`);
+                const userVal = inputEl.value.trim().toLowerCase();
+                
+                const isCorrect = dataC[i].answers.includes(userVal);
+
+                inputEl.disabled = true;
+
+                if (isCorrect) {
+                    inputEl.classList.add('correct');
+                } else {
+                    inputEl.classList.add('incorrect');
+                    fbEl.innerText = dataC[i].answers[0];
+                    fbEl.classList.add('visible');
+                }
+            }
+
+            document.getElementById('btn-check-c').style.display = 'none';
+            document.getElementById('btn-reset-c').style.display = 'inline-block';
+        }
+
+        function resetBlockC() {
+            checkedC = 0;
+            updateGlobalProgress();
+
+            for (let i = 1; i <= 6; i++) {
+                const inputEl = document.getElementById(`gap-c${i}`);
+                const fbEl = document.getElementById(`fb-c${i}`);
+                
+                inputEl.value = '';
+                inputEl.disabled = false;
+                inputEl.classList.remove('correct', 'incorrect');
+                
+                fbEl.innerText = '';
+                fbEl.classList.remove('visible');
+            }
+
+            document.getElementById('btn-check-c').style.display = 'inline-block';
+            document.getElementById('btn-reset-c').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
