@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session 3: Reading Part 7 (Multiple Matching)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #a78bfa; /* Purple for Week 2 */
+            --accent-hover: #bba4fc;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Background texture and Orbs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+        .orb {
+            position: fixed; border-radius: 50%; background: var(--accent);
+            opacity: 0.12; filter: blur(130px); z-index: -1; pointer-events: none;
+        }
+        .orb-1 { top: -10%; right: -5%; width: 400px; height: 400px; }
+        .orb-2 { bottom: -10%; left: -5%; width: 500px; height: 500px; }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        .back-btn {
+            display: inline-flex; align-items: center; color: var(--text-sec);
+            text-decoration: none; font-size: 0.95rem; font-weight: 500;
+            margin-bottom: 2.5rem; transition: color 0.2s ease;
+        }
+        .back-btn:hover { color: var(--accent); }
+
+        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; color: var(--text-pri); }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+
+        section { margin-bottom: 5rem; }
+        p { margin-bottom: 1rem; }
+
+        /* Section 1: Onboarding */
+        .onboarding-card {
+            background: var(--surface); border-radius: 12px; padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .onboarding-card p { font-size: 1.1rem; color: var(--text-pri); }
+
+        /* Section 2: Accordions */
+        .reference-label { font-size: 1.1rem; color: var(--text-sec); margin-bottom: 1rem; font-style: italic; }
+        .acc-wrapper {
+            background: var(--surface); border-radius: 8px; margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+        }
+        .acc-header {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; background: transparent; border: none;
+            color: var(--text-pri); cursor: pointer; text-align: left;
+        }
+        .acc-header:hover { background: var(--surface-alt); }
+        .acc-header .chevron { font-size: 1.5rem; transition: transform 0.35s ease; color: var(--accent); }
+        .acc-wrapper.open > .acc-header .chevron { transform: rotate(180deg); }
+        .acc-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .acc-wrapper.open > .acc-content { grid-template-rows: 1fr; }
+        .acc-content > .acc-inner { overflow: hidden; }
+        .acc-body { padding: 0 1.5rem 1.5rem 1.5rem; color: var(--text-sec); }
+
+        .guide-list { list-style: none; margin-top: 1rem; }
+        .guide-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.75rem; color: var(--text-pri); }
+        .guide-list li::before { content: '•'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
+        .callout {
+            background: rgba(167, 139, 250, 0.1); border-left: 3px solid var(--accent);
+            padding: 1rem; margin-top: 1rem; border-radius: 0 6px 6px 0; font-size: 0.95rem; color: var(--text-pri);
+        }
+
+        /* Section 3: Exercise Layout */
+        .exam-instruction { font-style: italic; color: var(--text-pri); margin-bottom: 1.5rem; }
+        
+        .teacher-note {
+            background: rgba(167, 139, 250, 0.08); border-left: 4px solid var(--accent);
+            padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin-bottom: 2.5rem; color: var(--text-sec);
+        }
+
+        /* Reading Grid */
+        .reading-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 1.5rem; margin-bottom: 4rem;
+        }
+        .writer-card {
+            background: var(--surface); border-left: 3px solid var(--accent);
+            padding: 2rem; border-radius: 0 12px 12px 0; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .writer-label {
+            font-family: var(--font-display); font-size: 1.4rem; color: var(--accent);
+            margin-bottom: 1rem; display: block;
+        }
+        .writer-text { font-size: 1rem; line-height: 1.85; color: var(--text-pri); }
+
+        /* Question Cards */
+        .question-card {
+            background: var(--surface); border-left: 3px solid var(--accent);
+            padding: 1.5rem 2rem; margin-bottom: 1.5rem; border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+        .q-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+        .q-num { font-family: var(--font-display); font-size: 1.2rem; color: var(--accent); font-weight: 700; }
+        .q-statement { font-size: 1.1rem; font-weight: 600; color: var(--text-pri); line-height: 1.4; }
+
+        .selector-row { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+        .btn-select {
+            flex: 1; background: transparent; border: 1px solid var(--accent);
+            color: var(--accent); font-family: var(--font-display); font-weight: 700;
+            padding: 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-select:hover { background: rgba(167, 139, 250, 0.1); }
+        .btn-select.active { background: var(--accent); color: #000; }
+
+        /* Feedback States */
+        .btn-select.correct { background: var(--correct) !important; border-color: var(--correct) !important; color: #000 !important; }
+        .btn-select.incorrect { background: var(--incorrect) !important; border-color: var(--incorrect) !important; color: #fff !important; }
+        .btn-select.reveal { border-color: var(--correct); color: var(--correct); }
+
+        .feedback-panel {
+            margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed rgba(255,255,255,0.1);
+            display: none; animation: fadeIn 0.4s ease;
+        }
+        .feedback-panel.visible { display: block; }
+        .gap-label {
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-sec); background: rgba(255,255,255,0.05);
+            padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 0.75rem;
+        }
+        .explanation-text { font-size: 0.95rem; color: var(--text-sec); line-height: 1.6; }
+
+        /* Actions Area */
+        .action-area { text-align: center; margin-top: 4rem; }
+        .score-display { display: none; margin-bottom: 2rem; }
+        .score-text { font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 1rem; }
+        .progress-bar { width: 100%; max-width: 400px; height: 8px; background: var(--surface-alt); border-radius: 4px; margin: 0 auto; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.6s ease; }
+        
+        .btn-main {
+            background: var(--accent); color: #000; border: none; padding: 14px 36px;
+            border-radius: 6px; font-family: var(--font-body); font-size: 1.1rem;
+            font-weight: 600; cursor: pointer;
+        }
+        .btn-outline {
+            background: transparent; color: var(--accent); border: 1px solid var(--accent);
+            padding: 10px 24px; border-radius: 6px; cursor: pointer; margin-left: 1rem; display: none;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 700px) {
+            .reading-grid { grid-template-columns: 1fr; }
+            .back-btn { margin-bottom: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: ONBOARDING -->
+        <section id="onboarding">
+            <h1>Session 3: Stance & Matching</h1>
+            <div class="onboarding-card">
+                <p>This week's first two sessions were about producing modal forms. Today is about distinguishing between four writers who use the same modal language to say very different things.</p>
+                <p>Part 7 is multiple matching. The core trap isn't misreading a single text—it's <strong>cross-text confusion</strong>. Two writers might hold similar positions, but the difference is in the degree of certainty or the exact logical claim. Modal verbs are the signals that determine which writer matches the statement.</p>
+                <p>This isn't close reading; it's <strong>disciplined scanning</strong>. Identify the precise claim in the statement, then find the "Receipt" in the ink. No general guesses allowed.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: STRATEGY -->
+        <section id="strategy">
+            <div class="reference-label">References — open before you begin, or use for review.</div>
+            
+            <div class="acc-wrapper" id="acc-strat">
+                <button class="acc-header" onclick="toggleAcc('acc-strat')">
+                    <h3>Part 7 — Scanning and matching strategy</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        <h4>HOW TO WORK THROUGH IT</h4>
+                        <ul class="guide-list">
+                            <li><strong>Step 1</strong> — Read all four texts quickly to build a mental map of each writer's stance.</li>
+                            <li><strong>Step 2</strong> — Read the statement and identify its logical direction (Positive? Conditional? Critical?).</li>
+                            <li><strong>Step 3</strong> — Test the statement against the texts. Don't look for topic matches; look for claim matches.</li>
+                            <li><strong>Step 4</strong> — Watch for the <strong>Modal Swap</strong>: "could eventually" is not the same as "will inevitably".</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acc-wrapper" id="acc-modals">
+                <button class="acc-header" onclick="toggleAcc('acc-modals')">
+                    <h3>How writers use modals to signal stance</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        <p>Modal verbs are signals of an intellectual position. Note the difference in force:</p>
+                        <ul class="guide-list">
+                            <li><strong>will / is bound to</strong> → Confident assertion / Inevitability.</li>
+                            <li><strong>might / could / may</strong> → Hedging / Possibility.</li>
+                            <li><strong>must / ought to</strong> → Strong necessity / Moral obligation.</li>
+                            <li><strong>should have / ought to have</strong> → Retrospective criticism (Past regret).</li>
+                        </ul>
+                        <div class="callout">
+                            <strong>Note:</strong> A statement about a past failure can only match a writer using a <em>modal perfect</em> (should have/ought to have).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISE -->
+        <section id="exercise">
+            <h2>Part 7: Multiple Matching</h2>
+            <p class="exam-instruction">You are going to read four commentaries about artificial intelligence and creative work. For questions 1–10, choose from the commentaries (A–D). The commentaries may be chosen more than once.</p>
+
+            <div class="teacher-note">
+                Before you answer: read all four texts through. For each writer, note their overall position and the modal verbs they use most. One minute per text.
+            </div>
+
+            <!-- Reading Texts -->
+            <div class="reading-grid">
+                <div class="writer-card">
+                    <span class="writer-label">Writer A</span>
+                    <div class="writer-text">Those who frame artificial intelligence as an existential threat to human creativity may be overstating the case considerably. Throughout history, new tools have consistently expanded what artists are capable of producing — the printing press, the camera, the synthesiser — and there is no compelling reason to assume that AI will prove categorically different. What AI tools might do, in practice, is liberate artists from the more mechanical aspects of their craft, allowing them to focus on the decisions that genuinely require human judgement and sensibility. A photographer who uses editing software to realise a precise visual effect is not considered less of an artist for doing so; a musician who uses a digital audio workstation is not accused of inauthenticity. The same logic could reasonably be extended to AI. This need not be a story of replacement. It could equally be a story of augmentation — one in which human creativity is extended rather than diminished by the tools available to it.</div>
+                </div>
+                <div class="writer-card">
+                    <span class="writer-label">Writer B</span>
+                    <div class="writer-text">The claim that artificial intelligence is capable of genuine creativity rests on a fundamental confusion between process and experience. What AI systems do — however impressively — is identify statistical patterns in vast quantities of existing material and recombine them in ways that resemble original production. This is not creativity. Creativity, properly understood, requires intentionality, subjective experience, and the capacity to mean something by what one makes. A system that has never felt loss cannot write meaningfully about grief; a system that has never perceived beauty cannot make genuinely aesthetic choices. The outputs of AI tools can be technically accomplished, commercially successful, and widely admired — none of this is in dispute. What they cannot be, by definition, is the product of a creative mind, because the systems that generate them do not have minds. Calling this creativity does a disservice to both the word and the human experience it describes.</div>
+                </div>
+                <div class="writer-card">
+                    <span class="writer-label">Writer C</span>
+                    <div class="writer-text">Whether artificial intelligence is "truly" creative is a question for philosophers, and it is not one that the market has shown much interest in waiting for them to answer. Consumers of creative content — music, visual art, narrative, design — are responding to outputs, not to the processes that generated them. An image that moves people moves them regardless of whether it was produced by a human hand or an algorithm. This is not a moral position; it is an observation about how creative economies actually function. What the current debate consistently underestimates is the scale of the economic transformation already underway. AI-generated content is set to reshape the production, distribution, and pricing of creative work within the decade, and the industries that fail to adapt to this reality should not expect the market to wait for them. The question worth asking is not whether AI can create — it is what this changes, and for whom.</div>
+                </div>
+                <div class="writer-card">
+                    <span class="writer-label">Writer D</span>
+                    <div class="writer-text">The creative industries are facing a structural challenge that ought to have been anticipated — and, in some quarters, was — long before AI tools became widely accessible to the general public. The failure to lobby effectively for protective legislation in the years when that window was still open is one that the sector will be paying for over a considerable period. Human artists are now competing in a market where the marginal cost of producing certain categories of creative content has collapsed almost to zero. This is not a technological inevitability that must simply be accepted; it is a policy failure that can and must be corrected. Regulators who have so far treated AI-generated content as a peripheral concern are bound to find themselves confronted with the consequences of that complacency sooner than they expect. Meaningful protection for human creative labour is not a luxury — it is an obligation that democratic governments have conspicuously failed to meet.</div>
+                </div>
+            </div>
+
+            <!-- Questions -->
+            <div id="questions-container">
+                <!-- Q1-10 will be handled by logic -->
+            </div>
+
+            <div class="action-area">
+                <div class="score-display" id="score-display">
+                    <div class="score-text">You scored <span id="score-val">0</span> / 10</div>
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                </div>
+                <button class="btn-main" id="check-btn" onclick="checkAnswers()">Check all answers</button>
+                <button class="btn-outline" id="reset-btn" onclick="resetExercise()">Try again</button>
+            </div>
+        </section>
+
+        <!-- SECTION 4: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li>Questions 1 and 4 both had Writer A as a possibility. What was the specific phrase in the statement that disqualified Writer A in question 4?</li>
+                <li>Question 9 required a modal perfect. Which writer used it, and how does it change the claim compared to someone saying "we should act now"?</li>
+                <li>Writers C and D both predict a massive impact. What is the fundamental difference in their tone?</li>
+            </ul>
+            <p class="wrap-up-note">These are not trick questions. The point is to hear yourself explain the system.</p>
+        </section>
+    </div>
+
+    <script>
+        function toggleAcc(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+
+        const questions = [
+            { id: 1, text: "AI tools need not be regarded as a challenge to the primacy of human artistic practice.", correct: "A", type: "MODAL DISTINCTION — NEED NOT", exp: "Writer A explicitly uses 'need not' to argue that the AI story is one of augmentation, not replacement." },
+            { id: 2, text: "The question of whether AI possesses genuine creativity is being allowed to overshadow more consequential practical matters.", correct: "C", type: "WRITER'S PURPOSE", exp: "Writer C dismisses the philosophical debate as secondary to the 'economic transformation' already underway." },
+            { id: 3, text: "Without legislative action, the harm done to human creative workers will prove impossible to undo.", correct: "D", type: "PRESCRIPTIVE STANCE", exp: "Writer D warns of consequences that will be paid for over a 'considerable period' if policy isn't corrected." },
+            { id: 4, text: "AI systems are fundamentally incapable of creativity because authentic creative acts depend on conscious experience.", correct: "B", type: "MODAL DISTINCTION — CANNOT", exp: "Writer B argues that without 'intentionality' and 'subjective experience', a system 'cannot' be creative." },
+            { id: 5, text: "The widespread commercial uptake of AI-generated content is probable irrespective of its artistic qualities.", correct: "C", type: "PRAGMATIC STANCE", exp: "Writer C notes that consumers respond to outputs regardless of how they were produced." },
+            { id: 6, text: "It is unreasonable to expect human artists to operate in a market where production costs have been distorted by technology.", correct: "D", type: "ETHICAL STANCE", exp: "Writer D frames the collapse of marginal costs as a 'policy failure' that must be corrected." },
+            { id: 7, text: "AI may allow creative practitioners to achieve outcomes that were previously beyond their capabilities.", correct: "A", type: "HEDGED OPTIMISM", exp: "Writer A suggests AI tools 'might' liberate artists and extend human creativity." },
+            { id: 8, text: "What AI produces is more accurately described as reconfiguration of pre-existing work than as original creation.", correct: "B", type: "DEFINITIONAL CLAIM", exp: "Writer B defines AI work as 'identifying statistical patterns' and 'recombining' them." },
+            { id: 9, text: "The creative sector should have taken stronger political action to secure protective measures before AI tools became mainstream.", correct: "D", type: "MODAL PERFECT — OUGHT TO HAVE", exp: "Writer D uses 'ought to have been anticipated' to criticize the past failure to lobby for legislation." },
+            { id: 10, text: "The influence of AI on how creative content is produced and valued will be transformative within a relatively short timeframe.", correct: "C", type: "SEMI-MODAL PREDICTION", exp: "Writer C uses 'is set to reshape' to predict changes happening 'within the decade'." }
+        ];
+
+        const selections = {};
+        let isSubmitted = false;
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = questions.map(q => `
+                <div class="question-card" id="q-${q.id}">
+                    <div class="q-header">
+                        <span class="q-num">${q.id}</span>
+                        <span class="q-statement">${q.text}</span>
+                    </div>
+                    <div class="selector-row">
+                        ${['A', 'B', 'C', 'D'].map(letter => `
+                            <button class="btn-select" id="btn-${q.id}-${letter}" onclick="selectWriter(${q.id}, '${letter}')">${letter}</button>
+                        `).join('')}
+                    </div>
+                    <div class="feedback-panel" id="fb-${q.id}">
+                        <span class="gap-label">${q.type}</span>
+                        <p class="explanation-text">${q.exp}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectWriter(qId, letter) {
+            if (isSubmitted) return;
+            
+            // UI Update
+            ['A', 'B', 'C', 'D'].forEach(l => {
+                document.getElementById(`btn-${qId}-${l}`).classList.remove('active');
+            });
+            document.getElementById(`btn-${qId}-${letter}`).classList.add('active');
+            
+            // State Update
+            selections[qId] = letter;
+        }
+
+        function checkAnswers() {
+            if (Object.keys(selections).length < 10) {
+                alert("Please answer all 10 questions before checking.");
+                return;
+            }
+
+            isSubmitted = true;
+            let score = 0;
+
+            questions.forEach(q => {
+                const selected = selections[q.id];
+                const correct = q.correct;
+                const fb = document.getElementById(`fb-${q.id}`);
+                
+                ['A', 'B', 'C', 'D'].forEach(letter => {
+                    const btn = document.getElementById(`btn-${q.id}-${letter}`);
+                    btn.classList.remove('active');
+                    if (letter === correct) {
+                        btn.classList.add('correct');
+                    } else if (letter === selected) {
+                        btn.classList.add('incorrect');
+                    } else {
+                        btn.style.opacity = '0.3';
+                    }
+                });
+
+                if (selected === correct) score++;
+                fb.classList.add('visible');
+            });
+
+            // Score display
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.style.display = 'block';
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('progress-fill').style.width = (score * 10) + '%';
+            
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('reset-btn').style.display = 'inline-block';
+        }
+
+        function resetExercise() {
+            location.reload();
+        }
+
+        renderQuestions();
+    </script>
+</body>
+</html>
