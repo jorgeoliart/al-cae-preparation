@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Writing: The Report (Week 2)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #a78bfa; /* Purple for Week 2 */
+            --accent-hover: #bba4fc;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            --surface-exam: rgba(255, 255, 255, 0.04);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { top: 5%; right: -5%; width: 400px; height: 400px; }
+        .orb-2 { bottom: 10%; left: -5%; width: 500px; height: 500px; }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-btn:hover { color: var(--accent); }
+
+        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; color: var(--text-pri); }
+        h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section { margin-bottom: 5rem; }
+        p { margin-bottom: 1rem; color: var(--text-sec); font-size: 1.05rem; }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* SECTION 1: Intro */
+        .intro-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .intro-card p { color: var(--text-pri); margin-bottom: 1.25rem; }
+        .intro-card p:last-child { margin-bottom: 0; }
+
+        /* SECTION 2: Model Report & Task */
+        .exam-task-box {
+            background: var(--surface-alt);
+            border-top: 3px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            font-style: italic;
+            color: var(--text-pri);
+        }
+
+        .model-report {
+            background: var(--surface-exam);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.2);
+            color: var(--text-pri);
+            line-height: 1.8;
+        }
+        .model-report-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-pri);
+            font-family: var(--font-display);
+            font-weight: 700;
+        }
+        .model-report h4 {
+            color: var(--text-pri);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.15rem;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            font-family: var(--font-body);
+        }
+        .model-report p {
+            color: var(--text-pri);
+            margin-bottom: 1rem;
+        }
+
+        /* Interactive Analysis Cards */
+        .analysis-label {
+            font-size: 1.05rem;
+            color: var(--text-sec);
+            margin-bottom: 1.5rem;
+        }
+        
+        .acc-wrapper {
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+        }
+        .acc-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+        .acc-header:hover { background: var(--surface-alt); }
+        .acc-header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding-right: 2rem;
+        }
+        .acc-badge {
+            font-size: 0.75rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--bg);
+            background: var(--accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            align-self: flex-start;
+            letter-spacing: 1px;
+        }
+        .acc-question {
+            font-size: 1.1rem;
+            color: var(--text-pri);
+            font-weight: 500;
+        }
+        .acc-header .chevron {
+            font-size: 1.5rem;
+            transition: transform 0.35s ease;
+            color: var(--accent);
+        }
+        .acc-wrapper.open > .acc-header .chevron { transform: rotate(180deg); }
+        
+        /* FIX APPLIED HERE: Separating grid track, inner overflow, and padding */
+        .acc-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s ease;
+            background: rgba(0,0,0,0.3);
+        }
+        .acc-wrapper.open > .acc-content { grid-template-rows: 1fr; }
+        .acc-inner { overflow: hidden; }
+        .acc-body {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-pri);
+            font-size: 1.05rem;
+        }
+
+        /* SECTION 3: Framework */
+        .framework-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .framework-card {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .framework-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 0.5rem;
+        }
+        .framework-title h3 { margin: 0; font-size: 1.15rem; color: var(--accent); }
+        .word-target { font-size: 0.85rem; color: var(--text-sec); font-family: var(--font-display); font-weight: 700; }
+        
+        .framework-list {
+            list-style: none;
+        }
+        .framework-list li {
+            position: relative;
+            padding-left: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-pri);
+            font-size: 0.95rem;
+        }
+        .framework-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--text-sec);
+        }
+
+        .grammar-callout {
+            background: rgba(167, 139, 250, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 2rem;
+        }
+        .grammar-callout-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        .grammar-callout p {
+            color: var(--text-pri);
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        /* SECTION 4: Handoff */
+        .handoff-section {
+            text-align: center;
+            background: var(--surface);
+            padding: 4rem 2rem;
+            border-radius: 12px;
+            border: 1px dashed rgba(167, 139, 250, 0.3);
+        }
+        .handoff-section h2 {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text-pri);
+        }
+        .handoff-inst {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto 3rem auto;
+            color: var(--text-pri);
+            font-size: 1.1rem;
+        }
+        .handoff-inst p { color: var(--text-pri); margin-bottom: 1rem; }
+
+        .btn-large {
+            display: inline-block;
+            background: var(--accent);
+            color: #080b10;
+            text-decoration: none;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.25rem;
+            padding: 18px 40px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px rgba(167, 139, 250, 0.2);
+        }
+        .btn-large:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(167, 139, 250, 0.3);
+        }
+        .link-note {
+            display: block;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-sec);
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 1.5rem 1rem 4rem 1rem; }
+            .model-report { padding: 1.5rem; }
+            .framework-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: INTRO -->
+        <section id="intro">
+            <h1>Session 4: The Report Form</h1>
+            <div class="intro-card">
+                <p>David, this week you've been focused on producing language — mastering transformations, navigating word formation, and building out phrasal verbs. Now, the job shifts. You need to organise that language into a highly specific form that the CAE examiner expects.</p>
+                <p>A report is not an essay. An essay builds an argument and flows smoothly from start to finish. A report does not. A report delivers precise information in designated sections. It has explicit headings. It is impersonal. It is written for a specific reader with a specific purpose. The reader doesn't want to be charmed by your writing; they want to be informed efficiently.</p>
+                <p>Right now, your IB training is a liability here. Those 500-word discursive essays you are used to writing are the exact wrong model. The CAE report is tight (220–250 words), strictly sectioned, and deliberately functional. The examiner will actively penalise narrative drift, personal register ("I think..."), and missing structure.</p>
+                <p>Today, we will analyse a model report, map its non-negotiable framework, and then you will move to the Google Doc to write a single, precise section.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MODEL REPORT & ANALYSIS -->
+        <section id="model-analysis">
+            <h2>Model Analysis</h2>
+            
+            <div class="exam-task-box">
+                <strong>Task:</strong> You have recently attended Up Helly Aa, a fire festival held annually in Shetland, Scotland. Your college has asked you to write a report for other students who may be interested in attending international festivals. Your report should describe the festival, explain its cultural significance, and make recommendations for potential visitors.
+            </div>
+
+            <div class="model-report">
+                <div class="model-report-title">Up Helly Aa: A Festival Worth Travelling For</div>
+
+                <h4>Introduction</h4>
+                <p>Up Helly Aa is an annual fire festival held each January in Lerwick, the capital of the Shetland Islands in northern Scotland. It is widely regarded as one of the most visually dramatic festivals in Europe and draws visitors from across the world. This report describes the festival's key features, outlines its cultural importance, and offers practical recommendations for those considering attending.</p>
+
+                <h4>The Festival</h4>
+                <p>The centrepiece of Up Helly Aa is a torchlit procession in which over a thousand participants, known as Guizers, carry burning torches through the town before setting fire to a replica Viking longship. The event commemorates Shetland's Norse heritage and has been celebrated in its current form since the late nineteenth century. Attendance is free, though visitors are advised to arrive early to secure a good vantage point along the procession route.</p>
+
+                <h4>Cultural Significance</h4>
+                <p>The festival serves as a powerful expression of local identity. It might be argued that its significance lies not only in its spectacular imagery but in its function as a community ritual — one in which virtually the entire local population participates in some capacity. This collective dimension could be considered its most distinctive feature.</p>
+
+                <h4>Recommendations</h4>
+                <p>Visitors would be well advised to book accommodation several months in advance, as availability in Lerwick is extremely limited during the festival period. It is also strongly recommended that appropriate cold-weather clothing be worn, given the January conditions. Those wishing to engage more deeply with the cultural context may find it worthwhile to visit the Shetland Museum prior to attending.</p>
+            </div>
+
+            <div class="analysis-label">Click each card to deconstruct the report's mechanics:</div>
+
+            <div class="analysis-accordion">
+                <!-- Card 1 -->
+                <div class="acc-wrapper" id="acc-1">
+                    <button class="acc-header" onclick="toggleAcc('acc-1')">
+                        <div class="acc-header-content">
+                            <span class="acc-badge">HEADING STRUCTURE</span>
+                            <span class="acc-question">How many sections does this report have, and what does each heading tell the reader?</span>
+                        </div>
+                        <span class="chevron">▾</span>
+                    </button>
+                    <!-- FIX APPLIED: Separate inner (overflow:hidden) and body (padding) -->
+                    <div class="acc-content">
+                        <div class="acc-inner">
+                            <div class="acc-body">
+                                Four sections: Introduction, The Festival, Cultural Significance, Recommendations. Each heading signals the exact function of that section — the reader knows before reading what kind of information they will find. This is non-negotiable in a CAE report: unnamed or vague headings are penalised.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="acc-wrapper" id="acc-2">
+                    <button class="acc-header" onclick="toggleAcc('acc-2')">
+                        <div class="acc-header-content">
+                            <span class="acc-badge">IMPERSONAL REGISTER</span>
+                            <span class="acc-question">Find three phrases in the report that avoid using 'I'. What do they use instead?</span>
+                        </div>
+                        <span class="chevron">▾</span>
+                    </button>
+                    <div class="acc-content">
+                        <div class="acc-inner">
+                            <div class="acc-body">
+                                "It is widely regarded as..." / "Attendance is free, though visitors are advised..." / "It is also strongly recommended that...". The report uses impersonal passive constructions and third-person reference throughout. First-person narration ("I thought the festival was amazing") is a serious register error in a formal report.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="acc-wrapper" id="acc-3">
+                    <button class="acc-header" onclick="toggleAcc('acc-3')">
+                        <div class="acc-header-content">
+                            <span class="acc-badge">MODAL HEDGING</span>
+                            <span class="acc-question">The report uses several modal constructions in the Cultural Significance section. Find them. Why are they there?</span>
+                        </div>
+                        <span class="chevron">▾</span>
+                    </button>
+                    <div class="acc-content">
+                        <div class="acc-inner">
+                            <div class="acc-body">
+                                "It might be argued that..." / "could be considered its most distinctive feature". These hedging modals signal that the writer is offering an interpretation, not a verified fact. In formal analytical writing, claims about significance or meaning are hedged — presenting them as certainties would be over-assertive and register-inappropriate.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="acc-wrapper" id="acc-4">
+                    <button class="acc-header" onclick="toggleAcc('acc-4')">
+                        <div class="acc-header-content">
+                            <span class="acc-badge">RECOMMENDATIONS LANGUAGE</span>
+                            <span class="acc-question">How does the Recommendations section signal obligation or advice without using 'you should'?</span>
+                        </div>
+                        <span class="chevron">▾</span>
+                    </button>
+                    <div class="acc-content">
+                        <div class="acc-inner">
+                            <div class="acc-body">
+                                "Visitors would be well advised to..." / "It is also strongly recommended that... be worn" (note the subjunctive) / "may find it worthwhile to...". These are the C1 structures for recommendations in formal writing. "You should bring warm clothes" is B2. "Appropriate cold-weather clothing is strongly recommended" is C1.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="acc-wrapper" id="acc-5">
+                    <button class="acc-header" onclick="toggleAcc('acc-5')">
+                        <div class="acc-header-content">
+                            <span class="acc-badge">WORD COUNT DISCIPLINE</span>
+                            <span class="acc-question">Count the words in each section. How does the writer stay within 220–250 words while covering four distinct areas?</span>
+                        </div>
+                        <span class="chevron">▾</span>
+                    </button>
+                    <div class="acc-content">
+                        <div class="acc-inner">
+                            <div class="acc-body">
+                                Introduction: ~55 words. The Festival: ~75 words. Cultural Significance: ~60 words. Recommendations: ~65 words. Total: ~255 words. Every sentence earns its place — there is no narrative filler, no personal anecdote, no repetition. Each section delivers its information and stops. This is the discipline a test taker needs to build.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="acc-wrapper" id="acc-6">
+                    <button class="acc-header" onclick="toggleAcc('acc-6')">
+                        <div class="acc-header-content">
+                            <span class="acc-badge">THE IB TRAP</span>
+                            <span class="acc-question">What would this report look like if you wrote it in his IB essay style? What would go wrong?</span>
+                        </div>
+                        <span class="chevron">▾</span>
+                    </button>
+                    <div class="acc-content">
+                        <div class="acc-inner">
+                            <div class="acc-body">
+                                It would likely start with a rhetorical hook ("Have you ever witnessed something truly unforgettable?"), use first-person throughout, lack headings, exceed 350 words, and include personal reactions rather than structured information. Every one of those features would cost marks. The CAE report is a different genre — not a harder essay, a different form entirely.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: FRAMEWORK -->
+        <section id="framework">
+            <h2>The CAE Report: Structure at a Glance</h2>
+            
+            <div class="framework-grid">
+                <!-- Block 1 -->
+                <div class="framework-card">
+                    <div class="framework-title">
+                        <h3>Introduction</h3>
+                        <span class="word-target">40–50 words</span>
+                    </div>
+                    <ul class="framework-list">
+                        <li>State what the report is about and its purpose</li>
+                        <li>Name the festival, location, and occasion</li>
+                        <li>Signal the sections to follow (optional but clean)</li>
+                        <li>Register: impersonal passive preferred — "This report aims to..." / "The following report examines..."</li>
+                    </ul>
+                </div>
+
+                <!-- Block 2 -->
+                <div class="framework-card">
+                    <div class="framework-title">
+                        <h3>The Festival / Overview</h3>
+                        <span class="word-target">60–70 words</span>
+                    </div>
+                    <ul class="framework-list">
+                        <li>Factual description: what happens, when, where, who participates</li>
+                        <li>One striking specific detail that makes it memorable</li>
+                        <li>No personal reactions — describe, don't narrate</li>
+                    </ul>
+                </div>
+
+                <!-- Block 3 -->
+                <div class="framework-card">
+                    <div class="framework-title">
+                        <h3>Significance / Analysis</h3>
+                        <span class="word-target">50–60 words</span>
+                    </div>
+                    <ul class="framework-list">
+                        <li>Why it matters culturally, historically, or socially</li>
+                        <li>Use modal hedging for interpretive claims</li>
+                        <li>This is where C1 register earns marks: nominalisations, hedged assertions, formal connectors</li>
+                    </ul>
+                </div>
+
+                <!-- Block 4 -->
+                <div class="framework-card">
+                    <div class="framework-title">
+                        <h3>Recommendations</h3>
+                        <span class="word-target">50–60 words</span>
+                    </div>
+                    <ul class="framework-list">
+                        <li>Practical advice for potential visitors</li>
+                        <li>Use formal recommendation structures: "would be well advised to", "it is recommended that", "visitors may wish to"</li>
+                        <li>Minimum two concrete, specific recommendations — not vague ("enjoy the festival")</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="grammar-callout">
+                <div class="grammar-callout-title">Grammar in Action — Week 2 target: modal hedging</div>
+                <p>Every report has a Significance section and a Recommendations section. Both demand modal constructions. This is not optional decoration — it is the register marker that separates B2 from C1. In the Google Doc, your Recommendations section must contain at least two distinct modal structures.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: HANDOFF -->
+        <section id="handoff" class="handoff-section">
+            <h2>Now it's your turn — open the Google Doc</h2>
+            
+            <div class="handoff-inst">
+                <p>You've seen how the report works. Now write one section.</p>
+                <p>In the Google Doc, you will find:</p>
+                <p>
+                    — A planning template for your own report (a festival of your choice)<br>
+                    — A focused task: write the Recommendations section only (50–60 words)<br>
+                    — A language checklist: at least two modal structures required
+                </p>
+                <p>Jorge will guide you through the planning template first. The Recommendations section is your micro-writing target for today. The full report comes in Writing-2.</p>
+            </div>
+
+            <!-- Replace [GOOGLE_DOC_URL] with the actual Google Doc link before the session -->
+            <a href="https://docs.google.com/document/d/1M333f-oQbKGF725K-I4EvR1GrpxzGZgfuKFlDgy-3Ps/edit?usp=sharing" target="_blank" class="btn-large">Open Writing Task — Google Doc →</a>
+            <span class="link-note">If the link doesn't open automatically, ask Jorge for the document.</span>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+    </script>
+</body>
+</html>

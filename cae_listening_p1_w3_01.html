@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAE Listening — Part 1 | Week 3</title>
+
+  <!-- Expected audio file in the same folder: cae_listening_p1_w3_01.mp3 -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080b10;
+      --surface:   #0f1520;
+      --surface2:  #161e2e;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #f59e0b;
+      --accent-dim: rgba(245,158,11,0.12);
+      --accent-mid: rgba(245,158,11,0.25);
+      --text:      #e8eaf0;
+      --muted:     #6b7a99;
+      --correct:   #34d399;
+      --correct-bg: rgba(52,211,153,0.10);
+      --wrong:     #f87171;
+      --wrong-bg:  rgba(248,113,113,0.10);
+      --radius:    12px;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'Instrument Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Background grid ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,158,11,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,158,11,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Ambient orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(130px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: rgba(245,158,11,0.07);
+      top: -120px; right: -100px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(245,158,11,0.04);
+      bottom: 10%; left: -80px;
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .site-label {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .site-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .page-title {
+      font-family: var(--font-head);
+      font-size: clamp(28px, 5vw, 40px);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .page-title span { color: var(--accent); }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+
+    /* ── Instruction banner ── */
+    .instruction-banner {
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 13.5px;
+      color: #d4a845;
+      margin-bottom: 32px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .instruction-banner .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Audio player card ── */
+    .audio-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      margin-bottom: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .audio-label {
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .audio-card audio {
+      width: 100%;
+      accent-color: var(--accent);
+      border-radius: 8px;
+    }
+    .audio-note {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── Phase badge ── */
+    .phase-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 24px;
+      font-family: var(--font-head);
+      letter-spacing: 0.05em;
+      transition: background 0.3s;
+    }
+    .phase-badge .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .phase-badge.locked .dot { animation: none; background: var(--muted); }
+    .phase-badge.locked { background: rgba(107,122,153,0.1); border-color: rgba(107,122,153,0.2); color: var(--muted); }
+
+    /* ── Extract cards ── */
+    .extract {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      transition: border-color 0.3s;
+    }
+
+    .extract-header {
+      padding: 16px 22px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .extract-number {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 6px;
+      padding: 3px 9px;
+      white-space: nowrap;
+    }
+    .extract-context {
+      font-size: 13.5px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .questions-block {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── Question ── */
+    .question-item {
+      border-left: 3px solid var(--border);
+      padding-left: 18px;
+      transition: border-color 0.3s;
+    }
+    .question-item.revealed-correct { border-color: var(--correct); }
+    .question-item.revealed-wrong   { border-color: var(--wrong); }
+
+    .question-number {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .question-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    /* ── Options ── */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .option-label:hover { background: rgba(255,255,255,0.03); border-color: rgba(245,158,11,0.2); }
+
+    .option-label input[type="radio"] { display: none; }
+
+    .option-letter {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 20px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface2);
+      border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .option-text { font-size: 14px; color: var(--text); line-height: 1.45; }
+
+    /* Selected state */
+    .option-label.selected {
+      background: var(--accent-dim);
+      border-color: rgba(245,158,11,0.35);
+    }
+    .option-label.selected .option-letter {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* Locked states */
+    .option-label.locked { cursor: default; }
+    .option-label.locked:hover { background: transparent; border-color: var(--border); }
+    .option-label.locked.selected:hover { background: var(--accent-dim); border-color: rgba(245,158,11,0.35); }
+
+    /* Reveal states */
+    .option-label.show-correct {
+      background: var(--correct-bg);
+      border-color: rgba(52,211,153,0.35);
+    }
+    .option-label.show-correct .option-letter { background: var(--correct); color: #000; }
+
+    .option-label.show-wrong {
+      background: var(--wrong-bg);
+      border-color: rgba(248,113,113,0.35);
+    }
+    .option-label.show-wrong .option-letter { background: var(--wrong); color: #000; }
+
+    /* ── Reveal panel ── */
+    .reveal-panel {
+      margin-top: 14px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .reveal-panel.visible { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .receipt-block {
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+    }
+    .receipt-label {
+      font-family: var(--font-head);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--correct);
+      margin-bottom: 4px;
+    }
+    .receipt-quote {
+      color: #a7f3d0;
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    .trap-block {
+      background: rgba(248,113,113,0.06);
+      border: 1px solid rgba(248,113,113,0.18);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #fca5a5;
+    }
+    .trap-label {
+      font-family: var(--font-head);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--wrong);
+      margin-bottom: 4px;
+    }
+
+    /* ── Reveal button ── */
+    .btn-reveal {
+      align-self: flex-start;
+      margin-top: 10px;
+      padding: 7px 16px;
+      background: transparent;
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 7px;
+      color: var(--accent);
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: none;
+    }
+    .btn-reveal:hover { background: var(--accent-dim); border-color: rgba(245,158,11,0.5); }
+    .btn-reveal.visible { display: inline-flex; align-items: center; gap: 7px; }
+    .btn-reveal.used { display: none; }
+
+    /* ── Lock button ── */
+    .lock-row {
+      margin-top: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-lock {
+      padding: 13px 36px;
+      background: var(--accent);
+      border: none;
+      border-radius: 9px;
+      color: #000;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-lock:hover { opacity: 0.9; }
+    .btn-lock:active { transform: scale(0.98); }
+    .btn-lock:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-lock.hidden { display: none; }
+
+    .lock-note {
+      font-size: 12.5px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ── Score card ── */
+    .score-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-top: 36px;
+      text-align: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.4s ease;
+    }
+    .score-card.visible { display: flex; }
+    .score-title {
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .score-number {
+      font-family: var(--font-head);
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .score-denom { font-size: 22px; color: var(--muted); }
+    .score-message {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 400px;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      margin-top: 60px;
+      text-align: center;
+      font-size: 12px;
+      color: rgba(107,122,153,0.5);
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 520px) {
+      .extract-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="site-label">AstraLingua &mdash; CAE Preparation</div>
+  <h1 class="page-title">Listening <span>Part 1</span></h1>
+  <p class="page-subtitle">Three short extracts &mdash; two questions each &mdash; 6 marks total &middot; Week 3, Session 1</p>
+
+  <!-- Instruction banner -->
+  <div class="instruction-banner">
+    <span class="icon">🎧</span>
+    <span>Listen to all three extracts. Choose the best answer for each question. <strong>Do not check your answers yet</strong> — wait for the teacher to lock the session before revealing.</span>
+  </div>
+
+  <!-- Audio player -->
+  <div class="audio-card">
+    <div class="audio-label">Audio</div>
+    <audio id="mainAudio" controls>
+      <source src="./cae_listening_p1_w3_01.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <div class="audio-note">File: cae_listening_p1_w3_01.mp3 — place in the same folder as this HTML file.</div>
+  </div>
+
+  <!-- Phase badge -->
+  <div class="phase-badge" id="phaseBadge">
+    <span class="dot"></span>
+    <span id="phaseText">Phase 1 — Select your answers</span>
+  </div>
+
+  <!-- Extracts -->
+  <div id="extractsContainer"></div>
+
+  <!-- Lock button -->
+  <div class="lock-row" id="lockRow">
+    <button class="btn-lock" id="btnLock" onclick="lockAnswers()">Lock answers &amp; begin review</button>
+    <span class="lock-note">All answers must be selected before locking.</span>
+  </div>
+
+  <!-- Score card -->
+  <div class="score-card" id="scoreCard">
+    <div class="score-title">Final Score</div>
+    <div class="score-number" id="scoreNum"></div>
+    <div class="score-message" id="scoreMsg"></div>
+  </div>
+
+  <div class="page-footer">AstraLingua &mdash; CAE Preparation &middot; Jorge &middot; 2026</div>
+</div>
+
+<script>
+  const DATA = [
+    {
+      number: 1,
+      context: "You hear part of an interview with a woman who works in retail management.",
+      questions: [
+        {
+          id: 1,
+          text: "How does the woman feel now about her first job in retailing?",
+          options: [
+            "pleased by the way she handled the staff",
+            "confident that it gave her a good start",
+            "relaxed about the mistakes she made"
+          ],
+          correct: 1,
+          receipt: '"It was a good grounding."',
+          trap: "A is blocked by 'I blush now to think of my time there' — she is embarrassed about her staff dealings, not pleased. C fails for the same reason: blush signals discomfort, not relaxation about mistakes."
+        },
+        {
+          id: 2,
+          text: "What is the woman advised to do next?",
+          options: [
+            "reflect on her skills",
+            "volunteer for extra work",
+            "discuss her situation with her boss"
+          ],
+          correct: 0,
+          receipt: '"You need to work out skills you can offer, emphasising your selling points."',
+          trap: "C is explicitly blocked — the interviewer says 'before you rush off to see your line manager'. B is an Acoustic Copycat: 'going the extra mile' appears in the audio, but it is phrased as a question, not as advice given."
+        }
+      ]
+    },
+    {
+      number: 2,
+      context: "You overhear a woman telling a friend a story about a swan.",
+      questions: [
+        {
+          id: 3,
+          text: "What problem did the woman have with the swan?",
+          options: [
+            "She misunderstood its intentions.",
+            "She underestimated the speed of its approach.",
+            "She failed to realise the consequences of disturbing it."
+          ],
+          correct: 2,
+          receipt: '"I\'d never have done that if I\'d known what would happen."',
+          trap: "A is cleanly eliminated: 'it was immediately obvious from his body language that he had other things on his mind' — she read his intentions correctly. B is a distractor: speed is mentioned but she never claims to have underestimated it."
+        },
+        {
+          id: 4,
+          text: "What is the man's reaction to the story?",
+          options: [
+            "He feels he would have handled the situation better.",
+            "He is unconvinced by the woman's version of events.",
+            "He fails to see quite how serious the problem was."
+          ],
+          correct: 2,
+          receipt: '"I\'m sure he wouldn\'t have hurt you."',
+          trap: "A has no textual support — the man never implies he would do better. B is wrong — he believes the story, he just underestimates its danger. The woman's 'Are you kidding?' directly confirms C: she is correcting his failure to grasp the seriousness."
+        }
+      ]
+    },
+    {
+      number: 3,
+      context: "You hear part of an interview with Bruce Loader, a successful businessman talking about his early life.",
+      questions: [
+        {
+          id: 5,
+          text: "Why did Bruce decide to give up the idea of studying art?",
+          options: [
+            "He failed to gain a place at art college.",
+            "He became tired of doing representational art.",
+            "He was persuaded that he could not realise his ambition."
+          ],
+          correct: 2,
+          receipt: '"I did [believe them]. That was my biggest mistake."',
+          trap: "A is a strong Acoustic Copycat — college is discussed at length, but 'three accepted me' explicitly kills this option. B is wrong: Bruce never says he tired of representational art; it was the tutors who argued against it, and he accepted their argument."
+        },
+        {
+          id: 6,
+          text: "What was his father's reaction to Bruce's decision?",
+          options: [
+            "He was anxious to discuss alternative employment options.",
+            "He was angry that a good opportunity had been wasted.",
+            "He was dismissive of the advantages of higher education."
+          ],
+          correct: 1,
+          receipt: '"His face was white with rage. You could have made something of going to college."',
+          trap: "C is a tone-reversal trap: the father mentions college prominently, but he valued it — he is furious the opportunity was thrown away, which is the opposite of dismissive. A fails because the father did not discuss alternatives; he issued an ultimatum and withdrew support."
+        }
+      ]
+    }
+  ];
+
+  const LETTERS = ['A', 'B', 'C'];
+  let phase = 1;
+  let revealedCount = 0;
+  const totalQuestions = 6;
+  let correctCount = 0;
+  const selectedAnswers = {}; // questionId → optionIndex
+
+  function buildUI() {
+    const container = document.getElementById('extractsContainer');
+
+    DATA.forEach(extract => {
+      const card = document.createElement('div');
+      card.className = 'extract';
+      card.id = `extract-${extract.number}`;
+
+      let questionsHTML = '';
+      extract.questions.forEach(q => {
+        let optionsHTML = '';
+        q.options.forEach((opt, i) => {
+          optionsHTML += `
+            <label class="option-label" id="opt-${q.id}-${i}" onclick="selectOption(${q.id}, ${i})">
+              <input type="radio" name="q${q.id}" value="${i}" />
+              <span class="option-letter">${LETTERS[i]}</span>
+              <span class="option-text">${opt}</span>
+            </label>`;
+        });
+
+        questionsHTML += `
+          <div class="question-item" id="qi-${q.id}">
+            <div class="question-number">Question ${q.id}</div>
+            <div class="question-text">${q.text}</div>
+            <div class="options" id="opts-${q.id}">
+              ${optionsHTML}
+            </div>
+            <button class="btn-reveal" id="reveal-btn-${q.id}" onclick="revealQuestion(${q.id})">
+              ▶ Reveal answer
+            </button>
+            <div class="reveal-panel" id="reveal-panel-${q.id}">
+              <div class="receipt-block">
+                <div class="receipt-label">📍 The Receipt</div>
+                <div class="receipt-quote">${q.receipt}</div>
+              </div>
+              <div class="trap-block">
+                <div class="trap-label">⚠ Distractor analysis</div>
+                ${q.trap}
+              </div>
+            </div>
+          </div>`;
+      });
+
+      card.innerHTML = `
+        <div class="extract-header">
+          <span class="extract-number">Extract ${extract.number}</span>
+          <span class="extract-context">${extract.context}</span>
+        </div>
+        <div class="questions-block">${questionsHTML}</div>`;
+
+      container.appendChild(card);
+    });
+
+    updateLockButton();
+  }
+
+  function selectOption(qId, index) {
+    if (phase !== 1) return;
+
+    selectedAnswers[qId] = index;
+
+    // Update visual state for this question's options
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => {
+        if (q.id === qId) {
+          q.options.forEach((_, i) => {
+            const label = document.getElementById(`opt-${qId}-${i}`);
+            if (i === index) {
+              label.classList.add('selected');
+            } else {
+              label.classList.remove('selected');
+            }
+          });
+        }
+      });
+    });
+
+    updateLockButton();
+  }
+
+  function updateLockButton() {
+    const allAnswered = Object.keys(selectedAnswers).length === totalQuestions;
+    document.getElementById('btnLock').disabled = !allAnswered;
+  }
+
+  function lockAnswers() {
+    if (Object.keys(selectedAnswers).length < totalQuestions) return;
+    phase = 2;
+
+    // Disable all options
+    document.querySelectorAll('.option-label').forEach(el => el.classList.add('locked'));
+
+    // Hide lock button
+    document.getElementById('btnLock').classList.add('hidden');
+    document.querySelector('.lock-note').style.display = 'none';
+
+    // Update phase badge
+    const badge = document.getElementById('phaseBadge');
+    badge.classList.add('locked');
+    document.getElementById('phaseText').textContent = 'Phase 2 — Reveal answers one by one';
+
+    // Show all reveal buttons
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => {
+        const btn = document.getElementById(`reveal-btn-${q.id}`);
+        btn.classList.add('visible');
+      });
+    });
+  }
+
+  function revealQuestion(qId) {
+    // Find the question data
+    let qData = null;
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => { if (q.id === qId) qData = q; });
+    });
+    if (!qData) return;
+
+    const selected = selectedAnswers[qId];
+    const isCorrect = selected === qData.correct;
+    if (isCorrect) correctCount++;
+
+    // Style all options
+    qData.options.forEach((_, i) => {
+      const label = document.getElementById(`opt-${qId}-${i}`);
+      label.classList.remove('selected');
+      if (i === qData.correct) {
+        label.classList.add('show-correct');
+      } else if (i === selected && !isCorrect) {
+        label.classList.add('show-wrong');
+      }
+    });
+
+    // Update question border
+    const qi = document.getElementById(`qi-${qId}`);
+    qi.classList.add(isCorrect ? 'revealed-correct' : 'revealed-wrong');
+
+    // Show reveal panel
+    document.getElementById(`reveal-panel-${qId}`).classList.add('visible');
+
+    // Hide reveal button
+    const btn = document.getElementById(`reveal-btn-${qId}`);
+    btn.classList.remove('visible');
+    btn.classList.add('used');
+
+    revealedCount++;
+
+    // Show score after all revealed
+    if (revealedCount === totalQuestions) {
+      showScore();
+    }
+  }
+
+  function showScore() {
+    const card = document.getElementById('scoreCard');
+    card.classList.add('visible');
+    document.getElementById('scoreNum').innerHTML =
+      `${correctCount}<span class="score-denom"> / ${totalQuestions}</span>`;
+
+    let msg = '';
+    if (correctCount === 6) msg = "Full marks. Every answer supported by a precise Receipt.";
+    else if (correctCount >= 4) msg = "Solid attempt. Review the distractor analysis above for any red-flagged answers.";
+    else if (correctCount >= 2) msg = "Several traps landed. The receipt audit above shows where the procedure broke down.";
+    else msg = "Difficult first exposure — that's expected. The debrief is the session. Use the distractor analysis to understand each trap.";
+
+    document.getElementById('scoreMsg').textContent = msg;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  buildUI();
+</script>
+</body>
+</html>

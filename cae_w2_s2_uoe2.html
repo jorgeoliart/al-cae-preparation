@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAE Session: Word Formation (Use of English Part 3)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+
+        :root {
+            --bg: #080b10;
+            --accent: #a78bfa; /* Purple for Week 2 */
+            --accent-hover: #bba4fc;
+            --text-pri: #e8eaf0;
+            --text-sec: #8892a4;
+            --correct: #34d399;
+            --incorrect: #f87171;
+            
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-alt: rgba(255, 255, 255, 0.06);
+            --surface-exam: rgba(255, 255, 255, 0.04);
+            
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'Instrument Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-pri);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Ambient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.12;
+            filter: blur(130px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .orb-1 { top: -10%; right: -5%; width: 400px; height: 400px; }
+        .orb-2 { bottom: -10%; left: -5%; width: 500px; height: 500px; }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-btn:hover { color: var(--accent); }
+
+        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; color: var(--text-pri); }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem; }
+        h3 { font-size: 1.25rem; font-weight: 400; }
+        h4 { font-size: 1.1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+        section { margin-bottom: 5rem; }
+        p { margin-bottom: 1rem; color: var(--text-sec); }
+        strong { color: var(--text-pri); font-weight: 600; }
+
+        /* Section 1: Intro */
+        .intro-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .intro-card p { font-size: 1.1rem; color: var(--text-pri); }
+
+        /* Section 2: Accordions */
+        .reference-label { font-size: 1.05rem; color: var(--text-sec); margin-bottom: 1rem; }
+        .acc-wrapper {
+            background: var(--surface); border-radius: 8px; margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+        }
+        .acc-header {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 1.25rem 1.5rem; background: transparent; border: none;
+            color: var(--text-pri); cursor: pointer; text-align: left; transition: background 0.2s;
+        }
+        .acc-header:hover { background: var(--surface-alt); }
+        .acc-header .chevron { font-size: 1.5rem; transition: transform 0.35s ease; color: var(--accent); }
+        .acc-wrapper.open > .acc-header .chevron { transform: rotate(180deg); }
+        
+        .acc-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .acc-wrapper.open > .acc-content { grid-template-rows: 1fr; }
+        .acc-content > .acc-inner { overflow: hidden; }
+        .acc-body { padding: 0 1.5rem 1.5rem 1.5rem; }
+
+        .sub-acc { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); margin-top: 1rem; }
+        .sub-acc .acc-header { padding: 1rem 1.5rem; }
+
+        /* Data Grids (instead of tables) */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .grid-3-col { grid-template-columns: 1fr 2fr 2fr; }
+        .data-header { font-weight: 700; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        .data-cell { color: var(--text-pri); padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .trap-callout {
+            background: rgba(167, 139, 250, 0.1); border-left: 3px solid var(--accent);
+            padding: 1rem; margin-top: 1rem; border-radius: 0 6px 6px 0;
+            font-size: 0.95rem; color: var(--text-pri);
+        }
+
+        .guide-list { list-style: none; margin-top: 1rem; }
+        .guide-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.75rem; color: var(--text-pri); line-height: 1.5;}
+        .guide-list li::before { content: '•'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
+        /* Section 3: Part 3 Exercises */
+        .progress-wrapper { margin-bottom: 2rem; }
+        .progress-bar-bg {
+            width: 100%; height: 6px; background: var(--surface-alt);
+            border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem;
+        }
+        .progress-bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; }
+        .progress-text { font-size: 0.9rem; color: var(--text-sec); text-align: right; margin: 0; }
+
+        .exam-instruction {
+            font-style: italic; font-size: 1.05rem; margin-bottom: 2rem; color: var(--text-pri);
+        }
+
+        .exam-text-card {
+            background: var(--surface-exam); border-radius: 8px; padding: 3rem;
+            margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.2);
+        }
+        .exam-title {
+            font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;
+            color: var(--text-pri); margin-bottom: 2rem; text-align: center; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .exam-line {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 0.8rem; font-size: 1.1rem; line-height: 1.8; color: var(--text-pri);
+        }
+        .line-content { flex: 1; padding-right: 1.5rem; }
+        .base-word {
+            font-family: var(--font-display); font-weight: 700; color: var(--accent);
+            letter-spacing: 1px; min-width: 120px; text-align: right; user-select: none;
+        }
+
+        .gap-input {
+            background: #0d1117; border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text-pri); padding: 4px 10px; border-radius: 4px;
+            font-family: inherit; font-size: 1.05rem; text-align: center;
+            width: 160px; margin: 0 4px; transition: all 0.2s;
+        }
+        .gap-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
+        .gap-input:disabled { opacity: 1; }
+        .gap-input.correct { border-color: var(--correct); color: var(--correct); background: rgba(52, 211, 153, 0.1); }
+        .gap-input.incorrect { border-color: var(--incorrect); color: var(--incorrect); background: rgba(248, 113, 113, 0.1); }
+
+        .action-area { text-align: center; margin-top: 2rem; margin-bottom: 3rem; }
+        .btn-main {
+            background: var(--accent); color: #000; border: none; padding: 12px 32px;
+            border-radius: 6px; font-family: var(--font-body); font-size: 1.1rem;
+            font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-main:hover { background: var(--accent-hover); }
+        .btn-outline {
+            background: transparent; color: var(--accent); border: 1px solid var(--accent);
+            padding: 10px 24px; border-radius: 6px; font-family: var(--font-body);
+            font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: none; margin-left: 1rem;
+        }
+        .btn-outline:hover { background: rgba(167, 139, 250, 0.1); }
+
+        /* Feedback Grid */
+        .feedback-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; display: none;
+            animation: fadeIn 0.4s ease forwards; margin-bottom: 3rem;
+        }
+        .feedback-grid.visible { display: grid; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .fb-card {
+            background: var(--surface); border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0; padding: 1.25rem; display: flex; flex-direction: column;
+        }
+        .fb-card.correct-card { border-left-color: var(--correct); }
+        .fb-card.incorrect-card { border-left-color: var(--incorrect); }
+        
+        .fb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .fb-num { font-family: var(--font-display); font-weight: 700; color: var(--text-sec); }
+        .fb-label {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-sec); background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 4px;
+        }
+        
+        .fb-content { font-size: 1.05rem; color: var(--text-pri); }
+        .fb-student-ans { font-weight: 600; }
+        .fb-student-ans.correct { color: var(--correct); }
+        .fb-student-ans.incorrect { color: var(--incorrect); text-decoration: line-through; margin-right: 0.5rem; }
+        .fb-correct-ans { color: var(--correct); font-weight: 600; }
+
+        /* Section 4: Phrasal Verbs */
+        .pv-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem; margin-bottom: 3rem;
+        }
+        .pv-card {
+            background: var(--surface); border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0; padding: 1.5rem;
+        }
+        .pv-verb { font-family: var(--font-display); font-size: 1.4rem; color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; }
+        .pv-particle { color: var(--text-pri); }
+        .pv-def { font-size: 0.95rem; color: var(--text-sec); margin-bottom: 1rem; }
+        .pv-example {
+            background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 6px;
+            font-size: 1rem; color: var(--text-pri); font-style: italic; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .production-task {
+            background: var(--surface-alt); border-radius: 12px; padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 2rem;
+        }
+        .scenario-box {
+            background: rgba(167, 139, 250, 0.1); border-left: 3px solid var(--accent);
+            padding: 1.25rem; border-radius: 0 6px 6px 0; margin-bottom: 2rem; color: var(--text-pri); font-size: 1.05rem;
+        }
+        .prod-textarea {
+            width: 100%; min-height: 160px; background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.15); color: var(--text-pri);
+            padding: 1.25rem; border-radius: 8px; font-family: inherit;
+            font-size: 1.05rem; line-height: 1.6; resize: vertical; transition: all 0.2s;
+        }
+        .prod-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
+        .prod-note { font-size: 0.85rem; color: var(--text-sec); margin-top: 1rem; font-style: italic; }
+
+        /* Section 5: Wrap-up */
+        .wrap-up-list { list-style: none; counter-reset: wrapup-counter; }
+        .wrap-up-list li { position: relative; padding-left: 2.5rem; margin-bottom: 1.5rem; font-size: 1.1rem; color: var(--text-pri); }
+        .wrap-up-list li::before {
+            counter-increment: wrapup-counter; content: counter(wrapup-counter); position: absolute; left: 0; top: 0;
+            width: 28px; height: 28px; background: rgba(167, 139, 250, 0.15); color: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+        }
+        .wrap-up-note { font-size: 0.9rem; font-style: italic; color: var(--text-sec); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        @media (max-width: 700px) {
+            .container { padding: 1.5rem 1rem 4rem 1rem; }
+            h1 { font-size: 2rem; }
+            .exam-text-card { padding: 1.5rem; }
+            .exam-line { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1.5rem; }
+            .base-word { align-self: flex-end; }
+            .feedback-grid { grid-template-columns: 1fr; }
+            .data-grid { grid-template-columns: 1fr; gap: 0; }
+            .data-header { display: none; }
+            .data-cell { padding: 0.25rem 0; border: none; }
+            .data-cell:nth-child(3n+1) { font-weight: 700; color: var(--accent); padding-top: 1rem; }
+            .data-cell:nth-child(3n+3) { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        
+        <a href="index.html" class="back-btn">← Back to Programme</a>
+
+        <!-- SECTION 1: INTRO -->
+        <section id="intro">
+            <h1>Session 2: Word Formation & Morphology</h1>
+            <div class="intro-card">
+                <p>Part 3 at FCE was largely mechanical: add a suffix, check the word class, move on. At CAE, the traps are more subtle. Two suffixes can both be real words but only one is correct in context. Negative prefixes don't follow a single rule. Spelling changes are penalised. Reaching for what sounds right is exactly what the examiner is banking on.</p><br>
+                <p>The system is learnable — but only if you slow down and apply it deliberately. The accordion below maps the system. The exercise tests whether you can use it under pressure.</p><br>
+                <p>The vocabulary today comes from the Travel & Culture field — which is also the territory of the report you'll write later this week. Paying attention here is not optional.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ACCORDION -->
+        <section id="reference">
+            <div class="reference-label">Reference — open before you begin, or use for review.</div>
+            
+            <div class="acc-wrapper" id="acc-main">
+                <button class="acc-header" onclick="toggleAcc('acc-main')">
+                    <h3>Derivational Morphology at C1</h3>
+                    <span class="chevron">▾</span>
+                </button>
+                <div class="acc-content">
+                    <div class="acc-inner acc-body">
+                        
+                        <!-- Panel 1 -->
+                        <div class="acc-wrapper sub-acc" id="panel-1">
+                            <button class="acc-header" onclick="toggleAcc('panel-1')">
+                                <h4>Suffixes by target word class</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>The first question in any Part 3 item is always: what word class does this gap need? Identify the class, then apply the right suffix. The same base word can produce multiple forms — make sure you're producing the right one.</p>
+                                    
+                                    <div class="data-grid">
+                                        <div class="data-header">Target class</div><div class="data-header">Common suffixes</div><div class="data-header">Examples</div>
+                                        
+                                        <div class="data-cell">Noun (person)</div><div class="data-cell">-er / -or, -ist, -ian, -ant / -ent, -ee</div><div class="data-cell">traveller, historian, inhabitant</div>
+                                        <div class="data-cell">Noun (abstract)</div><div class="data-cell">-tion / -sion, -ment, -ance / -ence, -ity, -ness, -al</div><div class="data-cell">celebration, achievement, significance, diversity, awareness, arrival</div>
+                                        <div class="data-cell">Adjective</div><div class="data-cell">-ful, -less, -ive, -al, -ous, -able / -ible, -ic</div><div class="data-cell">meaningful, cultural, remarkable, accessible</div>
+                                        <div class="data-cell">Adverb</div><div class="data-cell">-ly (from adjective)</div><div class="data-cell">traditionally, significantly</div>
+                                        <div class="data-cell">Verb</div><div class="data-cell">-ise / -ize, -ify, -en</div><div class="data-cell">diversify, sustain → (already a verb)</div>
+                                    </div>
+                                    
+                                    <div class="trap-callout">
+                                        <strong>⚠️ Trap:</strong> At CAE, the trap is often two plausible nouns from the same base: <em>celebration</em> vs <em>celebratory</em> — one is a noun, one is an adjective. The gap tells you which class you need. Read the sentence structure, not just the base word.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2 -->
+                        <div class="acc-wrapper sub-acc" id="panel-2">
+                            <button class="acc-header" onclick="toggleAcc('panel-2')">
+                                <h4>Negative prefixes: selection rules</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>There is no single negative prefix. The choice depends on the base word — and in many cases it simply has to be learned. The patterns below cover the most predictable cases.</p>
+                                    
+                                    <div class="data-grid grid-3-col">
+                                        <div class="data-header">Prefix</div><div class="data-header">Typical base</div><div class="data-header">Examples</div>
+                                        
+                                        <div class="data-cell">un-</div><div class="data-cell">Most adjectives and past participles</div><div class="data-cell">unexpected, unforgettable, unrecognised</div>
+                                        <div class="data-cell">in-</div><div class="data-cell">Latinate adjectives</div><div class="data-cell">insignificant, inaccessible, inappropriate</div>
+                                        <div class="data-cell">im-</div><div class="data-cell">Before b, m, p</div><div class="data-cell">immovable, imbalanced, impossible</div>
+                                        <div class="data-cell">il-</div><div class="data-cell">Before l</div><div class="data-cell">illogical, illegible</div>
+                                        <div class="data-cell">ir-</div><div class="data-cell">Before r</div><div class="data-cell">irreplaceable, irrelevant</div>
+                                        <div class="data-cell">dis-</div><div class="data-cell">Verbs and some nouns/adjectives</div><div class="data-cell">disappear, discomfort, disrespectful</div>
+                                        <div class="data-cell">mis-</div><div class="data-cell">Verbs (wrong action)</div><div class="data-cell">misinterpret, misrepresent</div>
+                                        <div class="data-cell">over-</div><div class="data-cell">Verbs and adjectives (excess)</div><div class="data-cell">overestimate, overcrowded</div>
+                                    </div>
+
+                                    <div class="trap-callout">
+                                        <strong>⚠️ Trap:</strong> The most common CAE trap: <em>un-</em> feels like the default negative prefix — but <em>insignificant</em>, <em>inaccessible</em>, and <em>irreplaceable</em> all reject it. When in doubt, ask: is this base word Latin-derived? If yes, lean toward <em>in-</em> and its variants.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3 -->
+                        <div class="acc-wrapper sub-acc" id="panel-3">
+                            <button class="acc-header" onclick="toggleAcc('panel-3')">
+                                <h4>CAE-level spelling traps</h4>
+                                <span class="chevron">▾</span>
+                            </button>
+                            <div class="acc-content">
+                                <div class="acc-inner acc-body">
+                                    <p>Correct word class, wrong spelling = wrong answer. These are the patterns that produce the most avoidable errors.</p>
+                                    
+                                    <ul class="guide-list">
+                                        <li><strong>-tion vs -sion:</strong> verbs ending in -t → usually -tion (<em>celebrate → celebration</em>); verbs ending in -d or -de → usually -sion (<em>expand → expansion</em>, <em>divide → division</em>)</li>
+                                        <li><strong>-ance vs -ence:</strong> no reliable rule — must be learned per word. High-frequency CAE pairs: <em>significance</em> (not significence), <em>appearance</em>, <em>existence</em>, <em>independence</em></li>
+                                        <li><strong>Consonant doubling:</strong> single vowel + single consonant before a suffix starting with a vowel → double the consonant (<em>travel → traveller</em>, <em>forget → unforgettable</em>)</li>
+                                        <li><strong>Adjectives ending -ic:</strong> adverb adds -ally, not -ly (<em>dramatic → dramatically</em>, <em>historic → historically</em>)</li>
+                                        <li><strong>Silent -e drop:</strong> before vowel suffix (<em>explore → exploration</em>, not explorement)</li>
+                                    </ul>
+
+                                    <div class="trap-callout">
+                                        <strong>⚠️ Note:</strong> One mark per item. A correctly derived word with a spelling error gets zero. Proofread the derived form as a separate step — don't just write it and move on.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXERCISES -->
+        <section id="exercises">
+            <h2>Part 3: Word Formation</h2>
+            
+            <div class="progress-wrapper">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text"><span id="progress-count">0</span> / 8 answered</p>
+            </div>
+
+            <p class="exam-instruction">For questions 1–8, read the text below. Use the word given in capitals at the end of some of the lines to form a word that fits in the gap in the same line.</p>
+
+            <div class="exam-text-card">
+                <div class="exam-title">Carnaval de Oruro: Bolivia's Living Heritage</div>
+                
+                <div class="exam-line">
+                    <span class="line-content">Every February, the city of Oruro in the Bolivian Andes undergoes a</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">(1) <input type="text" id="gap-1" class="gap-input" autocomplete="off" spellcheck="false"> transformation. For eleven days, the streets fill with</span>
+                    <span class="base-word">REMARK</span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">elaborately costumed dancers, brass bands, and the thunder of drums in</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">one of South America's most (2) <input type="text" id="gap-2" class="gap-input" autocomplete="off" spellcheck="false"> cultural spectacles. The</span>
+                    <span class="base-word">MEMORY</span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">Carnaval de Oruro — inscribed on UNESCO's list of Intangible Cultural</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">Heritage in 2001 — is not merely a tourist attraction. It is a living</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">expression of (3) <input type="text" id="gap-3" class="gap-input" autocomplete="off" spellcheck="false"> identity, rooted in pre-Columbian ritual</span>
+                    <span class="base-word">COMMUNE</span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">and shaped by centuries of (4) <input type="text" id="gap-4" class="gap-input" autocomplete="off" spellcheck="false"> between indigenous Andean</span>
+                    <span class="base-word">INTERACT</span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">traditions and Spanish colonial Catholicism.</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">The festival's central (5) <input type="text" id="gap-5" class="gap-input" autocomplete="off" spellcheck="false"> is the Diablada, a dance in which</span>
+                    <span class="base-word">PERFORM</span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">performers dressed as devils engage in an elaborate moral conflict.</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">Its symbolism is (6) <input type="text" id="gap-6" class="gap-input" autocomplete="off" spellcheck="false"> layered, drawing on both Christian</span>
+                    <span class="base-word">RICH</span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">iconography and Andean cosmology simultaneously. Preparations begin</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">months in advance, requiring a level of (7) <input type="text" id="gap-7" class="gap-input" autocomplete="off" spellcheck="false"> commitment from</span>
+                    <span class="base-word">SUSTAIN</span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">participants that has no equivalent in purely commercial entertainment.</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">Critics who dismiss such festivals as folkloric curiosities</span>
+                    <span class="base-word"></span>
+                </div>
+                <div class="exam-line">
+                    <span class="line-content">(8) <input type="text" id="gap-8" class="gap-input" autocomplete="off" spellcheck="false"> their broader cultural and anthropological significance.</span>
+                    <span class="base-word">ESTIMATE</span>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button class="btn-main" id="btn-check" onclick="checkAnswers()">Check all answers</button>
+                <button class="btn-outline" id="btn-reset" onclick="resetExercise()">Try again</button>
+            </div>
+
+            <!-- Feedback Grid (Populated by JS) -->
+            <div class="feedback-grid" id="feedback-grid"></div>
+
+        </section>
+
+        <!-- SECTION 4: PHRASAL VERBS -->
+        <section id="phrasal-verbs">
+            <h2>Phrasal Verbs — Change & Development</h2>
+            <p>This week's semantic field is change and development. These verbs describe how things evolve, disappear, or transform over time — exactly the kind of language that appears in formal writing about cultural and social change.</p>
+            
+            <div class="pv-grid">
+                <div class="pv-card">
+                    <div class="pv-verb">turn <span class="pv-particle">into</span></div>
+                    <div class="pv-def">to change and become something different</div>
+                    <div class="pv-example">"Over the centuries, the original ritual gradually turned into a citywide celebration involving thousands of participants."</div>
+                </div>
+                <div class="pv-card">
+                    <div class="pv-verb">give way <span class="pv-particle">to</span></div>
+                    <div class="pv-def">to be replaced by something else, especially gradually</div>
+                    <div class="pv-example">"Traditional oral methods of preserving cultural memory have slowly given way to digital archiving."</div>
+                </div>
+                <div class="pv-card">
+                    <div class="pv-verb">die <span class="pv-particle">out</span></div>
+                    <div class="pv-def">to disappear completely, usually over a long period</div>
+                    <div class="pv-example">"Without active community support, many regional dialects are at risk of dying out within a generation."</div>
+                </div>
+                <div class="pv-card">
+                    <div class="pv-verb">take <span class="pv-particle">over</span></div>
+                    <div class="pv-def">to become dominant or to assume control of something</div>
+                    <div class="pv-example">"Commercial interests have taken over many festivals that were once entirely community-led."</div>
+                </div>
+                <div class="pv-card">
+                    <div class="pv-verb">grow out <span class="pv-particle">of</span></div>
+                    <div class="pv-def">to develop from something as its origin or cause</div>
+                    <div class="pv-example">"The modern carnival grew out of a centuries-old harvest festival observed by the region's earliest inhabitants."</div>
+                </div>
+                <div class="pv-card">
+                    <div class="pv-verb">phase <span class="pv-particle">out</span></div>
+                    <div class="pv-def">to eliminate or discontinue something gradually and deliberately</div>
+                    <div class="pv-example">"Several governments have moved to phase out subsidies for cultural events that attract primarily international tourists."</div>
+                </div>
+            </div>
+
+            <div class="production-task">
+                <h3>The Scenario — use all six</h3>
+                <p>Read the situation below. Write a short paragraph (5–6 sentences) using all six phrasal verbs. The paragraph must be coherent — not a list of disconnected sentences.</p>
+                
+                <div class="scenario-box">
+                    "A traditional annual music festival in a small coastal town has changed dramatically over the past thirty years. Describe what has happened to it and how."
+                </div>
+                
+                <textarea class="prod-textarea" placeholder="Write your paragraph here." spellcheck="false"></textarea>
+                <div class="prod-note">There are no wrong answers here — only more or less precise ones. Jorge will read your paragraph with you. Focus on register: these are formal verbs. Use them formally.</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: WRAP-UP -->
+        <section id="wrap-up">
+            <h2>To finish — answer these out loud</h2>
+            <ul class="wrap-up-list">
+                <li>In item 2, why is <em>memorably</em> wrong even though it comes from the same base word as <em>memorable</em>?</li>
+                <li>What is the rule for choosing between <em>un-</em> and <em>in-</em> as a negative prefix? Give one example where getting this wrong would cost a mark.</li>
+                <li>You used all six phrasal verbs in your paragraph. Which one felt most unnatural in formal writing — and why might that be?</li>
+            </ul>
+            <p class="wrap-up-note">No written answers needed. The point is to hear yourself explain the reasoning.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Accordion Logic
+        function toggleAcc(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+            } else {
+                el.classList.add('open');
+            }
+        }
+
+        // Exercise Data
+        const itemData = {
+            1: { answers: ["remarkable"], label: "ADJECTIVE FROM VERB" },
+            2: { answers: ["memorable"], label: "ADJECTIVE FROM NOUN" },
+            3: { answers: ["communal"], label: "ADJECTIVE FROM NOUN" },
+            4: { answers: ["interaction"], label: "NOUN FROM VERB (-tion)" },
+            5: { answers: ["performance"], label: "NOUN FROM VERB (-ance)" },
+            6: { answers: ["richly"], label: "ADVERB FROM ADJECTIVE" },
+            7: { answers: ["sustained"], label: "ADJECTIVE FROM VERB (PAST PARTICIPLE)" },
+            8: { answers: ["underestimate"], label: "VERB WITH NEGATIVE/DIRECTIONAL PREFIX" }
+        };
+
+        // Progress tracking
+        const inputs = document.querySelectorAll('.gap-input');
+        inputs.forEach(input => {
+            input.addEventListener('input', updateProgress);
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const idNum = parseInt(this.id.split('-')[1]);
+                    if (idNum < 8) {
+                        document.getElementById(`gap-${idNum + 1}`).focus();
+                    } else {
+                        checkAnswers();
+                    }
+                }
+            });
+        });
+
+        function updateProgress() {
+            let filled = 0;
+            inputs.forEach(i => { if(i.value.trim() !== '') filled++; });
+            document.getElementById('progress-count').innerText = filled;
+            document.getElementById('progress-fill').style.width = (filled / 8 * 100) + '%';
+        }
+
+        function checkAnswers() {
+            const fbGrid = document.getElementById('feedback-grid');
+            fbGrid.innerHTML = ''; // clear old
+            let score = 0;
+
+            for (let i = 1; i <= 8; i++) {
+                const inputEl = document.getElementById(`gap-${i}`);
+                const userVal = inputEl.value.trim().toLowerCase();
+                const correctAnswers = itemData[i].answers;
+                const isCorrect = correctAnswers.includes(userVal);
+
+                // Update input styles
+                inputEl.disabled = true;
+                if (userVal === "") {
+                    inputEl.classList.add('incorrect');
+                } else if (isCorrect) {
+                    inputEl.classList.add('correct');
+                    score++;
+                } else {
+                    inputEl.classList.add('incorrect');
+                }
+
+                // Build Feedback Card
+                let fbCardHTML = `
+                    <div class="fb-card ${isCorrect ? 'correct-card' : 'incorrect-card'}">
+                        <div class="fb-header">
+                            <span class="fb-num">Item ${i}</span>
+                            <span class="fb-label">${itemData[i].label}</span>
+                        </div>
+                        <div class="fb-content">
+                            <span class="fb-student-ans ${isCorrect ? 'correct' : 'incorrect'}">${userVal === '' ? '(blank)' : userVal}</span>
+                            ${!isCorrect ? `<span class="fb-correct-ans">${correctAnswers[0]}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                fbGrid.insertAdjacentHTML('beforeend', fbCardHTML);
+            }
+
+            fbGrid.classList.add('visible');
+            document.getElementById('btn-check').style.display = 'none';
+            document.getElementById('btn-reset').style.display = 'inline-block';
+        }
+
+        function resetExercise() {
+            inputs.forEach(input => {
+                input.value = '';
+                input.disabled = false;
+                input.classList.remove('correct', 'incorrect');
+            });
+            updateProgress();
+            
+            const fbGrid = document.getElementById('feedback-grid');
+            fbGrid.classList.remove('visible');
+            fbGrid.innerHTML = '';
+            
+            document.getElementById('btn-check').style.display = 'inline-block';
+            document.getElementById('btn-reset').style.display = 'none';
+            document.getElementById('gap-1').focus();
+        }
+    </script>
+</body>
+</html>

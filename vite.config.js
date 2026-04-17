@@ -13,6 +13,7 @@ export default defineConfig({
         caeS1W2: resolve(__dirname, 'cae_s1_w2_modals.html'),
         caeS2W2: resolve(__dirname, 'cae_s2_w2_modals.html'),
         caeS3W2: resolve(__dirname, 'cae_s3_w2_reading.html'),
+        caeW3S2: resolve(__dirname, 'cae_listening_p1_w3_01.html'),
         // Add new session entries here
       }
     }

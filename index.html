@@ -3,616 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AstraLingua CAE | Preparation Programme</title>
+    <title>AstraLingua CAE | David Pérez</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Syne:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@400;700&display=swap');
 
         :root {
-            --bg: #080b10;
-            --text-pri: #e8eaf0;
-            --text-sec: #8892a4;
-            --surface: rgba(255, 255, 255, 0.04);
-            --surface-hover: rgba(255, 255, 255, 0.07);
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            
+            --bg:           #080b10;
+            --text-pri:     #e8eaf0;
+            --text-sec:     #8892a4;
+            --text-dim:     #3d4455;
+            --surface:      rgba(255,255,255,0.04);
+            --surface-hover:rgba(255,255,255,0.07);
+            --border:       rgba(255,255,255,0.07);
+            --accent:       #a78bfa;
+            --accent-dim:   rgba(167,139,250,0.12);
             --font-display: 'Syne', sans-serif;
-            --font-body: 'Instrument Sans', sans-serif;
-            
-            --orb-color: #4a9eff;
+            --font-body:    'Instrument Sans', sans-serif;
         }
 
-        /* Week Accent Colours */
-        .theme-w1 { --accent: #4a9eff; }
-        .theme-w2 { --accent: #a78bfa; }
-        .theme-w3 { --accent: #34d399; }
-        .theme-w4 { --accent: #fb923c; }
-        .theme-w5 { --accent: #f0c040; }
-        .theme-w6 { --accent: #38bdf8; }
-        .theme-w7 { --accent: #e879f9; }
-        .theme-w8 { --accent: #f472b6; }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg);
+            background: var(--bg);
             color: var(--text-pri);
             font-family: var(--font-body);
             line-height: 1.6;
-            overflow-x: hidden;
-            position: relative;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        /* Subtle background grid */
+        /* subtle grid */
         body::before {
             content: '';
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: 
-                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+            inset: 0;
+            background-image:
+                linear-gradient(to right,  rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
             background-size: 48px 48px;
             z-index: -2;
             pointer-events: none;
         }
 
-        /* Ambient Orbs */
+        /* orbs */
         .orb {
             position: fixed;
             border-radius: 50%;
-            background: var(--orb-color);
-            opacity: 0.12;
-            filter: blur(130px);
+            background: var(--accent);
+            filter: blur(140px);
+            opacity: 0.1;
             z-index: -1;
             pointer-events: none;
         }
-        .orb-1 {
-            top: -10%;
-            right: -5%;
-            width: 400px;
-            height: 400px;
-        }
-        .orb-2 {
-            bottom: -10%;
-            left: -5%;
-            width: 500px;
-            height: 500px;
-        }
+        .orb-1 { width: 480px; height: 480px; top: -80px;  right: -80px;  }
+        .orb-2 { width: 380px; height: 380px; bottom: -60px; left: -60px; opacity: 0.07; }
 
+        /* layout */
         .container {
-            max-width: 900px;
+            max-width: 780px;
             margin: 0 auto;
-            padding: 3rem 2rem;
+            padding: 4rem 2rem 6rem;
         }
 
-        /* Header */
+        /* header */
         header {
-            margin-bottom: 2rem;
+            margin-bottom: 3.5rem;
         }
         .site-name {
             font-family: var(--font-display);
+            font-size: 2rem;
             font-weight: 700;
-            font-size: 2.5rem;
-            color: var(--text-pri);
-            margin-bottom: 0.25rem;
             letter-spacing: -0.5px;
+            color: var(--text-pri);
+            margin-bottom: 0.2rem;
         }
-        .subtitle {
-            font-size: 1.25rem;
+        .site-meta {
+            font-size: 0.9rem;
             color: var(--text-sec);
-            margin-bottom: 1.5rem;
-        }
-        .student-info {
-            font-size: 0.95rem;
-            color: var(--text-sec);
-            font-weight: 500;
+            margin-bottom: 2rem;
         }
         .header-rule {
             height: 1px;
-            background: var(--border-subtle);
-            margin: 2rem 0;
+            background: var(--border);
             border: none;
         }
 
-        /* Programme Overview */
-        .overview-pill {
-            display: inline-block;
-            background: var(--surface);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-sec);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-bottom: 4rem;
+        /* week section */
+        .week {
+            margin-bottom: 2.8rem;
         }
 
-        /* Week Sections */
-        .week-section {
-            margin-bottom: 3rem;
-        }
-        .week-heading {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 1.25rem;
+        .week-header {
             display: flex;
-            align-items: center;
-        }
-        .week-heading::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent);
-            margin-right: 12px;
-        }
-        .week-divider {
-            height: 1px;
-            background: var(--border-subtle);
-            margin-bottom: 1.5rem;
-            border: none;
-        }
-
-        /* Card Grid */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            align-items: baseline;
             gap: 0.75rem;
+            margin-bottom: 0.6rem;
         }
 
-        /* Card Styling */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border-subtle);
-            border-left: 3px solid var(--accent);
-            border-radius: 6px;
-            padding: 1rem 1.2rem;
-            display: flex;
-            flex-direction: column;
-            text-decoration: none;
-            transition: transform 0.25s ease, background 0.25s ease;
-            min-height: 140px;
-        }
-        a.card:hover {
-            background: var(--surface-hover);
-            transform: translateY(-3px);
-        }
-        .card.placeholder {
-            opacity: 0.35;
-            cursor: default;
-            pointer-events: none;
-        }
-
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-        .session-label {
-            font-size: 0.8rem;
+        .week-number {
+            font-family: var(--font-display);
+            font-size: 0.7rem;
             font-weight: 700;
-            color: var(--text-sec);
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-subtle);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .uoe-badge {
-            font-size: 0.75rem;
-            font-weight: 600;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: var(--accent);
-            background: color-mix(in srgb, var(--accent) 15%, transparent);
-            padding: 3px 8px;
+            white-space: nowrap;
+        }
+
+        .week-title {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-pri);
+        }
+
+        .week-rule {
+            height: 1px;
+            background: var(--border);
+            border: none;
+            margin-bottom: 0.8rem;
+        }
+
+        /* session list */
+        .session-list {
+            list-style: none;
+        }
+
+        .session-list li {
+            border-bottom: 1px solid var(--border);
+        }
+        .session-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* active link */
+        .session-list li a {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 0.6rem 0;
+            text-decoration: none;
+            color: var(--text-pri);
+            transition: background 0.15s ease;
             border-radius: 4px;
         }
-
-        .card-desc {
-            font-size: 0.9rem;
-            color: var(--text-pri);
-            line-height: 1.4;
-            flex-grow: 1;
-            margin-bottom: 1rem;
+        .session-list li a:hover {
+            background: var(--surface-hover);
+            padding-left: 0.5rem;
+            margin: 0 -0.5rem;
+            padding-right: 0.5rem;
         }
-
-        .card-bottom {
-            display: flex;
-            justify-content: flex-end;
-            align-items: flex-end;
-        }
-        .arrow-icon {
-            color: var(--text-sec);
-            font-size: 1.2rem;
-            line-height: 1;
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-        a.card:hover .arrow-icon {
+        .session-list li a:hover .session-arrow {
             color: var(--accent);
             transform: translateX(3px);
         }
-        .coming-soon {
-            font-size: 0.75rem;
-            color: var(--text-sec);
-            font-style: italic;
+
+        /* inactive / not yet built */
+        .session-list li.inactive {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0;
+            opacity: 0.32;
+            cursor: default;
         }
 
-        /* Footer */
-        footer {
+        /* strand badge */
+        .strand {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 2px 7px;
+            border-radius: 3px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            width: 78px;
             text-align: center;
-            padding: 4rem 0 2rem 0;
-            font-size: 0.9rem;
-            color: var(--text-sec);
-            border-top: 1px solid var(--border-subtle);
-            margin-top: 2rem;
         }
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            .card-grid { grid-template-columns: repeat(2, 1fr); }
+        .strand.reading   { --accent: #34d399; --accent-dim: rgba(52,211,153,0.12);  }
+        .strand.writing   { --accent: #fb923c; --accent-dim: rgba(251,146,60,0.12);  }
+        .strand.uoe       { --accent: #a78bfa; --accent-dim: rgba(167,139,250,0.12); }
+        .strand.listening { --accent: #f0c040; --accent-dim: rgba(240,192,64,0.12);  }
+
+        .session-desc {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-pri);
+            padding: 0 1rem;
+            line-height: 1.35;
         }
-        @media (max-width: 700px) {
-            .container { padding: 2rem 1rem; }
-            .site-name { font-size: 2rem; }
-            .card-grid { grid-template-columns: 1fr; }
-            .card { min-height: auto; }
+
+        .inactive .session-desc {
+            color: var(--text-sec);
+        }
+
+        .session-arrow {
+            font-size: 1rem;
+            color: var(--text-dim);
+            flex-shrink: 0;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        /* footer */
+        footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        /* responsive */
+        @media (max-width: 600px) {
+            .container { padding: 2.5rem 1.25rem 4rem; }
+            .site-name  { font-size: 1.6rem; }
+            .strand     { width: 64px; font-size: 0.65rem; }
+            .session-desc { font-size: 0.85rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
 
-    <div class="container">
-        
-        <header>
-            <div class="site-name">AstralLingua CAE</div>
-            <div class="subtitle">C1 Advanced — Preparation Programme</div>
-            <hr class="header-rule">
-        </header>
+<div class="container">
 
-        <div class="overview-pill">
-            8 weeks · 32 sessions · November 2026
-        </div>
+    <header>
+        <div class="site-name">AstraLingua CAE</div>
+        <div class="site-meta">David Pérez &nbsp;·&nbsp; C1 Advanced &nbsp;·&nbsp; November 2026</div>
+        <hr class="header-rule">
+    </header>
 
-        <main>
-            <!-- WEEK 1 -->
-            <section class="week-section theme-w1">
-                <h2 class="week-heading">Week 1 — Passive structures</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <a href="cae_s1_w1_passive_constructions.html" class="card">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + transformation drills</div>
-                        <div class="card-bottom"><span class="arrow-icon">→</span></div>
+    <main>
+
+        <!-- ═══════════════════════════════════════════
+             WEEK 1 — Passive Constructions
+             To add a session: copy a <li> block.
+             Active:   <li><a href="filename.html"> ... </a></li>
+             Inactive: <li class="inactive"> ... </li>
+        ════════════════════════════════════════════ -->
+        <section class="week">
+            <div class="week-header">
+                <span class="week-number">Week 1</span>
+                <span class="week-title">Passive Constructions</span>
+            </div>
+            <hr class="week-rule">
+            <ul class="session-list">
+                <li>
+                    <a href="cae_s1_w1_passive_constructions.html">
+                        <span class="strand uoe">UoE-1</span>
+                        <span class="session-desc">Part 4 — transformation drills · all passive forms</span>
+                        <span class="session-arrow">→</span>
                     </a>
-                    <a href="cae_s2_w1_passive_constructions.html" class="card">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Open cloze — auxiliaries in passive contexts</div>
-                        <div class="card-bottom"><span class="arrow-icon">→</span></div>
+                </li>
+                <li>
+                    <a href="cae_s2_w1_passive_constructions.html">
+                        <span class="strand uoe">UoE-2</span>
+                        <span class="session-desc">Part 2 — open cloze · auxiliaries in passive contexts</span>
+                        <span class="session-arrow">→</span>
                     </a>
-                    <a href="cae_s3_w1_reading.html" class="card">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Reading part 5</span>
-                        </div>
-                        <div class="card-desc">Reading part 5</div>
-                        <div class="card-bottom"><span class="arrow-icon">→</span></div>
+                </li>
+                <li>
+                    <a href="cae_s3_w1_passive_constructions.html">
+                        <span class="strand uoe">UoE-3</span>
+                        <span class="session-desc">Part 3 — word formation · phrasal verbs: movement & direction</span>
+                        <span class="session-arrow">→</span>
                     </a>
-                    <a href="cae_s4_w1_reading.html" class="card">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Reading part 6</span>
-                        </div>
-                        <div class="card-desc">Reading part 6</div>
-                        <div class="card-bottom"><span class="arrow-icon">→</span></div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- ═══════════════════════════════════════════
+             WEEK 2 — Modal Verbs / Report / Part 7
+        ════════════════════════════════════════════ -->
+        <section class="week">
+            <div class="week-header">
+                <span class="week-number">Week 2</span>
+                <span class="week-title">Modal Verbs · Report · Part 7</span>
+            </div>
+            <hr class="week-rule">
+            <ul class="session-list">
+                <li>
+                    <a href="cae_s1_w2_modal_verbs.html">
+                        <span class="strand uoe">UoE-1</span>
+                        <span class="session-desc">Part 4 — transformation drills · modal meanings</span>
+                        <span class="session-arrow">→</span>
                     </a>
-                </div>
-            </section>
+                </li>
+                <li class="inactive">
+                    <span class="strand uoe">UoE-2</span>
+                    <span class="session-desc">Part 3 — word formation · Travel & Culture · phrasal verbs: change & development</span>
+                    <span class="session-arrow">→</span>
+                </li>
+                <li class="inactive">
+                    <span class="strand writing">Writing-1</span>
+                    <span class="session-desc">Report deconstruction · structure, headings, register</span>
+                    <span class="session-arrow">→</span>
+                </li>
+                <li class="inactive">
+                    <span class="strand reading">Reading-1</span>
+                    <span class="session-desc">Part 7 — first exposure · cohesion signals procedure</span>
+                    <span class="session-arrow">→</span>
+                </li>
+                <li class="inactive">
+                    <span class="strand reading">Reading-2</span>
+                    <span class="session-desc">Part 7 — second exposure · consolidation</span>
+                    <span class="session-arrow">→</span>
+                </li>
+                <li class="inactive">
+                    <span class="strand writing">Writing-2</span>
+                    <span class="session-desc">Timed report · festival · 220–250 words · The Chop</span>
+                    <span class="session-arrow">→</span>
+                </li>
+            </ul>
+        </section>
 
-            <!-- WEEK 2 -->
-            <section class="week-section theme-w2">
-                <h2 class="week-heading">Week 2 — Modal Verbs</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <a href="cae_s1_w2_modals.html" class="card">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + transformation drills</div>
-                        <div class="card-bottom"><span class="arrow-icon">-></span></div>
+        <!-- ═══════════════════════════════════════════
+             WEEK 3 — Reading & Listening intensive
+        ════════════════════════════════════════════ -->
+        <section class="week">
+            <div class="week-header">
+                <span class="week-number">Week 3</span>
+                <span class="week-title">Reading Parts 5 & 7 · Listening Parts 1 & 4</span>
+            </div>
+            <hr class="week-rule">
+            <ul class="session-list">
+                <li>
+                    <a href="https://docs.google.com/document/d/1hMvDK2ZYaiUjp4aHVoLDcezEp-vfXcDWzbbGB0m6Ub4/edit?usp=drive_link">
+                        <span class="strand reading">Reading-1</span>
+                        <span class="session-desc">Part 7 — gapped text</span>
+                        <span class="session-arrow">→</span>
                     </a>
-                    <a href="cae_s2_w2_modals.html" class="card">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Open cloze — modal forms and semi-modals</div>
-                        <div class="card-bottom"><span class="arrow-icon">-></span></div>
+                    
+                </li>
+                <li>
+                    <a href="https://docs.google.com/document/d/1hMvDK2ZYaiUjp4aHVoLDcezEp-vfXcDWzbbGB0m6Ub4/edit?usp=drive_link">
+                        <span class="strand reading">Reading-2</span>
+                        <span class="session-desc">Part 5 — multiple choice</span>
+                        <span class="session-arrow">→</span>
                     </a>
-                    <a href="cae_s3_w2_reading.html" class="card">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Reading part 5</span>
-                        </div>
-                        <div class="card-desc">Reading part 5</div>
-                        <div class="card-bottom"><span class="coming-soon">-></span></div>
+                    
+                </li>
+                <li>
+                    <a href="cae_listening_p1_w3_01.html">
+                        <span class="strand listening">Listening-1</span>
+                        <span class="session-desc">Part 1 — short extracts</span>
+                        <span class="session-arrow">→</span>
                     </a>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Writing</span>
-                        </div>
-                        <div class="card-desc">Writing: formal email / proposal</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                </div>
-            </section>
+                    
+                </li>
+                <li>
+                    <a href="...">
+                        <span class="strand reading">Reading-3</span>
+                        <span class="session-desc">Part 7 — gapped text</span>
+                        <span class="session-arrow">→</span>
+                    </a>
+                    
+                </li>
+                <li class="inactive">
+                    <a href="https://docs.google.com/document/d/1FFgUVJtmj0683aDpbABribYZ5KzMlC_YlF8A9ZUoRcc/edit?usp=sharing">
+                        <span class="strand reading">Reading-4</span>
+                        <span class="session-desc">Part 5 — multiple choice</span>
+                        <span class="session-arrow">→</span>
+                    </a>
+                </li>
+                <li class="inactive">
+                    <a href="">
+                        <span class="strand listening">Reading-5</span>
+                        <span class="session-desc">Part 5 — multiple choice</span>
+                        <span class="session-arrow">→</span>
+                    </a>
+                    
+                </li>
+                <li class="inactive">
+                    <a href="">
+                        <span class="strand listening">Listening-2</span>
+                        <span class="session-desc">Part 4 — multiple choice</span>
+                        <span class="session-arrow">→</span>
+                    </a>
+                    
+                </li>
+            </ul>
+        </section>
 
-            <!-- WEEK 3 -->
-            <section class="week-section theme-w3">
-                <h2 class="week-heading">Week 3 — Conditionals</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + transformation drills</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Open cloze — conjunctions and inverted forms</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Transformation drills + phrasal verbs: problems</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Writing</span>
-                        </div>
-                        <div class="card-desc">Writing: discursive essay</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                </div>
-            </section>
+    </main>
 
-            <!-- WEEK 4 -->
-            <section class="week-section theme-w4">
-                <h2 class="week-heading">Week 4 — Reported Speech & Reporting Verbs</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + transformation drills</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Open cloze — reporting verb patterns</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Part 3</span>
-                        </div>
-                        <div class="card-desc">Word formation + phrasal verbs: communication</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Writing</span>
-                        </div>
-                        <div class="card-desc">Writing: formal report / review</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                </div>
-            </section>
+    <footer>
+        AstraLingua &nbsp;·&nbsp; CAE Preparation &nbsp;·&nbsp; Jorge
+    </footer>
 
-            <!-- WEEK 5 -->
-            <section class="week-section theme-w5">
-                <h2 class="week-heading">Week 5 — Comparison Structures</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + transformation drills</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Open cloze — comparison particles and degree adverbs</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Part 1</span>
-                        </div>
-                        <div class="card-desc">MCQ cloze + phrasal verbs: work & effort</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Writing</span>
-                        </div>
-                        <div class="card-desc">Writing: essay / review</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- WEEK 6 -->
-            <section class="week-section theme-w6">
-                <h2 class="week-heading">Week 6 — Noun Phrases & Nominalisation</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 3</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + word formation</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Transformation drills — clausal to nominal</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Open cloze + phrasal verbs: thinking & understanding</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Writing</span>
-                        </div>
-                        <div class="card-desc">Writing: formal essay / proposal</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- WEEK 7 -->
-            <section class="week-section theme-w7">
-                <h2 class="week-heading">Week 7 — Discourse Markers & Cohesion</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + open cloze</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Transformation drills — connectors</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Part 1</span>
-                        </div>
-                        <div class="card-desc">MCQ cloze + phrasal verbs: argument & opinion</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Writing</span>
-                        </div>
-                        <div class="card-desc">Writing: discursive essay</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- WEEK 8 -->
-            <section class="week-section theme-w8">
-                <h2 class="week-heading">Week 8 — Verb Patterns</h2>
-                <hr class="week-divider">
-                <div class="card-grid">
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S1</span>
-                            <span class="uoe-badge">Part 4</span>
-                        </div>
-                        <div class="card-desc">Explicit instruction + transformation drills</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S2</span>
-                            <span class="uoe-badge">Part 2</span>
-                        </div>
-                        <div class="card-desc">Open cloze — verb + to-inf / -ing</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S3</span>
-                            <span class="uoe-badge">Part 1</span>
-                        </div>
-                        <div class="card-desc">MCQ cloze + phrasal verbs: mixed review</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                    <div class="card placeholder">
-                        <div class="card-top">
-                            <span class="session-label">S4</span>
-                            <span class="uoe-badge">Writing</span>
-                        </div>
-                        <div class="card-desc">Writing: formal review / proposal</div>
-                        <div class="card-bottom"><span class="coming-soon">Coming soon</span></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            AstraLingua · CAE Preparation · Jorge
-        </footer>
-
-    </div>
+</div>
 
 </body>
 </html>
