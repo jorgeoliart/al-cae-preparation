@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAE Listening — Part 4 | Week 3</title>
+
+  <!-- Expected audio file in the same folder: cae_listening_p4_w3_01.mp3 -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #080b10;
+      --surface:    #0f1520;
+      --surface2:   #161e2e;
+      --border:     rgba(255,255,255,0.07);
+      --accent:     #f59e0b;
+      --accent-dim: rgba(245,158,11,0.10);
+      --accent-mid: rgba(245,158,11,0.22);
+      --t2:         #2dd4bf;
+      --t2-dim:     rgba(45,212,191,0.10);
+      --t2-mid:     rgba(45,212,191,0.20);
+      --text:       #e8eaf0;
+      --muted:      #6b7a99;
+      --correct:    #34d399;
+      --correct-bg: rgba(52,211,153,0.10);
+      --wrong:      #f87171;
+      --wrong-bg:   rgba(248,113,113,0.10);
+      --radius:     12px;
+      --font-head:  'Syne', sans-serif;
+      --font-body:  'Instrument Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(245,158,11,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,158,11,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(140px); pointer-events: none; z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(245,158,11,0.06); top: -120px; right: -80px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(45,212,191,0.04); bottom: 8%; left: -80px; }
+
+    .page {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .site-label {
+      font-family: var(--font-head);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .site-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .page-title {
+      font-family: var(--font-head);
+      font-size: clamp(26px, 5vw, 38px); font-weight: 800;
+      color: var(--text); line-height: 1.1; margin-bottom: 6px;
+    }
+    .page-title span { color: var(--accent); }
+    .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* ── Instruction banner ── */
+    .instruction-banner {
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--radius);
+      padding: 13px 18px; font-size: 13.5px; color: #d4a845;
+      margin-bottom: 24px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .instruction-banner .icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── Audio card ── */
+    .audio-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 18px 22px; margin-bottom: 28px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .audio-label {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    }
+    .audio-card audio { width: 100%; accent-color: var(--accent); }
+    .audio-note { font-size: 12px; color: var(--muted); font-style: italic; }
+
+    /* ── Phase badge ── */
+    .phase-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 20px; padding: 4px 13px;
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      font-family: var(--font-head); letter-spacing: 0.05em;
+      margin-bottom: 20px; transition: all 0.3s;
+    }
+    .phase-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .phase-badge.locked { background: rgba(107,122,153,0.1); border-color: rgba(107,122,153,0.2); color: var(--muted); }
+    .phase-badge.locked .dot { animation: none; background: var(--muted); }
+
+    /* ════════════════════════════════════
+       EXAM-FORMAT TASK GRID
+    ════════════════════════════════════ */
+    .tasks-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .tasks-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .task-col.t2 {
+      border-left: 1px solid var(--border);
+    }
+
+    /* ── Task column header ── */
+    .task-col-header {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .task-col.t1 .task-col-header { background: var(--accent-dim); border-bottom-color: rgba(245,158,11,0.15); }
+    .task-col.t2 .task-col-header { background: var(--t2-dim); border-bottom-color: rgba(45,212,191,0.15); }
+
+    .task-num-label {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .task-col.t1 .task-num-label { color: var(--accent); }
+    .task-col.t2 .task-num-label { color: var(--t2); }
+
+    .task-instruction { font-size: 13px; color: var(--muted); line-height: 1.4; }
+    .task-instruction strong { color: var(--text); }
+
+    /* ── Options list ── */
+    .options-list {
+      padding: 14px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 5px;
+    }
+
+    .opt-row {
+      display: flex; align-items: baseline; gap: 9px;
+      font-size: 13.5px; padding: 1px 0;
+    }
+    .opt-letter {
+      font-family: var(--font-head); font-weight: 700; font-size: 12px;
+      min-width: 16px; flex-shrink: 0;
+    }
+    .task-col.t1 .opt-letter { color: var(--accent); }
+    .task-col.t2 .opt-letter { color: var(--t2); }
+    .opt-label-text { color: var(--muted); }
+
+    /* ── Speaker slots ── */
+    .speaker-slots {
+      padding: 14px 20px 18px;
+      display: flex; flex-direction: column; gap: 11px;
+    }
+
+    .speaker-row {
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .spk-meta {
+      display: flex; align-items: center; gap: 7px;
+      min-width: 94px; flex-shrink: 0;
+    }
+    .spk-q {
+      font-family: var(--font-head); font-weight: 800; font-size: 14px; color: var(--text);
+    }
+    .spk-label { font-size: 12px; color: var(--muted); font-style: italic; white-space: nowrap; }
+
+    /* Letter pick buttons */
+    .letter-pick { display: flex; gap: 4px; }
+    .lbtn {
+      width: 27px; height: 27px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      font-family: var(--font-head); font-weight: 700; font-size: 11px;
+      color: var(--muted); cursor: pointer; flex-shrink: 0;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .task-col.t1 .lbtn:hover { background: var(--accent-dim); border-color: rgba(245,158,11,0.4); color: var(--accent); }
+    .task-col.t2 .lbtn:hover { background: var(--t2-dim); border-color: rgba(45,212,191,0.4); color: var(--t2); }
+    .task-col.t1 .lbtn.selected { background: var(--accent-mid); border-color: rgba(245,158,11,0.6); color: var(--accent); }
+    .task-col.t2 .lbtn.selected { background: var(--t2-mid); border-color: rgba(45,212,191,0.6); color: var(--t2); }
+
+    .lbtn.locked { cursor: default; }
+    .task-col.t1 .lbtn.locked:hover { background: var(--surface2); border-color: var(--border); color: var(--muted); }
+    .task-col.t2 .lbtn.locked:hover { background: var(--surface2); border-color: var(--border); color: var(--muted); }
+    .task-col.t1 .lbtn.locked.selected:hover { background: var(--accent-mid); border-color: rgba(245,158,11,0.6); color: var(--accent); }
+    .task-col.t2 .lbtn.locked.selected:hover { background: var(--t2-mid); border-color: rgba(45,212,191,0.6); color: var(--t2); }
+
+    .lbtn.show-correct { background: var(--correct-bg) !important; border-color: rgba(52,211,153,0.5) !important; color: var(--correct) !important; }
+    .lbtn.show-wrong   { background: var(--wrong-bg) !important; border-color: rgba(248,113,113,0.5) !important; color: var(--wrong) !important; }
+
+    /* ════════════════════════════════════
+       REVEAL AREA
+    ════════════════════════════════════ */
+    .reveal-area { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+
+    .reveal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+
+    .reveal-card-header {
+      padding: 11px 18px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .reveal-card-title {
+      font-family: var(--font-head); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    }
+
+    .btn-reveal {
+      padding: 5px 14px; background: transparent;
+      border: 1px solid rgba(245,158,11,0.3); border-radius: 6px;
+      color: var(--accent); font-family: var(--font-head);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s; display: none;
+      align-items: center; gap: 6px;
+    }
+    .btn-reveal:hover { background: var(--accent-dim); }
+    .btn-reveal.visible { display: inline-flex; }
+    .btn-reveal.used    { display: none !important; }
+
+    .reveal-body {
+      display: none; padding: 16px 18px;
+      flex-direction: column; gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .reveal-body.visible { display: flex; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+    .reveal-body-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    @media (max-width: 580px) { .reveal-body-grid { grid-template-columns: 1fr; } }
+
+    .receipt-block {
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .receipt-block-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--correct); margin-bottom: 3px;
+    }
+    .receipt-answer {
+      font-size: 11.5px; font-weight: 600; margin-bottom: 5px;
+    }
+    .receipt-answer.t1 { color: var(--accent); }
+    .receipt-answer.t2 { color: var(--t2); }
+    .receipt-quote { color: #a7f3d0; font-style: italic; font-size: 13px; line-height: 1.4; }
+
+    .trap-block {
+      background: rgba(248,113,113,0.06);
+      border: 1px solid rgba(248,113,113,0.18);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .trap-block-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--wrong); margin-bottom: 3px;
+    }
+    .trap-text { color: #fca5a5; font-size: 13px; line-height: 1.45; }
+
+    /* ── Lock button ── */
+    .lock-row {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px; margin-bottom: 32px;
+    }
+    .btn-lock {
+      padding: 12px 34px; background: var(--accent); border: none;
+      border-radius: 9px; color: #000;
+      font-family: var(--font-head); font-size: 14px; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-lock:hover { opacity: 0.9; }
+    .btn-lock:active { transform: scale(0.98); }
+    .btn-lock:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-lock.hidden { display: none; }
+    .lock-note { font-size: 12.5px; color: var(--muted); text-align: center; }
+
+    /* ── Score card ── */
+    .score-card {
+      display: none; background: var(--surface);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 28px; margin-bottom: 32px;
+      flex-direction: column; align-items: center;
+      gap: 10px; text-align: center; animation: fadeIn 0.4s ease;
+    }
+    .score-card.visible { display: flex; }
+    .score-title {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+    }
+    .score-row { display: flex; gap: 36px; align-items: flex-end; }
+    .score-col { text-align: center; }
+    .score-col-label {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px;
+    }
+    .score-col.t1 .score-col-label { color: var(--accent); }
+    .score-col.t2 .score-col-label { color: var(--t2); }
+    .score-num {
+      font-family: var(--font-head); font-size: 46px; font-weight: 800; line-height: 1;
+    }
+    .score-col.t1 .score-num { color: var(--accent); }
+    .score-col.t2 .score-num { color: var(--t2); }
+    .score-denom { font-size: 18px; color: var(--muted); }
+    .score-total-line { font-family: var(--font-head); font-size: 13px; color: var(--muted); }
+    .score-msg { font-size: 13.5px; color: var(--muted); max-width: 460px; }
+
+    .page-footer {
+      margin-top: 48px; text-align: center;
+      font-size: 12px; color: rgba(107,122,153,0.45); letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 640px) {
+      .tasks-grid { grid-template-columns: 1fr; }
+      .task-col.t2 { border-left: none; border-top: 1px solid var(--border); }
+      .letter-pick { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+
+  <div class="site-label">AstraLingua &mdash; CAE Preparation</div>
+  <h1 class="page-title">Listening <span>Part 4</span></h1>
+  <p class="page-subtitle">Five speakers &nbsp;&middot;&nbsp; Two simultaneous tasks &nbsp;&middot;&nbsp; 10 marks total &nbsp;&middot;&nbsp; Week 3</p>
+
+  <div class="instruction-banner">
+    <span class="icon">🎧</span>
+    <span><strong>Read both option lists before the audio plays.</strong> For each speaker, select one answer from Task One <em>and</em> a separate answer from Task Two. Do not reveal answers until the teacher locks the session.</span>
+  </div>
+
+  <div class="audio-card">
+    <div class="audio-label">Audio</div>
+    <audio id="mainAudio" controls>
+      <source src="./cae_listening_p4_w3_01.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <div class="audio-note">File: cae_listening_p4_w3_01.mp3 — same folder as this HTML file.</div>
+  </div>
+
+  <div class="phase-badge" id="phaseBadge">
+    <span class="dot"></span>
+    <span id="phaseText">Phase 1 &mdash; Select your answers</span>
+  </div>
+
+  <!-- ══ EXAM-FORMAT TASK GRID ══ -->
+  <div class="tasks-wrapper">
+    <div class="tasks-grid">
+
+      <div class="task-col t1">
+        <div class="task-col-header">
+          <div class="task-num-label">Task One</div>
+          <div class="task-instruction">For questions <strong>21–25</strong>, choose from the list <strong>A–H</strong> each speaker's <strong>occupation</strong>.</div>
+        </div>
+        <div class="options-list" id="optListT1"></div>
+        <div class="speaker-slots" id="slotsT1"></div>
+      </div>
+
+      <div class="task-col t2">
+        <div class="task-col-header">
+          <div class="task-num-label">Task Two</div>
+          <div class="task-instruction">For questions <strong>26–30</strong>, choose from the list <strong>A–H</strong> each speaker's <strong>aim for the future</strong>.</div>
+        </div>
+        <div class="options-list" id="optListT2"></div>
+        <div class="speaker-slots" id="slotsT2"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="lock-row" id="lockRow">
+    <button class="btn-lock" id="btnLock" onclick="lockAnswers()" disabled>Lock answers &amp; begin review</button>
+    <span class="lock-note" id="lockNote">All 10 answers must be selected before locking.</span>
+  </div>
+
+  <div class="reveal-area" id="revealArea"></div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="score-title">Final Score</div>
+    <div class="score-row">
+      <div class="score-col t1">
+        <div class="score-col-label">Task One</div>
+        <div class="score-num" id="scoreT1"></div>
+      </div>
+      <div class="score-col t2">
+        <div class="score-col-label">Task Two</div>
+        <div class="score-num" id="scoreT2"></div>
+      </div>
+    </div>
+    <div class="score-total-line" id="scoreTotal"></div>
+    <div class="score-msg" id="scoreMsg"></div>
+  </div>
+
+  <div class="page-footer">AstraLingua &mdash; CAE Preparation &middot; Jorge &middot; 2026</div>
+</div>
+
+<script>
+  const T1_OPTS = [
+    { l:'A', text:'travel broadcaster' },
+    { l:'B', text:'hotel owner' },
+    { l:'C', text:'guide book publisher' },
+    { l:'D', text:'tourist board representative' },
+    { l:'E', text:'environmentalist' },
+    { l:'F', text:'railway executive' },
+    { l:'G', text:'manager of a tourist attraction' },
+    { l:'H', text:'local government official' },
+  ];
+  const T2_OPTS = [
+    { l:'A', text:'to increase the amount spent by clients' },
+    { l:'B', text:'to improve our circulation' },
+    { l:'C', text:'to revive country skills' },
+    { l:'D', text:'to raise standards overall' },
+    { l:'E', text:'to restore local transport networks' },
+    { l:'F', text:'to refurbish the rooms' },
+    { l:'G', text:'to attract a new type of client' },
+    { l:'H', text:'to expand tourist accommodation' },
+  ];
+  const LETTERS = ['A','B','C','D','E','F','G','H'];
+
+  const SPEAKERS = [
+    {
+      id:1,
+      t1:{ q:21, correct:7, receipt:'"I\'m not really concerned about the bed and breakfast sector" + "Reinstating the railway connection would get my vote."', trap:'F (railway executive) is a powerful Acoustic Copycat — railway dominates the speech, but the speaker is advocating for its restoration, not employed in that sector. Political register ("would get my vote") signals local government.' },
+      t2:{ q:26, correct:4, receipt:'"But what about transport? The railway line was removed twenty years ago… Reinstating the railway connection would get my vote."', trap:'H (expand tourist accommodation) tempts via the bed and breakfast mention, but this is explicitly dismissed. The stated concern is transport infrastructure.' }
+    },
+    {
+      id:2,
+      t1:{ q:22, correct:2, receipt:'"it\'s my job to try and include them in our publications."', trap:'D (tourist board representative) attracts via "export market" language, but publications are the defining clue. Tourist boards do not produce guidebooks.' },
+      t2:{ q:27, correct:3, receipt:'"Quality across the board, that\'s the way forward!"', trap:'F (to refurbish the rooms) is an Acoustic Copycat — accommodation problems are discussed at length, but the aim is sector-wide quality improvement, not renovation of specific rooms.' }
+    },
+    {
+      id:3,
+      t1:{ q:23, correct:3, receipt:'"One of our key tasks has always been to gather information from overseas markets and feed it back to local tourist organisations throughout the country."', trap:'G (manager of a tourist attraction) tempts from surface narrative, but this speaker has a national coordination role. A site manager would not describe feeding market data to local organisations.' },
+      t2:{ q:28, correct:6, receipt:'"we\'re thinking of marketing certain regions to the more mature, higher spending travellers… in order to extend the main tourist season."', trap:'A (increase amount spent by clients) is close — higher spending is mentioned — but the aim is targeting a new demographic, not extracting more from existing visitors.' }
+    },
+    {
+      id:4,
+      t1:{ q:24, correct:4, receipt:'"People fail to understand how difficult it is to reverse damage to our surroundings."', trap:'H (local government official) tempts given the policy framing, but the core concern is environmental harm. An environmentalist advocates; a local government official administers.' },
+      t2:{ q:29, correct:2, receipt:'"promoting traditional crafts and setting up visitor\'s centres to see these in action."', trap:'D (raise standards overall) attracts from the general tone, but traditional crafts maps directly onto C (revive country skills). D is already occupied by Speaker 2.' }
+    },
+    {
+      id:5,
+      t1:{ q:25, correct:6, receipt:'"redecorated the bedroom where Queen Elizabeth slept in 1570… restored the eighteenth-century kitchen… cooking demonstrations for schoolchildren."', trap:'No strong trap — the heritage site profile is unambiguous. A (travel broadcaster) might tempt a distracted listener but no broadcast function is referenced.' },
+      t2:{ q:30, correct:0, receipt:'"we really do need visitors to stay longer and spend more money."', trap:'F (to refurbish the rooms) is a strong Acoustic Copycat — rooms were redecorated and the kitchen restored, but these are completed past actions. The stated future aim is explicitly financial.' }
+    },
+  ];
+
+  let phase = 1;
+  const sel = {};
+  let revealedCount = 0, scoreT1 = 0, scoreT2 = 0;
+
+  function buildOptLists() {
+    const l1 = document.getElementById('optListT1');
+    const l2 = document.getElementById('optListT2');
+    T1_OPTS.forEach(o => { l1.innerHTML += `<div class="opt-row"><span class="opt-letter">${o.l}</span><span class="opt-label-text">${o.text}</span></div>`; });
+    T2_OPTS.forEach(o => { l2.innerHTML += `<div class="opt-row"><span class="opt-letter">${o.l}</span><span class="opt-label-text">${o.text}</span></div>`; });
+  }
+
+  function buildSlots() {
+    const s1 = document.getElementById('slotsT1');
+    const s2 = document.getElementById('slotsT2');
+    SPEAKERS.forEach(sp => {
+      ['t1','t2'].forEach(task => {
+        const qData = task === 't1' ? sp.t1 : sp.t2;
+        const container = task === 't1' ? s1 : s2;
+        let btns = '';
+        LETTERS.forEach((l,i) => { btns += `<button class="lbtn" id="lb-${sp.id}-${task}-${i}" onclick="pickLetter(${sp.id},'${task}',${i})">${l}</button>`; });
+        container.innerHTML += `
+          <div class="speaker-row">
+            <div class="spk-meta">
+              <span class="spk-q">${qData.q}</span>
+              <span class="spk-label">Speaker ${sp.id}</span>
+            </div>
+            <div class="letter-pick">${btns}</div>
+          </div>`;
+      });
+    });
+  }
+
+  function buildRevealCards() {
+    const area = document.getElementById('revealArea');
+    SPEAKERS.forEach(sp => {
+      const card = document.createElement('div');
+      card.className = 'reveal-card';
+      card.innerHTML = `
+        <div class="reveal-card-header">
+          <span class="reveal-card-title">Speaker ${sp.id} &mdash; Debrief</span>
+          <button class="btn-reveal" id="reveal-btn-${sp.id}" onclick="revealSpeaker(${sp.id})">&#9654; Reveal</button>
+        </div>
+        <div class="reveal-body" id="rb-${sp.id}">
+          <div class="reveal-body-grid">
+            <div class="receipt-block">
+              <div class="receipt-block-label">&#128205; Receipt &mdash; Task One</div>
+              <div class="receipt-answer t1">Q${sp.t1.q} &nbsp;&middot;&nbsp; ${T1_OPTS[sp.t1.correct].l} &mdash; ${T1_OPTS[sp.t1.correct].text}</div>
+              <div class="receipt-quote">${sp.t1.receipt}</div>
+            </div>
+            <div class="receipt-block">
+              <div class="receipt-block-label">&#128205; Receipt &mdash; Task Two</div>
+              <div class="receipt-answer t2">Q${sp.t2.q} &nbsp;&middot;&nbsp; ${T2_OPTS[sp.t2.correct].l} &mdash; ${T2_OPTS[sp.t2.correct].text}</div>
+              <div class="receipt-quote">${sp.t2.receipt}</div>
+            </div>
+            <div class="trap-block">
+              <div class="trap-block-label">&#9888; Distractor &mdash; Task One</div>
+              <div class="trap-text">${sp.t1.trap}</div>
+            </div>
+            <div class="trap-block">
+              <div class="trap-block-label">&#9888; Distractor &mdash; Task Two</div>
+              <div class="trap-text">${sp.t2.trap}</div>
+            </div>
+          </div>
+        </div>`;
+      area.appendChild(card);
+    });
+  }
+
+  function pickLetter(spId, task, idx) {
+    if (phase !== 1) return;
+    sel[`${spId}-${task}`] = idx;
+    LETTERS.forEach((_,i) => {
+      document.getElementById(`lb-${spId}-${task}-${i}`).classList.toggle('selected', i === idx);
+    });
+    updateLock();
+  }
+
+  function updateLock() {
+    const needed = SPEAKERS.length * 2;
+    const done = Object.keys(sel).length;
+    document.getElementById('btnLock').disabled = done < needed;
+    document.getElementById('lockNote').textContent =
+      done < needed ? `${needed - done} answer${needed-done>1?'s':''} still needed before locking.`
+                    : 'All answers selected — ready to lock.';
+  }
+
+  function lockAnswers() {
+    if (Object.keys(sel).length < SPEAKERS.length * 2) return;
+    phase = 2;
+    document.querySelectorAll('.lbtn').forEach(b => b.classList.add('locked'));
+    document.getElementById('btnLock').classList.add('hidden');
+    document.getElementById('lockNote').style.display = 'none';
+    const badge = document.getElementById('phaseBadge');
+    badge.classList.add('locked');
+    document.getElementById('phaseText').textContent = 'Phase 2 — Reveal speaker by speaker';
+    SPEAKERS.forEach(sp => document.getElementById(`reveal-btn-${sp.id}`).classList.add('visible'));
+    document.getElementById('revealArea').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function revealSpeaker(spId) {
+    const sp = SPEAKERS.find(s => s.id === spId);
+    ['t1','t2'].forEach(task => {
+      const userIdx = sel[`${spId}-${task}`];
+      const correctIdx = task === 't1' ? sp.t1.correct : sp.t2.correct;
+      const ok = userIdx === correctIdx;
+      if (task === 't1') { if (ok) scoreT1++; } else { if (ok) scoreT2++; }
+      LETTERS.forEach((_,i) => {
+        const btn = document.getElementById(`lb-${spId}-${task}-${i}`);
+        btn.classList.remove('selected');
+        if (i === correctIdx) btn.classList.add('show-correct');
+        else if (i === userIdx && !ok) btn.classList.add('show-wrong');
+      });
+    });
+    document.getElementById(`rb-${spId}`).classList.add('visible');
+    const revBtn = document.getElementById(`reveal-btn-${spId}`);
+    revBtn.classList.remove('visible');
+    revBtn.classList.add('used');
+    revealedCount++;
+    if (revealedCount === SPEAKERS.length) showScore();
+  }
+
+  function showScore() {
+    const card = document.getElementById('scoreCard');
+    card.classList.add('visible');
+    const total = scoreT1 + scoreT2;
+    document.getElementById('scoreT1').innerHTML = `${scoreT1}<span class="score-denom">/5</span>`;
+    document.getElementById('scoreT2').innerHTML = `${scoreT2}<span class="score-denom">/5</span>`;
+    document.getElementById('scoreTotal').textContent = `Total: ${total} / 10`;
+    const msgs = [
+      "Difficult first exposure to the dual-task format — entirely expected. The receipt and distractor analysis above is the work.",
+      "Several traps landed — normal at first exposure. Focus on the distractor panels, particularly any Acoustic Copycat items.",
+      "Solid first attempt. Check which task scored lower — that asymmetry is the diagnostic data for the next session.",
+      "Strong performance for a first exposure. Every wrong answer still needs a receipt audit before moving on.",
+      "Full marks on first exposure. Every answer supported by a precise Receipt."
+    ];
+    const tier = total <= 3 ? 0 : total <= 5 ? 1 : total <= 7 ? 2 : total <= 9 ? 3 : 4;
+    document.getElementById('scoreMsg').textContent = msgs[tier];
+    card.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+
+  buildOptLists();
+  buildSlots();
+  buildRevealCards();
+</script>
+</body>
+</html>
