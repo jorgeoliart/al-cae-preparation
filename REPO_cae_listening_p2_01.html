@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAE Listening — Part 2 | Museum Tour</title>
+
+  <!-- Expected audio file in the same folder: cae_listening_p2_01.mp3 -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #080b10;
+      --surface:    #0f1520;
+      --surface2:   #161e2e;
+      --border:     rgba(255,255,255,0.07);
+      --accent:     #f59e0b;
+      --accent-dim: rgba(245,158,11,0.10);
+      --accent-mid: rgba(245,158,11,0.22);
+      --text:       #e8eaf0;
+      --muted:      #6b7a99;
+      --correct:    #34d399;
+      --correct-bg: rgba(52,211,153,0.10);
+      --wrong:      #f87171;
+      --wrong-bg:   rgba(248,113,113,0.10);
+      --radius:     12px;
+      --font-head:  'Syne', sans-serif;
+      --font-body:  'Instrument Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(245,158,11,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,158,11,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(140px); pointer-events: none; z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(245,158,11,0.06); top: -120px; right: -80px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(245,158,11,0.03); bottom: 8%; left: -80px; }
+
+    .page {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .site-label {
+      font-family: var(--font-head);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .site-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .page-title {
+      font-family: var(--font-head);
+      font-size: clamp(26px, 5vw, 38px); font-weight: 800;
+      color: var(--text); line-height: 1.1; margin-bottom: 6px;
+    }
+    .page-title span { color: var(--accent); }
+    .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* ── Instruction banner ── */
+    .instruction-banner {
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--radius);
+      padding: 13px 18px; font-size: 13.5px; color: #d4a845;
+      margin-bottom: 24px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .instruction-banner .icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── Procedure card ── */
+    .procedure-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px; margin-bottom: 24px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .procedure-title {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 4px;
+    }
+    .procedure-step {
+      display: flex; gap: 12px; align-items: flex-start;
+      font-size: 13.5px; color: var(--muted);
+    }
+    .step-num {
+      font-family: var(--font-head); font-weight: 800; font-size: 12px;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 4px; padding: 1px 7px;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .procedure-step span { color: var(--text); }
+    .procedure-step strong { color: var(--accent); }
+
+    /* ── Audio card ── */
+    .audio-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 18px 22px; margin-bottom: 28px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .audio-label {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    }
+    .audio-card audio { width: 100%; accent-color: var(--accent); }
+    .audio-note { font-size: 12px; color: var(--muted); font-style: italic; }
+
+    /* ── Phase badge ── */
+    .phase-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 20px; padding: 4px 13px;
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      font-family: var(--font-head); letter-spacing: 0.05em;
+      margin-bottom: 20px; transition: all 0.3s;
+    }
+    .phase-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .phase-badge.locked { background: rgba(107,122,153,0.1); border-color: rgba(107,122,153,0.2); color: var(--muted); }
+    .phase-badge.locked .dot { animation: none; background: var(--muted); }
+
+    /* ── Topic header ── */
+    .topic-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden; margin-bottom: 16px;
+    }
+    .topic-header-inner {
+      padding: 14px 22px;
+      background: var(--accent-dim);
+      border-bottom: 1px solid rgba(245,158,11,0.15);
+    }
+    .topic-title {
+      font-family: var(--font-head); font-size: 14px; font-weight: 800;
+      color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .topic-desc { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Questions list ── */
+    .questions-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden; margin-bottom: 28px;
+    }
+
+    .q-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .q-item:last-child { border-bottom: none; }
+
+    .q-main {
+      padding: 16px 22px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+
+    .q-num {
+      font-family: var(--font-head); font-weight: 800; font-size: 13px;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 6px; padding: 3px 9px;
+      flex-shrink: 0; margin-top: 2px;
+      min-width: 36px; text-align: center;
+    }
+
+    .q-sentence {
+      font-size: 14.5px; color: var(--text); line-height: 1.65; flex: 1;
+    }
+
+    /* Gap slot */
+    .gap-slot {
+      display: inline-block;
+      min-width: 110px; height: 22px;
+      background: var(--accent-dim);
+      border-bottom: 2px solid var(--accent-mid);
+      border-radius: 3px; margin: 0 4px;
+      vertical-align: middle;
+      transition: all 0.3s;
+    }
+    .gap-slot.revealed {
+      background: var(--correct-bg);
+      border-bottom-color: rgba(52,211,153,0.5);
+      padding: 0 8px; height: auto; min-height: 22px;
+      display: inline-flex; align-items: center;
+    }
+    .gap-answer {
+      font-family: var(--font-head); font-weight: 700;
+      font-size: 13.5px; color: var(--correct);
+      white-space: nowrap;
+    }
+
+    /* Double gap sentence */
+    .gap-slot.gap-double {
+      min-width: 90px;
+    }
+
+    /* ── Reveal panel ── */
+    .q-reveal {
+      display: none; padding: 0 22px 16px 70px;
+      flex-direction: column; gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .q-reveal.visible { display: flex; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+
+    .receipt-block {
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .receipt-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--correct); margin-bottom: 4px;
+    }
+    .receipt-quote { color: #a7f3d0; font-style: italic; font-size: 13px; line-height: 1.4; }
+
+    .grammar-block {
+      background: rgba(245,158,11,0.06);
+      border: 1px solid rgba(245,158,11,0.15);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .grammar-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 4px;
+    }
+    .grammar-text { font-size: 13px; color: #fcd34d; line-height: 1.45; }
+
+    .trap-block {
+      background: rgba(248,113,113,0.06);
+      border: 1px solid rgba(248,113,113,0.18);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .trap-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--wrong); margin-bottom: 4px;
+    }
+    .trap-text { color: #fca5a5; font-size: 13px; line-height: 1.45; }
+
+    /* ── Reveal button ── */
+    .btn-reveal-q {
+      align-self: flex-start;
+      margin: 0 22px 14px 70px;
+      padding: 5px 14px; background: transparent;
+      border: 1px solid rgba(245,158,11,0.3); border-radius: 6px;
+      color: var(--accent); font-family: var(--font-head);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s;
+      display: none; align-items: center; gap: 6px;
+    }
+    .btn-reveal-q:hover { background: var(--accent-dim); }
+    .btn-reveal-q.visible { display: inline-flex; }
+    .btn-reveal-q.used    { display: none !important; }
+
+    /* ── Lock button ── */
+    .lock-row {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px; margin-bottom: 32px;
+    }
+    .btn-lock {
+      padding: 12px 34px; background: var(--accent); border: none;
+      border-radius: 9px; color: #000;
+      font-family: var(--font-head); font-size: 14px; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-lock:hover { opacity: 0.9; }
+    .btn-lock:active { transform: scale(0.98); }
+    .btn-lock.hidden { display: none; }
+    .lock-note { font-size: 12.5px; color: var(--muted); text-align: center; }
+
+    /* ── Progress bar ── */
+    .progress-row {
+      display: none; flex-direction: column; gap: 6px; margin-bottom: 20px;
+    }
+    .progress-row.visible { display: flex; }
+    .progress-meta {
+      display: flex; justify-content: space-between;
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    }
+    .progress-meta span:last-child { color: var(--accent); }
+    .progress-track { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+
+    /* ── Final card ── */
+    .final-card {
+      display: none; background: var(--surface);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px 28px; margin-top: 16px;
+      flex-direction: column; gap: 14px;
+      animation: fadeIn 0.4s ease;
+    }
+    .final-card.visible { display: flex; }
+    .final-title {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    }
+    .final-note { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+    .final-note strong { color: var(--text); }
+
+    /* ── Trap summary ── */
+    .trap-summary {
+      display: none; background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px; margin-top: 16px;
+      flex-direction: column; gap: 10px;
+      animation: fadeIn 0.4s ease;
+    }
+    .trap-summary.visible { display: flex; }
+    .trap-summary-title {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    }
+    .trap-summary-item {
+      display: flex; gap: 10px; font-size: 13px; color: var(--muted);
+      padding: 8px 12px; background: var(--surface2); border-radius: 7px;
+    }
+    .trap-q {
+      font-family: var(--font-head); font-weight: 700; font-size: 12px;
+      color: var(--accent); min-width: 28px; flex-shrink: 0;
+    }
+
+    .page-footer {
+      margin-top: 48px; text-align: center;
+      font-size: 12px; color: rgba(107,122,153,0.45); letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+
+  <div class="site-label">AstraLingua &mdash; CAE Preparation</div>
+  <h1 class="page-title">Listening <span>Part 2</span></h1>
+  <p class="page-subtitle">Sentence completion &nbsp;&middot;&nbsp; 8 questions &nbsp;&middot;&nbsp; Exact words from the audio &nbsp;&middot;&nbsp; First exposure</p>
+
+  <div class="instruction-banner">
+    <span class="icon">🎧</span>
+    <span><strong>Write your answers on paper while the audio plays.</strong> Read all sentences before the first listen — each gap tells you what grammatical category to listen for. The sentence frame is your instruction.</span>
+  </div>
+
+  <!-- Procedure -->
+  <div class="procedure-card">
+    <div class="procedure-title">Pre-listen protocol</div>
+    <div class="procedure-step">
+      <span class="step-num">1</span>
+      <span>Read all 8 sentences. For each gap ask: <strong>what part of speech is missing?</strong> Noun, adjective, proper noun, noun phrase?</span>
+    </div>
+    <div class="procedure-step">
+      <span class="step-num">2</span>
+      <span>Mark Q9 — it has <strong>two gaps</strong>. Both words are required. Missing one loses the mark.</span>
+    </div>
+    <div class="procedure-step">
+      <span class="step-num">3</span>
+      <span>Write the <strong>exact word(s) heard</strong>. No paraphrasing, no synonyms. Spelling counts.</span>
+    </div>
+    <div class="procedure-step">
+      <span class="step-num">4</span>
+      <span>After both listens: check each answer fits the <strong>grammar of the sentence frame</strong> before the reveal.</span>
+    </div>
+  </div>
+
+  <!-- Audio -->
+  <div class="audio-card">
+    <div class="audio-label">Audio &nbsp;&mdash;&nbsp; Museum Tour</div>
+    <audio id="mainAudio" controls>
+      <source src="./REPO_cae_listening_p2_01.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <div class="audio-note">File: cae_listening_p2_01.mp3 — same folder as this HTML file. Two plays, no pausing.</div>
+  </div>
+
+  <!-- Phase badge -->
+  <div class="phase-badge" id="phaseBadge">
+    <span class="dot"></span>
+    <span id="phaseText">Phase 1 &mdash; Listen and write on paper</span>
+  </div>
+
+  <!-- Lock -->
+  <div class="lock-row" id="lockRow">
+    <button class="btn-lock" id="btnLock" onclick="beginReview()">Begin answer review</button>
+    <span class="lock-note" id="lockNote">Click when both listens are complete and all answers are written on paper.</span>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-row" id="progressRow">
+    <div class="progress-meta">
+      <span>Questions revealed</span>
+      <span id="progressLabel">0 / 8</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- Topic header -->
+  <div class="topic-header">
+    <div class="topic-header-inner">
+      <div class="topic-title">Museum Tour</div>
+      <div class="topic-desc">You will hear a guide taking a group of visitors around a museum.</div>
+    </div>
+  </div>
+
+  <!-- Questions -->
+  <div class="questions-list" id="questionsList"></div>
+
+  <!-- Final -->
+  <div class="final-card" id="finalCard">
+    <div class="final-title">Session complete</div>
+    <div class="final-note">
+      Check your paper answers against the receipts above.<br>
+      <strong>Spelling errors cost the mark at CAE.</strong> Check exact form — capitalisation matters for proper nouns (Q10: <em>Let's Interact</em>).<br>
+      For any wrong answer, name the failure type before closing: <strong>wrong word extracted / wrong word class / incomplete phrase / mishearing.</strong>
+    </div>
+  </div>
+
+  <div class="trap-summary" id="trapSummary">
+    <div class="trap-summary-title">&#9888; Active traps in this set</div>
+    <div class="trap-summary-item">
+      <span class="trap-q">Q8</span>
+      <span><strong>Wrong element extracted:</strong> the audio says "top five exhibitions of natural science" — the frame's superlative idea is already encoded. Write <em>natural science</em>, not <em>top five</em>.</span>
+    </div>
+    <div class="trap-summary-item">
+      <span class="trap-q">Q9</span>
+      <span><strong>Instruction blindness — double gap:</strong> the frame shows two blanks. Both <em>butterflies</em> and <em>birds</em> are required. One word alone does not receive the mark.</span>
+    </div>
+    <div class="trap-summary-item">
+      <span class="trap-q">Q12</span>
+      <span><strong>Wrong noun phrase extracted:</strong> "million-pound refit" is prominent in the audio but answers a different question. The frame — "the museum's ___ needs modernising" — requires <em>central heating</em>.</span>
+    </div>
+    <div class="trap-summary-item">
+      <span class="trap-q">Q13</span>
+      <span><strong>Wrong word class:</strong> the audio says "quite an intimidating sight" — the frame asks for the word the guide <em>uses to describe the effect</em>. That word is the adjective <em>intimidating</em>, not the noun <em>sight</em>.</span>
+    </div>
+  </div>
+
+  <div class="page-footer">AstraLingua &mdash; CAE Preparation &middot; Jorge &middot; 2026</div>
+</div>
+
+<script>
+  const QUESTIONS = [
+    {
+      num: 7,
+      before: 'This museum houses objects collected by the',
+      after: 'based in the city.',
+      answer: 'Cultural Society',
+      pos: 'proper noun phrase',
+      receipt: '"as a home for the collections built up over the years by the local Cultural Society."',
+      grammar: 'The frame predicts a proper noun phrase — the name of an organisation. Both words are needed: "Society" alone is too vague; "Cultural" alone is incomplete. Check capitalisation.',
+      trap: null
+    },
+    {
+      num: 8,
+      before: 'It has one of the country\'s best galleries containing',
+      after: 'exhibits.',
+      answer: 'natural science',
+      pos: 'noun phrase (modifier)',
+      receipt: '"it also has one of Britain\'s top five exhibitions of natural science."',
+      grammar: 'The frame already encodes the superlative idea ("best galleries") — extract only the content noun phrase. "Top five" describes ranking, not the type of exhibit. The answer is the noun modifier: <em>natural science</em>.',
+      trap: '"top five" — prominent evaluative phrase in the audio that students may write instead of the content noun phrase. The frame\'s grammar makes clear only a noun modifier fits: "galleries containing ___ exhibits."'
+    },
+    {
+      num: 9,
+      before: 'The museum\'s displays of',
+      after: 'are closed to visitors at present.',
+      answer: 'butterflies / birds',
+      pos: 'two plural nouns — double gap',
+      receipt: '"display cases full of butterflies, and many others full of birds."',
+      grammar: 'The frame shows two gaps joined by "and" — both words are mandatory. This is the only double-gap question in the set. Instruction blindness here (reading "displays of ___ and ___" as a single gap) loses the mark entirely.',
+      trap: 'Double gap instruction blindness — students who do not read the frame carefully write only one word. Both <em>butterflies</em> and <em>birds</em> are required.',
+      isDouble: true
+    },
+    {
+      num: 10,
+      before: 'The section called',
+      after: 'is popular with young people.',
+      answer: 'Let\'s Interact',
+      pos: 'proper noun — section name',
+      receipt: '"It\'s called \'Let\'s Interact\'."',
+      grammar: 'The frame predicts a proper noun — the name of a section. Exact form required: capitalisation and apostrophe. The surrounding description of noise and children is a Narrative Trap — the question asks for the name, not the description.',
+      trap: 'Narrative Trap — students may focus on "there\'s more noise than silence" as a description of the section and fail to extract the actual name. The receipt is the name itself: <em>Let\'s Interact</em>.'
+    },
+    {
+      num: 11,
+      before: 'The picture galleries contain works on various themes by',
+      after: '.',
+      answer: 'German artists',
+      pos: 'noun phrase',
+      receipt: '"boast a fine collection of drawings, prints and woodcuts by German artists."',
+      grammar: 'The frame — "works by ___" — predicts a noun phrase identifying the creators. "Drawings, prints and woodcuts" identifies the medium, not the artists. Extract the agent noun phrase.',
+      trap: null
+    },
+    {
+      num: 12,
+      before: 'The museum\'s',
+      after: 'needs modernising.',
+      answer: 'central heating',
+      pos: 'noun phrase',
+      receipt: '"the central heating needs a million-pound refit."',
+      grammar: 'The frame — "the museum\'s ___ needs modernising" — is a paraphrase of "needs a refit." The subject of that paraphrase is <em>central heating</em>, not the refit itself. Extract the noun phrase that logically completes "the museum\'s ___."',
+      trap: '"million-pound refit" — the most memorable phrase in that sentence, but it answers the wrong slot. The frame requires the thing that needs work, not the description of the work needed.'
+    },
+    {
+      num: 13,
+      before: 'The guide uses the word',
+      after: 'to describe the Rutland Dinosaur\'s effect on people.',
+      answer: 'intimidating',
+      pos: 'adjective',
+      receipt: '"quite an intimidating sight."',
+      grammar: 'The frame asks for a specific word used to describe an effect. "Sight" is the noun — it describes what the dinosaur is, not its effect. "Intimidating" is the adjective describing the effect on the viewer. Wrong word class = wrong answer.',
+      trap: '"sight" — the final noun in the phrase "quite an intimidating sight." Students who write the noun rather than the adjective lose the mark. The frame\'s grammar makes the required class explicit: "the guide uses the word ___ to describe the effect."'
+    },
+    {
+      num: 14,
+      before: 'Polystyrene was used to reconstruct most of the Rutland Dinosaur\'s',
+      after: '.',
+      answer: 'tail',
+      pos: 'singular noun (body part)',
+      receipt: '"the rest of the tail is polystyrene."',
+      grammar: 'The frame predicts a body part noun. Note the logic inversion in the audio: "the rest of the tail is polystyrene" — meaning most of the tail was reconstructed artificially. Low trap risk — clean extraction once the sentence is parsed correctly.',
+      trap: null
+    }
+  ];
+
+  let phase = 1;
+  let revealedCount = 0;
+  const total = QUESTIONS.length;
+
+  function buildQuestions() {
+    const list = document.getElementById('questionsList');
+    QUESTIONS.forEach(q => {
+      const item = document.createElement('div');
+      item.className = 'q-item';
+      item.id = `qi-${q.num}`;
+
+      // Sentence with gap(s)
+      let sentenceHTML = '';
+      if (q.isDouble) {
+        sentenceHTML = `${q.before} <span class="gap-slot gap-double" id="gap-${q.num}-a"></span> and <span class="gap-slot gap-double" id="gap-${q.num}-b"></span> ${q.after}`;
+      } else {
+        sentenceHTML = `${q.before} <span class="gap-slot" id="gap-${q.num}"></span> ${q.after}`;
+      }
+
+      const trapHTML = q.trap
+        ? `<div class="trap-block"><div class="trap-label">&#9888; Trap — ${q.num === 9 ? 'Instruction blindness' : q.num === 8 || q.num === 12 ? 'Wrong element extracted' : q.num === 13 ? 'Wrong word class' : 'Acoustic Copycat / Narrative Trap'}</div><div class="trap-text">${q.trap}</div></div>`
+        : '';
+
+      item.innerHTML = `
+        <div class="q-main">
+          <span class="q-num">${q.num}</span>
+          <span class="q-sentence">${sentenceHTML}</span>
+        </div>
+        <button class="btn-reveal-q" id="revbtn-${q.num}" onclick="revealQ(${q.num})">&#9654; Reveal Q${q.num}</button>
+        <div class="q-reveal" id="qr-${q.num}">
+          <div class="receipt-block">
+            <div class="receipt-label">&#128205; The Receipt</div>
+            <div class="receipt-quote">${q.receipt}</div>
+          </div>
+          <div class="grammar-block">
+            <div class="grammar-label">&#9654; Gap analysis &mdash; ${q.pos}</div>
+            <div class="grammar-text">${q.grammar}</div>
+          </div>
+          ${trapHTML}
+        </div>`;
+
+      list.appendChild(item);
+    });
+  }
+
+  function beginReview() {
+    phase = 2;
+    document.getElementById('btnLock').classList.add('hidden');
+    document.getElementById('lockNote').style.display = 'none';
+    const badge = document.getElementById('phaseBadge');
+    badge.classList.add('locked');
+    document.getElementById('phaseText').textContent = 'Phase 2 — Reveal question by question';
+    document.getElementById('progressRow').classList.add('visible');
+    QUESTIONS.forEach(q => {
+      document.getElementById(`revbtn-${q.num}`).classList.add('visible');
+    });
+    updateProgress();
+    document.getElementById('questionsList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function revealQ(num) {
+    const q = QUESTIONS.find(x => x.num === num);
+
+    if (q.isDouble) {
+      const parts = q.answer.split(' / ');
+      const gapA = document.getElementById(`gap-${num}-a`);
+      const gapB = document.getElementById(`gap-${num}-b`);
+      gapA.classList.add('revealed');
+      gapB.classList.add('revealed');
+      gapA.innerHTML = `<span class="gap-answer">${parts[0]}</span>`;
+      gapB.innerHTML = `<span class="gap-answer">${parts[1]}</span>`;
+    } else {
+      const gap = document.getElementById(`gap-${num}`);
+      gap.classList.add('revealed');
+      gap.innerHTML = `<span class="gap-answer">${q.answer}</span>`;
+    }
+
+    document.getElementById(`qr-${num}`).classList.add('visible');
+    const btn = document.getElementById(`revbtn-${num}`);
+    btn.classList.remove('visible');
+    btn.classList.add('used');
+
+    revealedCount++;
+    updateProgress();
+    if (revealedCount === total) showFinal();
+  }
+
+  function updateProgress() {
+    document.getElementById('progressLabel').textContent = `${revealedCount} / ${total}`;
+    document.getElementById('progressFill').style.width = `${(revealedCount / total) * 100}%`;
+  }
+
+  function showFinal() {
+    document.getElementById('finalCard').classList.add('visible');
+    document.getElementById('trapSummary').classList.add('visible');
+    document.getElementById('finalCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  buildQuestions();
+</script>
+</body>
+</html>

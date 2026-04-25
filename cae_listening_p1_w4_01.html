@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAE Listening — Part 1 | Consolidation</title>
+
+  <!-- Expected audio file in the same folder: cae_listening_p1_02.mp3 -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #080b10;
+      --surface:    #0f1520;
+      --surface2:   #161e2e;
+      --border:     rgba(255,255,255,0.07);
+      --accent:     #f59e0b;
+      --accent-dim: rgba(245,158,11,0.10);
+      --accent-mid: rgba(245,158,11,0.22);
+      --text:       #e8eaf0;
+      --muted:      #6b7a99;
+      --correct:    #34d399;
+      --correct-bg: rgba(52,211,153,0.10);
+      --wrong:      #f87171;
+      --wrong-bg:   rgba(248,113,113,0.10);
+      --radius:     12px;
+      --font-head:  'Syne', sans-serif;
+      --font-body:  'Instrument Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(245,158,11,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,158,11,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(130px); pointer-events: none; z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(245,158,11,0.07); top: -120px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(245,158,11,0.04); bottom: 10%; left: -80px; }
+
+    .page {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .site-label {
+      font-family: var(--font-head);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .site-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .page-title {
+      font-family: var(--font-head);
+      font-size: clamp(28px, 5vw, 40px); font-weight: 800;
+      color: var(--text); line-height: 1.1; margin-bottom: 6px;
+    }
+    .page-title span { color: var(--accent); }
+    .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+
+    /* ── Instruction banner ── */
+    .instruction-banner {
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--radius);
+      padding: 14px 18px; font-size: 13.5px; color: #d4a845;
+      margin-bottom: 28px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .instruction-banner .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Audio card ── */
+    .audio-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px 22px; margin-bottom: 32px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .audio-label {
+      font-family: var(--font-head); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    }
+    .audio-card audio { width: 100%; accent-color: var(--accent); border-radius: 8px; }
+    .audio-note { font-size: 12px; color: var(--muted); font-style: italic; }
+
+    /* ── Phase badge ── */
+    .phase-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      margin-bottom: 24px;
+      font-family: var(--font-head); letter-spacing: 0.05em;
+      transition: background 0.3s;
+    }
+    .phase-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .phase-badge.locked { background: rgba(107,122,153,0.1); border-color: rgba(107,122,153,0.2); color: var(--muted); }
+    .phase-badge.locked .dot { animation: none; background: var(--muted); }
+
+    /* ── Extract cards ── */
+    .extract {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden; margin-bottom: 20px;
+    }
+
+    .extract-header {
+      padding: 14px 22px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .extract-number {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 6px; padding: 3px 9px; white-space: nowrap;
+    }
+    .extract-context { font-size: 13.5px; color: var(--muted); font-style: italic; }
+
+    .questions-block {
+      padding: 22px; display: flex; flex-direction: column; gap: 28px;
+    }
+
+    /* ── Question item ── */
+    .question-item {
+      border-left: 3px solid var(--border);
+      padding-left: 18px; transition: border-color 0.3s;
+    }
+    .question-item.revealed-correct { border-color: var(--correct); }
+    .question-item.revealed-wrong   { border-color: var(--wrong); }
+
+    .question-number {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .question-text {
+      font-size: 15px; font-weight: 600; color: var(--text);
+      margin-bottom: 14px; line-height: 1.4;
+    }
+
+    /* ── Options ── */
+    .options { display: flex; flex-direction: column; gap: 8px; }
+
+    .option-label {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .option-label:hover { background: rgba(255,255,255,0.03); border-color: rgba(245,158,11,0.2); }
+    .option-label input[type="radio"] { display: none; }
+
+    .option-letter {
+      font-family: var(--font-head); font-weight: 700; font-size: 12px;
+      color: var(--muted); min-width: 20px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface2); border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .option-text { font-size: 14px; color: var(--text); line-height: 1.45; }
+
+    .option-label.selected { background: var(--accent-dim); border-color: rgba(245,158,11,0.35); }
+    .option-label.selected .option-letter { background: var(--accent); color: #000; }
+
+    .option-label.locked { cursor: default; }
+    .option-label.locked:hover { background: transparent; border-color: var(--border); }
+    .option-label.locked.selected:hover { background: var(--accent-dim); border-color: rgba(245,158,11,0.35); }
+
+    .option-label.show-correct { background: var(--correct-bg); border-color: rgba(52,211,153,0.35); }
+    .option-label.show-correct .option-letter { background: var(--correct); color: #000; }
+    .option-label.show-wrong   { background: var(--wrong-bg); border-color: rgba(248,113,113,0.35); }
+    .option-label.show-wrong .option-letter   { background: var(--wrong); color: #000; }
+
+    /* ── Reveal panel ── */
+    .reveal-panel {
+      margin-top: 14px; display: none;
+      flex-direction: column; gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .reveal-panel.visible { display: flex; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+    .receipt-block {
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .receipt-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--correct); margin-bottom: 4px;
+    }
+    .receipt-quote { color: #a7f3d0; font-style: italic; font-size: 14px; line-height: 1.4; }
+
+    .trap-block {
+      background: rgba(248,113,113,0.06);
+      border: 1px solid rgba(248,113,113,0.18);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .trap-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--wrong); margin-bottom: 4px;
+    }
+    .trap-text { color: #fca5a5; font-size: 13px; line-height: 1.45; }
+
+    /* ── Reveal button ── */
+    .btn-reveal {
+      align-self: flex-start; margin-top: 10px;
+      padding: 7px 16px; background: transparent;
+      border: 1px solid rgba(245,158,11,0.3); border-radius: 7px;
+      color: var(--accent); font-family: var(--font-head);
+      font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: none; align-items: center; gap: 7px;
+    }
+    .btn-reveal:hover { background: var(--accent-dim); border-color: rgba(245,158,11,0.5); }
+    .btn-reveal.visible { display: inline-flex; }
+    .btn-reveal.used    { display: none !important; }
+
+    /* ── Lock button ── */
+    .lock-row {
+      margin-top: 36px; display: flex;
+      flex-direction: column; align-items: center; gap: 10px;
+    }
+    .btn-lock {
+      padding: 13px 36px; background: var(--accent); border: none;
+      border-radius: 9px; color: #000;
+      font-family: var(--font-head); font-size: 14px; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-lock:hover { opacity: 0.9; }
+    .btn-lock:active { transform: scale(0.98); }
+    .btn-lock:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-lock.hidden { display: none; }
+    .lock-note { font-size: 12.5px; color: var(--muted); text-align: center; }
+
+    /* ── Score card ── */
+    .score-card {
+      display: none; background: var(--surface);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 28px; margin-top: 36px;
+      flex-direction: column; align-items: center;
+      gap: 8px; text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+    .score-card.visible { display: flex; }
+    .score-title {
+      font-family: var(--font-head); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+    }
+    .score-number {
+      font-family: var(--font-head); font-size: 52px; font-weight: 800;
+      color: var(--accent); line-height: 1;
+    }
+    .score-denom { font-size: 22px; color: var(--muted); }
+    .score-message { font-size: 14px; color: var(--muted); max-width: 420px; }
+
+    .page-footer {
+      margin-top: 60px; text-align: center;
+      font-size: 12px; color: rgba(107,122,153,0.5); letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 520px) {
+      .extract-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+
+  <div class="site-label">AstraLingua &mdash; CAE Preparation</div>
+  <h1 class="page-title">Listening <span>Part 1</span></h1>
+  <p class="page-subtitle">Three extracts &mdash; two questions each &mdash; 6 marks total &middot; Consolidation</p>
+
+  <div class="instruction-banner">
+    <span class="icon">🎧</span>
+    <span><strong>Pre-listen protocol — no prompting.</strong> Read all questions and annotate each one independently before the audio plays. Select your answers. Do not reveal until the teacher locks the session.</span>
+  </div>
+
+  <div class="audio-card">
+    <div class="audio-label">Audio</div>
+    <audio id="mainAudio" controls>
+      <source src="./REPO_cae_listening_p1_01.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <div class="audio-note">File: cae_listening_p1_02.mp3 — same folder as this HTML file.</div>
+  </div>
+
+  <div class="phase-badge" id="phaseBadge">
+    <span class="dot"></span>
+    <span id="phaseText">Phase 1 &mdash; Select your answers</span>
+  </div>
+
+  <div id="extractsContainer"></div>
+
+  <div class="lock-row" id="lockRow">
+    <button class="btn-lock" id="btnLock" onclick="lockAnswers()" disabled>Lock answers &amp; begin review</button>
+    <span class="lock-note" id="lockNote">All 6 answers must be selected before locking.</span>
+  </div>
+
+  <div class="score-card" id="scoreCard">
+    <div class="score-title">Final Score</div>
+    <div class="score-number" id="scoreNum"></div>
+    <div class="score-message" id="scoreMsg"></div>
+  </div>
+
+  <div class="page-footer">AstraLingua &mdash; CAE Preparation &middot; Jorge &middot; 2026</div>
+</div>
+
+<script>
+  const DATA = [
+    {
+      number: 1,
+      context: 'You overhear two friends, John and Diane, discussing holiday plans.',
+      questions: [
+        {
+          id: 1,
+          text: 'John thinks Diane\'s indecision about the holiday is',
+          options: [
+            'unreasonable in view of her financial position',
+            'surprising since her holiday is well overdue',
+            'understandable given how much money is involved'
+          ],
+          correct: 0,
+          receipt: '"I know it may seem extravagant, but you told me you\'d just been given promotion and a rise, so that can\'t be an issue, surely."',
+          trap: 'C is a Narrative Trap — money is central to the exchange, but John\'s point is that it is not a valid objection given her recent rise. He is calling her hesitation unreasonable, not empathising with it. B has no receipt — how overdue her holiday is is never mentioned.'
+        },
+        {
+          id: 2,
+          text: 'How does Diane feel about the prospect of a break from work?',
+          options: [
+            'nervous that her boss will regret promoting her',
+            'worried that staff will take advantage of her absence',
+            'doubtful whether she can clear her backlog of work in time'
+          ],
+          correct: 1,
+          receipt: '"one of my colleagues would probably be only too glad to use my absence to further his own position."',
+          trap: 'A is blocked — her boss is mentioned positively ("she knows you\'re a good worker") and there is no anxiety about the promotion itself. C tempts via the backlog and the unorganised office — but these are the context for her worry, not the worry itself. The substantive fear Diane articulates is the colleague exploiting her absence: B.'
+        }
+      ]
+    },
+    {
+      number: 2,
+      context: 'You overhear two friends discussing a new film.',
+      questions: [
+        {
+          id: 3,
+          text: 'Why has the film been refused a certificate allowing it to be shown to children?',
+          options: [
+            'The soundtrack makes it too frightening in places.',
+            'The plot is too psychologically complex.',
+            'The opening images are too violent.'
+          ],
+          correct: 0,
+          receipt: '"they couldn\'t take the little bursts of rather tense music — makes your hair stand on end."',
+          trap: 'C is a strong Narrative Trap — the aggression in the opening minutes is vivid and mentioned first, but the man immediately follows with "That didn\'t seem to worry the authorities." It bothered reviewers, not the certificate board. B is a separate concern about suitability for children, not the stated grounds for refusal. A is the only option tied to what the authorities actually objected to.'
+        },
+        {
+          id: 4,
+          text: 'The friends agree that the original story on which the film is based',
+          options: [
+            'is written in a rather unusual style.',
+            'gives a convincing portrayal of a historical character.',
+            'manages to keep the reader in suspense until the end.'
+          ],
+          correct: 0,
+          receipt: '"I loved the way the author uses dialect all the way through — a bit out of the ordinary."',
+          trap: 'B is blocked — both speakers express doubt that the Prince is convincingly based on a real person ("you can\'t really believe the Prince is based on a real person from the past, though, can you?"). C is blocked — the woman says she had no idea what the final outcome would be, which means the book did not create suspense successfully. A is the only point of genuine agreement between both speakers.'
+        }
+      ]
+    },
+    {
+      number: 3,
+      context: 'You hear an interview with the architect Ingrid Chapman, who is talking about an office building she has recently designed.',
+      questions: [
+        {
+          id: 5,
+          text: 'What does Ingrid think is the best feature of the new building?',
+          options: [
+            'the amount of light that comes in',
+            'the space she has created for staff interaction',
+            'the way each floor has its own facilities'
+          ],
+          correct: 1,
+          receipt: '"this is what\'s crucial for me — there are so many reasons for people to meet there: have a coffee, gossip, discuss formal matters in an informal setting."',
+          trap: 'A is a strong Acoustic Copycat — enormous glass walls and transparency are discussed prominently, but they are presented as the means to creating an airy feel, not as the best feature in themselves. C is blocked — individual floor facilities are listed (toilets, photocopying, café) as part of the meeting space, not as a distinct feature.'
+        },
+        {
+          id: 6,
+          text: 'What does she suggest companies with outdated office buildings should do?',
+          options: [
+            'employ her to design a more modern building',
+            'ask staff what kind of workplace they would like',
+            'use imagination to improve aspects of the offices'
+          ],
+          correct: 2,
+          receipt: '"it doesn\'t require much, a little creativity, that\'s all. Under-used areas can be refurbished, art hung on the walls, that sort of thing."',
+          trap: 'A is a deliberate joke trap — she says "Commission me to come up with a scheme for a replacement, for example? No, seriously." The "No, seriously" explicitly cancels A before she gives the real answer. B is partially supported — a questionnaire to staff is mentioned as one tool — but it is a single detail within her broader argument for creativity and imagination, not her main suggestion.'
+        }
+      ]
+    }
+  ];
+
+  const LETTERS = ['A','B','C'];
+  let phase = 1;
+  let revealedCount = 0;
+  const totalQuestions = 6;
+  let correctCount = 0;
+  const selectedAnswers = {};
+
+  function buildUI() {
+    const container = document.getElementById('extractsContainer');
+    DATA.forEach(extract => {
+      const card = document.createElement('div');
+      card.className = 'extract';
+      card.id = `extract-${extract.number}`;
+
+      let questionsHTML = '';
+      extract.questions.forEach(q => {
+        let optionsHTML = '';
+        q.options.forEach((opt, i) => {
+          optionsHTML += `
+            <label class="option-label" id="opt-${q.id}-${i}" onclick="selectOption(${q.id}, ${i})">
+              <input type="radio" name="q${q.id}" value="${i}" />
+              <span class="option-letter">${LETTERS[i]}</span>
+              <span class="option-text">${opt}</span>
+            </label>`;
+        });
+
+        questionsHTML += `
+          <div class="question-item" id="qi-${q.id}">
+            <div class="question-number">Question ${q.id}</div>
+            <div class="question-text">${q.text}</div>
+            <div class="options" id="opts-${q.id}">${optionsHTML}</div>
+            <button class="btn-reveal" id="reveal-btn-${q.id}" onclick="revealQuestion(${q.id})">&#9654; Reveal answer</button>
+            <div class="reveal-panel" id="reveal-panel-${q.id}">
+              <div class="receipt-block">
+                <div class="receipt-label">&#128205; The Receipt</div>
+                <div class="receipt-quote">${q.receipt}</div>
+              </div>
+              <div class="trap-block">
+                <div class="trap-label">&#9888; Distractor analysis</div>
+                <div class="trap-text">${q.trap}</div>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      card.innerHTML = `
+        <div class="extract-header">
+          <span class="extract-number">Extract ${extract.number}</span>
+          <span class="extract-context">${extract.context}</span>
+        </div>
+        <div class="questions-block">${questionsHTML}</div>`;
+
+      container.appendChild(card);
+    });
+
+    updateLockButton();
+  }
+
+  function selectOption(qId, index) {
+    if (phase !== 1) return;
+    selectedAnswers[qId] = index;
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => {
+        if (q.id === qId) {
+          q.options.forEach((_, i) => {
+            document.getElementById(`opt-${qId}-${i}`)
+              .classList.toggle('selected', i === index);
+          });
+        }
+      });
+    });
+    updateLockButton();
+  }
+
+  function updateLockButton() {
+    const done = Object.keys(selectedAnswers).length;
+    const remaining = totalQuestions - done;
+    document.getElementById('btnLock').disabled = done < totalQuestions;
+    document.getElementById('lockNote').textContent = done < totalQuestions
+      ? `${remaining} answer${remaining > 1 ? 's' : ''} still needed before locking.`
+      : 'All answers selected — ready to lock.';
+  }
+
+  function lockAnswers() {
+    if (Object.keys(selectedAnswers).length < totalQuestions) return;
+    phase = 2;
+    document.querySelectorAll('.option-label').forEach(el => el.classList.add('locked'));
+    document.getElementById('btnLock').classList.add('hidden');
+    document.getElementById('lockNote').style.display = 'none';
+    const badge = document.getElementById('phaseBadge');
+    badge.classList.add('locked');
+    document.getElementById('phaseText').textContent = 'Phase 2 — Reveal answers one by one';
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => {
+        document.getElementById(`reveal-btn-${q.id}`).classList.add('visible');
+      });
+    });
+  }
+
+  function revealQuestion(qId) {
+    let qData = null;
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => { if (q.id === qId) qData = q; });
+    });
+    if (!qData) return;
+
+    const selected = selectedAnswers[qId];
+    const isCorrect = selected === qData.correct;
+    if (isCorrect) correctCount++;
+
+    qData.options.forEach((_, i) => {
+      const label = document.getElementById(`opt-${qId}-${i}`);
+      label.classList.remove('selected');
+      if (i === qData.correct) label.classList.add('show-correct');
+      else if (i === selected && !isCorrect) label.classList.add('show-wrong');
+    });
+
+    document.getElementById(`qi-${qId}`).classList.add(isCorrect ? 'revealed-correct' : 'revealed-wrong');
+    document.getElementById(`reveal-panel-${qId}`).classList.add('visible');
+
+    const btn = document.getElementById(`reveal-btn-${qId}`);
+    btn.classList.remove('visible');
+    btn.classList.add('used');
+
+    revealedCount++;
+    if (revealedCount === totalQuestions) showScore();
+  }
+
+  function showScore() {
+    const card = document.getElementById('scoreCard');
+    card.classList.add('visible');
+    document.getElementById('scoreNum').innerHTML =
+      `${correctCount}<span class="score-denom"> / ${totalQuestions}</span>`;
+
+    const msgs = [
+      'Difficult session — work through every distractor analysis above and name the trap type for each wrong answer.',
+      'Several traps landed. Receipt audit: which answers had no receipt before the reveal? Those are the priority.',
+      'Solid consolidation. Check any answers where you had the right answer but the wrong receipt.',
+      'Strong result. One wrong answer — name the trap type from the analysis above before closing.',
+      'Full marks. Verify every receipt against the analysis — a correct answer without a receipt is still a flag at consolidation stage.'
+    ];
+    const tier = correctCount <= 2 ? 0 : correctCount <= 3 ? 1 : correctCount <= 4 ? 2 : correctCount === 5 ? 3 : 4;
+    document.getElementById('scoreMsg').textContent = msgs[tier];
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  buildUI();
+</script>
+</body>
+</html>
