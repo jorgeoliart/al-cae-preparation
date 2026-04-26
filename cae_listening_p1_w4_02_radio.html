@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAE Listening — Part 1 | Second Consolidation</title>
+
+  <!-- Expected audio file in the same folder: cae_listening_p1_03.mp3 -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #080b10;
+      --surface:    #0f1520;
+      --surface2:   #161e2e;
+      --border:     rgba(255,255,255,0.07);
+      --accent:     #f59e0b;
+      --accent-dim: rgba(245,158,11,0.10);
+      --accent-mid: rgba(245,158,11,0.22);
+      --text:       #e8eaf0;
+      --muted:      #6b7a99;
+      --correct:    #34d399;
+      --correct-bg: rgba(52,211,153,0.10);
+      --wrong:      #f87171;
+      --wrong-bg:   rgba(248,113,113,0.10);
+      --certain:    #a78bfa;
+      --certain-dim:rgba(167,139,250,0.12);
+      --unsure:     #fb923c;
+      --unsure-dim: rgba(251,146,60,0.12);
+      --guess:      #f87171;
+      --guess-dim:  rgba(248,113,113,0.10);
+      --radius:     12px;
+      --font-head:  'Syne', sans-serif;
+      --font-body:  'Instrument Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(245,158,11,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,158,11,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(130px); pointer-events: none; z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(245,158,11,0.07); top: -120px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(245,158,11,0.04); bottom: 10%; left: -80px; }
+
+    .page {
+      position: relative; z-index: 1;
+      max-width: 780px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .site-label {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .site-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .page-title {
+      font-family: var(--font-head);
+      font-size: clamp(28px, 5vw, 40px); font-weight: 800;
+      color: var(--text); line-height: 1.1; margin-bottom: 6px;
+    }
+    .page-title span { color: var(--accent); }
+    .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+
+    /* ── Instruction banner ── */
+    .instruction-banner {
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--radius);
+      padding: 14px 18px; font-size: 13.5px; color: #d4a845;
+      margin-bottom: 20px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .instruction-banner .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Confidence legend ── */
+    .confidence-legend {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px; margin-bottom: 24px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .legend-title {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 2px;
+    }
+    .legend-items { display: flex; gap: 12px; flex-wrap: wrap; }
+    .legend-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .legend-dot.certain { background: var(--certain); }
+    .legend-dot.unsure  { background: var(--unsure); }
+    .legend-dot.guess   { background: var(--guess); }
+
+    /* ── Audio card ── */
+    .audio-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px 22px; margin-bottom: 32px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .audio-label {
+      font-family: var(--font-head); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    }
+    .audio-card audio { width: 100%; accent-color: var(--accent); border-radius: 8px; }
+    .audio-note { font-size: 12px; color: var(--muted); font-style: italic; }
+
+    /* ── Phase badge ── */
+    .phase-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 12px; font-weight: 600; color: var(--accent);
+      margin-bottom: 24px;
+      font-family: var(--font-head); letter-spacing: 0.05em;
+      transition: all 0.3s;
+    }
+    .phase-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .phase-badge.locked { background: rgba(107,122,153,0.1); border-color: rgba(107,122,153,0.2); color: var(--muted); }
+    .phase-badge.locked .dot { animation: none; background: var(--muted); }
+
+    /* ── Extract cards ── */
+    .extract {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden; margin-bottom: 20px;
+    }
+
+    .extract-header {
+      padding: 14px 22px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .extract-number {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 6px; padding: 3px 9px; white-space: nowrap;
+    }
+    .extract-context { font-size: 13.5px; color: var(--muted); font-style: italic; }
+
+    .questions-block { padding: 22px; display: flex; flex-direction: column; gap: 28px; }
+
+    /* ── Question item ── */
+    .question-item {
+      border-left: 3px solid var(--border);
+      padding-left: 18px; transition: border-color 0.3s;
+    }
+    .question-item.revealed-correct { border-color: var(--correct); }
+    .question-item.revealed-wrong   { border-color: var(--wrong); }
+
+    .question-number {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .question-text {
+      font-size: 15px; font-weight: 600; color: var(--text);
+      margin-bottom: 14px; line-height: 1.4;
+    }
+
+    /* ── Options ── */
+    .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+
+    .option-label {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .option-label:hover { background: rgba(255,255,255,0.03); border-color: rgba(245,158,11,0.2); }
+    .option-label input[type="radio"] { display: none; }
+
+    .option-letter {
+      font-family: var(--font-head); font-weight: 700; font-size: 12px;
+      color: var(--muted); min-width: 20px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface2); border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .option-text { font-size: 14px; color: var(--text); line-height: 1.45; }
+
+    .option-label.selected { background: var(--accent-dim); border-color: rgba(245,158,11,0.35); }
+    .option-label.selected .option-letter { background: var(--accent); color: #000; }
+
+    .option-label.locked { cursor: default; }
+    .option-label.locked:hover { background: transparent; border-color: var(--border); }
+    .option-label.locked.selected:hover { background: var(--accent-dim); border-color: rgba(245,158,11,0.35); }
+
+    .option-label.show-correct { background: var(--correct-bg); border-color: rgba(52,211,153,0.35); }
+    .option-label.show-correct .option-letter { background: var(--correct); color: #000; }
+    .option-label.show-wrong   { background: var(--wrong-bg); border-color: rgba(248,113,113,0.35); }
+    .option-label.show-wrong .option-letter   { background: var(--wrong); color: #000; }
+
+    /* ── Confidence rating ── */
+    .confidence-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 4px;
+    }
+    .confidence-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); flex-shrink: 0;
+    }
+    .conf-btn {
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; color: var(--muted);
+      transition: all 0.15s;
+    }
+    .conf-btn:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+    .conf-btn.certain { border-color: var(--certain); color: var(--certain); background: var(--certain-dim); }
+    .conf-btn.unsure  { border-color: var(--unsure);  color: var(--unsure);  background: var(--unsure-dim); }
+    .conf-btn.guess   { border-color: var(--guess);   color: var(--guess);   background: var(--guess-dim); }
+
+    .conf-btn.locked  { cursor: default; pointer-events: none; }
+
+    /* Confidence tag shown in reveal */
+    .conf-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .conf-tag.certain { background: var(--certain-dim); border: 1px solid rgba(167,139,250,0.3); color: var(--certain); }
+    .conf-tag.unsure  { background: var(--unsure-dim);  border: 1px solid rgba(251,146,60,0.3);  color: var(--unsure); }
+    .conf-tag.guess   { background: var(--guess-dim);   border: 1px solid rgba(248,113,113,0.3); color: var(--guess); }
+
+    /* ── Reveal panel ── */
+    .reveal-panel {
+      margin-top: 14px; display: none;
+      flex-direction: column; gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+    .reveal-panel.visible { display: flex; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Result tag row */
+    .result-row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .result-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .result-tag.correct { background: var(--correct-bg); border: 1px solid rgba(52,211,153,0.3); color: var(--correct); }
+    .result-tag.wrong   { background: var(--wrong-bg);   border: 1px solid rgba(248,113,113,0.3); color: var(--wrong); }
+    .flag-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.4);
+      color: var(--wrong);
+    }
+
+    .receipt-block {
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .receipt-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--correct); margin-bottom: 4px;
+    }
+    .receipt-quote { color: #a7f3d0; font-style: italic; font-size: 14px; line-height: 1.4; }
+
+    .trap-block {
+      background: rgba(248,113,113,0.06);
+      border: 1px solid rgba(248,113,113,0.18);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .trap-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--wrong); margin-bottom: 4px;
+    }
+    .trap-text { color: #fca5a5; font-size: 13px; line-height: 1.45; }
+
+    /* ── Reveal button ── */
+    .btn-reveal {
+      align-self: flex-start; margin-top: 10px;
+      padding: 7px 16px; background: transparent;
+      border: 1px solid rgba(245,158,11,0.3); border-radius: 7px;
+      color: var(--accent); font-family: var(--font-head);
+      font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: none; align-items: center; gap: 7px;
+    }
+    .btn-reveal:hover { background: var(--accent-dim); border-color: rgba(245,158,11,0.5); }
+    .btn-reveal.visible { display: inline-flex; }
+    .btn-reveal.used    { display: none !important; }
+
+    /* ── Lock button ── */
+    .lock-row {
+      margin-top: 36px; display: flex;
+      flex-direction: column; align-items: center; gap: 10px;
+    }
+    .btn-lock {
+      padding: 13px 36px; background: var(--accent); border: none;
+      border-radius: 9px; color: #000;
+      font-family: var(--font-head); font-size: 14px; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-lock:hover { opacity: 0.9; }
+    .btn-lock:active { transform: scale(0.98); }
+    .btn-lock:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-lock.hidden { display: none; }
+    .lock-note { font-size: 12.5px; color: var(--muted); text-align: center; }
+
+    /* ── Metacognitive summary ── */
+    .meta-summary {
+      display: none; background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px; margin-top: 28px;
+      flex-direction: column; gap: 14px;
+      animation: fadeIn 0.4s ease;
+    }
+    .meta-summary.visible { display: flex; }
+    .meta-title {
+      font-family: var(--font-head); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    }
+    .meta-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 500px) { .meta-grid { grid-template-columns: 1fr; } }
+
+    .meta-cell {
+      border-radius: 9px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .meta-cell.good    { background: var(--correct-bg); border: 1px solid rgba(52,211,153,0.2); }
+    .meta-cell.flag    { background: var(--wrong-bg); border: 1px solid rgba(248,113,113,0.25); }
+    .meta-cell.neutral { background: var(--accent-dim); border: 1px solid rgba(245,158,11,0.15); }
+    .meta-cell.dim     { background: rgba(107,122,153,0.07); border: 1px solid rgba(107,122,153,0.12); }
+
+    .meta-cell-label {
+      font-family: var(--font-head); font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .meta-cell.good .meta-cell-label    { color: var(--correct); }
+    .meta-cell.flag .meta-cell-label    { color: var(--wrong); }
+    .meta-cell.neutral .meta-cell-label { color: var(--accent); }
+    .meta-cell.dim .meta-cell-label     { color: var(--muted); }
+
+    .meta-cell-count {
+      font-family: var(--font-head); font-size: 32px; font-weight: 800; line-height: 1;
+    }
+    .meta-cell.good .meta-cell-count    { color: var(--correct); }
+    .meta-cell.flag .meta-cell-count    { color: var(--wrong); }
+    .meta-cell.neutral .meta-cell-count { color: var(--accent); }
+    .meta-cell.dim .meta-cell-count     { color: var(--muted); }
+
+    .meta-cell-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .meta-cell.flag .meta-cell-desc { color: #fca5a5; }
+
+    .meta-note {
+      font-size: 13px; color: var(--muted); line-height: 1.55;
+      padding: 12px 16px; background: var(--surface2);
+      border-radius: 8px; border-left: 3px solid var(--accent);
+    }
+
+    /* ── Score card ── */
+    .score-card {
+      display: none; background: var(--surface);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 28px; margin-top: 20px;
+      flex-direction: column; align-items: center;
+      gap: 8px; text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+    .score-card.visible { display: flex; }
+    .score-title {
+      font-family: var(--font-head); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+    }
+    .score-number {
+      font-family: var(--font-head); font-size: 52px; font-weight: 800;
+      color: var(--accent); line-height: 1;
+    }
+    .score-denom { font-size: 22px; color: var(--muted); }
+    .score-message { font-size: 14px; color: var(--muted); max-width: 420px; }
+
+    .page-footer {
+      margin-top: 60px; text-align: center;
+      font-size: 12px; color: rgba(107,122,153,0.5); letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 520px) {
+      .extract-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .legend-items { flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+
+  <div class="site-label">AstraLingua &mdash; CAE Preparation</div>
+  <h1 class="page-title">Listening <span>Part 1</span></h1>
+  <p class="page-subtitle">Three extracts &mdash; two questions each &mdash; 6 marks total &middot; Second Consolidation</p>
+
+  <div class="instruction-banner">
+    <span class="icon">🎧</span>
+    <span><strong>Autonomy session — no prompting.</strong> Run the pre-listen protocol independently. Select your answer and your confidence rating for every question before locking. Do not reveal until the teacher locks the session.</span>
+  </div>
+
+  <!-- Confidence legend -->
+  <div class="confidence-legend">
+    <div class="legend-title">Confidence ratings</div>
+    <div class="legend-items">
+      <div class="legend-item"><div class="legend-dot certain"></div><span><strong style="color:#a78bfa">Certain</strong> — I have a precise receipt</span></div>
+      <div class="legend-item"><div class="legend-dot unsure"></div><span><strong style="color:#fb923c">Unsure</strong> — I have a receipt but it feels incomplete</span></div>
+      <div class="legend-item"><div class="legend-dot guess"></div><span><strong style="color:#f87171">Guess</strong> — I have no receipt</span></div>
+    </div>
+  </div>
+
+  <!-- Audio -->
+  <div class="audio-card">
+    <div class="audio-label">Audio</div>
+    <audio id="mainAudio" controls>
+      <source src="./cae_listening_p1_03.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <div class="audio-note">File: cae_listening_p1_03.mp3 — same folder as this HTML file.</div>
+  </div>
+
+  <!-- Phase badge -->
+  <div class="phase-badge" id="phaseBadge">
+    <span class="dot"></span>
+    <span id="phaseText">Phase 1 &mdash; Select answers + confidence ratings</span>
+  </div>
+
+  <div id="extractsContainer"></div>
+
+  <div class="lock-row" id="lockRow">
+    <button class="btn-lock" id="btnLock" onclick="lockAnswers()" disabled>Lock answers &amp; begin review</button>
+    <span class="lock-note" id="lockNote">All 6 answers and 6 confidence ratings must be selected before locking.</span>
+  </div>
+
+  <!-- Metacognitive summary (appears after all reveals) -->
+  <div class="meta-summary" id="metaSummary">
+    <div class="meta-title">Metacognitive analysis</div>
+    <div class="meta-grid" id="metaGrid"></div>
+    <div class="meta-note" id="metaNote"></div>
+  </div>
+
+  <!-- Score -->
+  <div class="score-card" id="scoreCard">
+    <div class="score-title">Final Score</div>
+    <div class="score-number" id="scoreNum"></div>
+    <div class="score-message" id="scoreMsg"></div>
+  </div>
+
+  <div class="page-footer">AstraLingua &mdash; CAE Preparation &middot; Jorge &middot; 2026</div>
+</div>
+
+<script>
+  const DATA = [
+    {
+      number: 1,
+      context: 'You hear part of a radio discussion about a football team.',
+      questions: [
+        {
+          id: 1,
+          text: 'What impresses the man about the player called John Elliott?',
+          options: [
+            'He is able to keep calm when he gets near the goal area.',
+            'He is good at preventing the opponents from scoring.',
+            'He can score many goals given the right conditions.'
+          ],
+          correct: 0,
+          receipt: '"when he sees that final pass coming as he approaches the goal area, you get a lot of players who get there but then freeze and get erratic, but he\'s not one of them."',
+          trap: 'B is blocked — he sets up goal scorers, he does not prevent opponents from scoring. C is a Narrative Trap — scoring potential is implied, but the specific quality the man admires is composure under pressure approaching the goal area, not goal output. The receipt is about what he does not do (freeze), not what he does score.'
+        },
+        {
+          id: 2,
+          text: 'What do the two speakers disagree about?',
+          options: [
+            'the inflated price paid for the new player',
+            'the new player\'s long-term prospects in the team',
+            'the manager\'s previous mistakes when purchasing players'
+          ],
+          correct: 1,
+          receipt: 'Woman: "They\'ll want to hang on to him come what may, at that price." Man: "they can sell him on if things go wrong, for more money."',
+          trap: 'A is blocked — both speakers agree he was overpriced ("overcharged", "overpaid"). C has no receipt — the manager\'s previous mistakes are mentioned in passing but never debated. The disagreement is specifically about what happens next: the woman says they\'ll keep him regardless; the man says he\'s a sellable asset.'
+        }
+      ]
+    },
+    {
+      number: 2,
+      context: 'You hear part of a radio interview with Deanna Carriconde, who has just won a prize for her environmental work in South America.',
+      questions: [
+        {
+          id: 3,
+          text: 'Deanna thinks the underlying cause of the ecosystem changes she mentions is',
+          options: [
+            'overfishing by industrial fisheries.',
+            'increased local sea temperatures.',
+            'growth of predator populations in the area.'
+          ],
+          correct: 1,
+          receipt: '"anchovies are being forced into colder water because the sea\'s warming up."',
+          trap: 'A is a strong Acoustic Copycat — industrial fishing is discussed extensively, but it is framed as a consequence of the ecosystem disruption (85% of remaining fish scooped up), not the underlying cause. C has no receipt — predators are mentioned as victims of the disruption, not causes of it. The chain of causation is: sea warming → anchovies move → predators and fishermen left with less.'
+        },
+        {
+          id: 4,
+          text: 'How do the local fishermen feel about Deanna\'s work now?',
+          options: [
+            'unhappy about sharing their catch with marine creatures she protects',
+            'pleased that she has prevented industrial exploitation of anchovies',
+            'optimistic about the prospect of catching better quality fish'
+          ],
+          correct: 2,
+          receipt: '"the local fishermen can catch more of the large fish that feed on the anchovies."',
+          trap: 'A is blocked — they used to see her as an enemy (working for seals) but now see her as an ally. B is wrong in scope — industrial fishing is being reduced, not prevented entirely; and the fishermen\'s feeling is forward-looking, not retrospective satisfaction. C is the only option supported by the receipt: more large fish = better quality catch ahead.'
+        }
+      ]
+    },
+    {
+      number: 3,
+      context: 'You hear part of a radio programme about books and reading.',
+      questions: [
+        {
+          id: 5,
+          text: 'Why did the woman read the book she describes?',
+          options: [
+            'It was an unexpected gift.',
+            'She came across it by chance.',
+            'It was recommended to her.'
+          ],
+          correct: 2,
+          receipt: '"I\'d heard about it from a friend, and I\'d got the idea it was something special and so I asked for it specifically."',
+          trap: 'A is a Narrative Trap — it was a birthday present, but she asked for it specifically so it was not unexpected. B is explicitly blocked — she sought it out deliberately after hearing about it; the opposite of coming across it by chance. The receipt makes C the only supported answer: a friend\'s recommendation led her to request it.'
+        },
+        {
+          id: 6,
+          text: 'What did the book help her to understand?',
+          options: [
+            'how strange the world is',
+            'how enjoyable stories can be',
+            'how she could become a writer'
+          ],
+          correct: 1,
+          receipt: '"it just opened me up to what pleasures there are in description, in narrative, you know, in ideas."',
+          trap: 'A is a Narrative Trap — she mentions the book\'s strangeness as what gripped her, but the question asks what it helped her understand, not what engaged her. C has no receipt — becoming a writer is never mentioned. The receipt for B is precise: pleasures in description and narrative = understanding how enjoyable stories can be.'
+        }
+      ]
+    }
+  ];
+
+  const LETTERS = ['A','B','C'];
+  const CONF_LEVELS = ['certain','unsure','guess'];
+  const CONF_LABELS = { certain: 'Certain', unsure: 'Unsure', guess: 'Guess' };
+
+  let phase = 1;
+  let revealedCount = 0;
+  const totalQuestions = 6;
+  let correctCount = 0;
+  const selectedAnswers = {};
+  const selectedConf = {};
+
+  // Metacognitive counters
+  let cc = 0, cw = 0, uc = 0, uw = 0, gc = 0, gw = 0;
+
+  function buildUI() {
+    const container = document.getElementById('extractsContainer');
+    DATA.forEach(extract => {
+      const card = document.createElement('div');
+      card.className = 'extract';
+
+      let questionsHTML = '';
+      extract.questions.forEach(q => {
+        let optionsHTML = '';
+        q.options.forEach((opt, i) => {
+          optionsHTML += `
+            <label class="option-label" id="opt-${q.id}-${i}" onclick="selectOption(${q.id}, ${i})">
+              <input type="radio" name="q${q.id}" value="${i}" />
+              <span class="option-letter">${LETTERS[i]}</span>
+              <span class="option-text">${opt}</span>
+            </label>`;
+        });
+
+        let confHTML = '';
+        CONF_LEVELS.forEach(level => {
+          confHTML += `<button class="conf-btn" id="conf-${q.id}-${level}" onclick="selectConf(${q.id},'${level}')">${CONF_LABELS[level]}</button>`;
+        });
+
+        questionsHTML += `
+          <div class="question-item" id="qi-${q.id}">
+            <div class="question-number">Question ${q.id}</div>
+            <div class="question-text">${q.text}</div>
+            <div class="options">${optionsHTML}</div>
+            <div class="confidence-row">
+              <span class="confidence-label">Confidence</span>
+              ${confHTML}
+            </div>
+            <button class="btn-reveal" id="reveal-btn-${q.id}" onclick="revealQuestion(${q.id})">&#9654; Reveal answer</button>
+            <div class="reveal-panel" id="reveal-panel-${q.id}">
+              <div class="result-row" id="result-row-${q.id}"></div>
+              <div class="receipt-block">
+                <div class="receipt-label">&#128205; The Receipt</div>
+                <div class="receipt-quote">${q.receipt}</div>
+              </div>
+              <div class="trap-block">
+                <div class="trap-label">&#9888; Distractor analysis</div>
+                <div class="trap-text">${q.trap}</div>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      card.innerHTML = `
+        <div class="extract-header">
+          <span class="extract-number">Extract ${extract.number}</span>
+          <span class="extract-context">${extract.context}</span>
+        </div>
+        <div class="questions-block">${questionsHTML}</div>`;
+
+      container.appendChild(card);
+    });
+
+    updateLockButton();
+  }
+
+  function selectOption(qId, index) {
+    if (phase !== 1) return;
+    selectedAnswers[qId] = index;
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => {
+        if (q.id === qId) {
+          q.options.forEach((_, i) => {
+            document.getElementById(`opt-${qId}-${i}`)
+              .classList.toggle('selected', i === index);
+          });
+        }
+      });
+    });
+    updateLockButton();
+  }
+
+  function selectConf(qId, level) {
+    if (phase !== 1) return;
+    selectedConf[qId] = level;
+    CONF_LEVELS.forEach(l => {
+      const btn = document.getElementById(`conf-${qId}-${l}`);
+      btn.className = 'conf-btn' + (l === level ? ` ${l}` : '');
+    });
+    updateLockButton();
+  }
+
+  function updateLockButton() {
+    const answersOk = Object.keys(selectedAnswers).length === totalQuestions;
+    const confOk    = Object.keys(selectedConf).length === totalQuestions;
+    const allDone   = answersOk && confOk;
+    document.getElementById('btnLock').disabled = !allDone;
+
+    const missingAnswers = totalQuestions - Object.keys(selectedAnswers).length;
+    const missingConf    = totalQuestions - Object.keys(selectedConf).length;
+    let note = '';
+    if (missingAnswers > 0 && missingConf > 0) {
+      note = `${missingAnswers} answer${missingAnswers>1?'s':''} and ${missingConf} confidence rating${missingConf>1?'s':''} still needed.`;
+    } else if (missingAnswers > 0) {
+      note = `${missingAnswers} answer${missingAnswers>1?'s':''} still needed.`;
+    } else if (missingConf > 0) {
+      note = `${missingConf} confidence rating${missingConf>1?'s':''} still needed.`;
+    } else {
+      note = 'All answers and ratings selected — ready to lock.';
+    }
+    document.getElementById('lockNote').textContent = note;
+  }
+
+  function lockAnswers() {
+    if (!document.getElementById('btnLock').disabled === false) return;
+    phase = 2;
+    document.querySelectorAll('.option-label').forEach(el => el.classList.add('locked'));
+    document.querySelectorAll('.conf-btn').forEach(el => el.classList.add('locked'));
+    document.getElementById('btnLock').classList.add('hidden');
+    document.getElementById('lockNote').style.display = 'none';
+    const badge = document.getElementById('phaseBadge');
+    badge.classList.add('locked');
+    document.getElementById('phaseText').textContent = 'Phase 2 — Reveal answers one by one';
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => {
+        document.getElementById(`reveal-btn-${q.id}`).classList.add('visible');
+      });
+    });
+  }
+
+  function revealQuestion(qId) {
+    let qData = null;
+    DATA.forEach(extract => {
+      extract.questions.forEach(q => { if (q.id === qId) qData = q; });
+    });
+    if (!qData) return;
+
+    const selected = selectedAnswers[qId];
+    const conf = selectedConf[qId];
+    const isCorrect = selected === qData.correct;
+    if (isCorrect) correctCount++;
+
+    // Update metacognitive counters
+    if (conf === 'certain' && isCorrect)  cc++;
+    if (conf === 'certain' && !isCorrect) cw++;
+    if (conf === 'unsure'  && isCorrect)  uc++;
+    if (conf === 'unsure'  && !isCorrect) uw++;
+    if (conf === 'guess'   && isCorrect)  gc++;
+    if (conf === 'guess'   && !isCorrect) gw++;
+
+    // Style options
+    qData.options.forEach((_, i) => {
+      const label = document.getElementById(`opt-${qId}-${i}`);
+      label.classList.remove('selected');
+      if (i === qData.correct) label.classList.add('show-correct');
+      else if (i === selected && !isCorrect) label.classList.add('show-wrong');
+    });
+
+    // Card border
+    document.getElementById(`qi-${qId}`).classList.add(isCorrect ? 'revealed-correct' : 'revealed-wrong');
+
+    // Result row
+    const resultRow = document.getElementById(`result-row-${qId}`);
+    const resultTag = `<span class="result-tag ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✓ Correct' : '✗ Wrong'}</span>`;
+    const confTag = `<span class="conf-tag ${conf}">${CONF_LABELS[conf]}</span>`;
+    let flagTag = '';
+    if (conf === 'certain' && !isCorrect) {
+      flagTag = `<span class="flag-tag">⚠ Pinga loca flag — certain but wrong</span>`;
+    } else if (conf === 'guess' && isCorrect) {
+      flagTag = `<span class="flag-tag">⚠ No receipt — verify before closing</span>`;
+    } else if (conf === 'unsure' && isCorrect) {
+      flagTag = `<span class="flag-tag" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:var(--accent);">Receipt incomplete — confirm</span>`;
+    }
+    resultRow.innerHTML = resultTag + confTag + flagTag;
+
+    // Show reveal panel
+    document.getElementById(`reveal-panel-${qId}`).classList.add('visible');
+
+    // Hide reveal button
+    const btn = document.getElementById(`reveal-btn-${qId}`);
+    btn.classList.remove('visible');
+    btn.classList.add('used');
+
+    revealedCount++;
+    if (revealedCount === totalQuestions) showFinal();
+  }
+
+  function showFinal() {
+    // Score
+    const scoreCard = document.getElementById('scoreCard');
+    scoreCard.classList.add('visible');
+    document.getElementById('scoreNum').innerHTML =
+      `${correctCount}<span class="score-denom"> / ${totalQuestions}</span>`;
+    const msgs = [
+      'Difficult session. Priority: any Certain + Wrong answers. Name the trap type for each before closing.',
+      'Several traps landed. Check the metacognitive analysis — where did confidence and accuracy diverge?',
+      'Solid session. The metacognitive pattern matters as much as the score — check the analysis below.',
+      'Strong result. One wrong answer — was it Certain or Unsure? That distinction determines the debrief priority.',
+      'Full marks. Check every Certain rating has a verifiable receipt — do not close the session without confirming each one.'
+    ];
+    const tier = correctCount <= 2 ? 0 : correctCount <= 3 ? 1 : correctCount <= 4 ? 2 : correctCount === 5 ? 3 : 4;
+    document.getElementById('scoreMsg').textContent = msgs[tier];
+
+    // Metacognitive summary
+    const metaSummary = document.getElementById('metaSummary');
+    metaSummary.classList.add('visible');
+
+    const grid = document.getElementById('metaGrid');
+    grid.innerHTML = `
+      <div class="meta-cell good">
+        <div class="meta-cell-label">&#10003; Certain + Correct</div>
+        <div class="meta-cell-count">${cc}</div>
+        <div class="meta-cell-desc">Receipt discipline working. These are the target pattern.</div>
+      </div>
+      <div class="meta-cell ${cw > 0 ? 'flag' : 'dim'}">
+        <div class="meta-cell-label">${cw > 0 ? '⚠' : ''} Certain + Wrong</div>
+        <div class="meta-cell-count">${cw}</div>
+        <div class="meta-cell-desc">${cw > 0 ? 'Pinga loca flag — the most dangerous pattern. Debrief these first.' : 'None. Good.'}</div>
+      </div>
+      <div class="meta-cell ${uc > 0 ? 'neutral' : 'dim'}">
+        <div class="meta-cell-label">Unsure + Correct</div>
+        <div class="meta-cell-count">${uc}</div>
+        <div class="meta-cell-desc">Receipt incomplete. Confirm the exact phrase before closing.</div>
+      </div>
+      <div class="meta-cell ${gc > 0 ? 'flag' : 'dim'}">
+        <div class="meta-cell-label">${gc > 0 ? '⚠' : ''} Guess + Correct</div>
+        <div class="meta-cell-count">${gc}</div>
+        <div class="meta-cell-desc">${gc > 0 ? 'Lucky answer — no receipt. Red flag regardless of result.' : 'None.'}</div>
+      </div>`;
+
+    // Note
+    let note = '';
+    if (cw > 0) {
+      note = `Priority debrief: ${cw} Certain + Wrong answer${cw>1?'s':''} flagged. These are pinga loca events — the procedure produced false confidence. Identify the trap type for each before closing this session.`;
+    } else if (gc > 0 || uc > 0) {
+      note = `No pinga loca flags. ${gc + uc} answer${(gc+uc)>1?'s':''} need receipt verification (Guess or Unsure + Correct). Confirm the exact phrase from the audio for each before closing.`;
+    } else if (cc === totalQuestions) {
+      note = `Full receipt discipline. Every correct answer was marked Certain. Verify each receipt against the analysis above — if any receipt feels approximate on review, downgrade it and note it for the next session.`;
+    } else {
+      note = `Check the pattern above. Any incorrect answers — what was the confidence rating? That tells you whether it was a procedure failure or a comprehension gap.`;
+    }
+    document.getElementById('metaNote').textContent = note;
+
+    scoreCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  buildUI();
+</script>
+</body>
+</html>

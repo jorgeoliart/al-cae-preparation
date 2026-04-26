@@ -19,6 +19,7 @@ export default defineConfig({
         listeningP4W3: resolve(__dirname, 'cae_listening_p4_w3_01.mp3'),
         listeningP1W4: resolve(__dirname, 'cae_listening_p1_w4_01.html'),
         listeningP2W4: resolve(__dirname, 'cae_listening_p2__w4_01.html'),
+        listeningP2_2W4: resolve(__dirname, 'cae_listening_p1_w4_02_radio.html'),
         // Add new session entries here
       }
     }
