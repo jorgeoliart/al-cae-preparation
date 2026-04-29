@@ -20,6 +20,8 @@ export default defineConfig({
         listeningP1W4: resolve(__dirname, 'cae_listening_p1_w4_01.html'),
         listeningP2W4: resolve(__dirname, 'cae_listening_p2__w4_01.html'),
         listeningP2_2W4: resolve(__dirname, 'cae_listening_p1_w4_02_radio.html'),
+        W5_cae_uoe_p1_comparison: resolve(__dirname, 'week5_cae_uoe_comparison_P1-01.html'),
+        W5_cae_uoe_p2_comparison: resolve(__dirname, 'week5_cae_uoe_comparison-P2-01.html'),
         // Add new session entries here
       }
     }

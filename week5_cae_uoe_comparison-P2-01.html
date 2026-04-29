@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAE UoE — Part 2 — Comparison Structures</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #080b10;
+      --surface:      #0f1318;
+      --surface-2:    #161c24;
+      --border:       rgba(167,139,250,0.14);
+      --accent:       #a78bfa;
+      --accent-dim:   rgba(167,139,250,0.10);
+      --accent-glow:  rgba(167,139,250,0.22);
+      --correct:      #34d399;
+      --correct-bg:   rgba(52,211,153,0.09);
+      --incorrect:    #f87171;
+      --incorrect-bg: rgba(248,113,113,0.08);
+      --reveal:       #f59e0b;
+      --reveal-bg:    rgba(245,158,11,0.10);
+      --text:         #e2e8f0;
+      --muted:        #7c8699;
+      --dim:          #4a5568;
+      --font-d:       'Syne', sans-serif;
+      --font-b:       'Instrument Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .page-header {
+      padding: 52px 24px 36px;
+      max-width: 880px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      padding: 4px 11px;
+      border-radius: 4px;
+      margin-bottom: 22px;
+    }
+    .page-header h1 {
+      font-family: var(--font-d);
+      font-size: clamp(28px, 4.5vw, 42px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+    }
+    .page-header .sub {
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
+
+    .main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 44px 24px 90px;
+    }
+
+    .sec-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .sec-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── ACCORDION ── */
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 52px;
+    }
+    .acc-panel { border-bottom: 1px solid var(--border); }
+    .acc-panel:last-child { border-bottom: none; }
+    .acc-trigger {
+      width: 100%;
+      background: var(--surface);
+      border: none;
+      padding: 17px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.18s;
+    }
+    .acc-trigger:hover { background: var(--surface-2); }
+    .acc-trigger-title {
+      font-family: var(--font-d);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .acc-arrow {
+      font-size: 11px;
+      color: var(--muted);
+      transition: transform 0.22s;
+      flex-shrink: 0;
+    }
+    .acc-panel.open .acc-arrow { transform: rotate(180deg); }
+    .acc-body {
+      display: none;
+      padding: 22px 24px 26px;
+      background: var(--bg);
+    }
+    .acc-panel.open .acc-body { display: block; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 6px 0 14px; }
+    th {
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.035); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .tbl-key  { color: var(--accent); font-style: italic; }
+    .tbl-eg   { color: var(--correct); font-size: 13px; }
+    .tbl-note { color: var(--muted); font-size: 12.5px; }
+
+    .grammar-note {
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      line-height: 1.55;
+      margin-top: 14px;
+    }
+    .grammar-note strong { color: var(--accent); }
+
+    .chip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 9px 13px;
+      font-size: 13.5px;
+      line-height: 1.45;
+    }
+    .chip b  { color: var(--accent); }
+    .chip em { color: var(--correct); font-style: italic; }
+    .chip small { color: var(--muted); font-size: 12px; display: block; margin-top: 3px; }
+
+    /* ── INSTRUCTION ── */
+    .instr {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      border-radius: 8px;
+      padding: 13px 17px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+    .instr strong { color: var(--accent); }
+
+    /* ── CLOZE ── */
+    .cloze-block { margin-bottom: 52px; }
+    .cloze-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 14px;
+    }
+    .cloze-title {
+      font-family: var(--font-d);
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cloze-range {
+      font-family: var(--font-d);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .cloze-text {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 30px;
+      font-size: 15.5px;
+      line-height: 2.1;
+      color: var(--text);
+      margin-bottom: 18px;
+    }
+
+    .gap-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      vertical-align: middle;
+      margin: 0 3px;
+    }
+    .gap-n {
+      font-family: var(--font-d);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      border-right: none;
+      border-radius: 3px 0 0 3px;
+      padding: 3px 5px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    input.gap {
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 0 5px 5px 0;
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 15px;
+      padding: 3px 9px;
+      width: 120px;
+      outline: none;
+      text-align: center;
+      transition: border-color 0.18s, background 0.18s, color 0.18s;
+    }
+    input.gap:focus    { border-color: var(--accent); }
+    input.gap.ok       { border-color: var(--correct);   background: var(--correct-bg);   color: var(--correct);   }
+    input.gap.err      { border-color: var(--incorrect);  background: var(--incorrect-bg); color: var(--incorrect); }
+    input.gap.revealed { border-color: var(--reveal);     background: var(--reveal-bg);    color: var(--reveal);    }
+
+    .reveal-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--dim);
+      color: var(--muted);
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
+      padding: 0;
+      vertical-align: middle;
+      margin-left: 3px;
+    }
+    .reveal-btn.visible { display: inline-flex; }
+    .reveal-btn:hover { border-color: var(--reveal); color: var(--reveal); background: var(--reveal-bg); }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+    .btn-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--accent-dim);
+      border: 1.5px solid var(--accent-glow);
+      color: var(--accent);
+      font-family: var(--font-d);
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      padding: 9px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+    }
+    .btn-check:hover { background: rgba(167,139,250,0.18); border-color: var(--accent); }
+
+    .score {
+      display: none;
+      font-family: var(--font-d);
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 9px 16px;
+      border-radius: 6px;
+    }
+    .score.show { display: inline-flex; align-items: center; gap: 8px; }
+    .score.good { background: var(--correct-bg);   color: var(--correct);   border: 1px solid rgba(52,211,153,0.28); }
+    .score.poor { background: var(--incorrect-bg); color: var(--incorrect); border: 1px solid rgba(248,113,113,0.28); }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 52px 0; }
+
+    /* ── PHRASAL VERBS ── */
+    .pv-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+    .pv-header h2 { font-family: var(--font-d); font-size: 20px; font-weight: 700; color: #fff; }
+    .pv-badge {
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: rgba(52,211,153,0.10);
+      color: var(--correct);
+      border: 1px solid rgba(52,211,153,0.22);
+      padding: 3px 9px;
+      border-radius: 4px;
+    }
+
+    .pv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .pv-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 17px;
+    }
+    .pv-card .verb { font-family: var(--font-d); font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
+    .pv-card .def  { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+
+    .pv-items { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; }
+    .pv-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px 20px;
+      font-size: 15px;
+      line-height: 1.85;
+    }
+    .item-n {
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input.pv-gap {
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 15px;
+      padding: 3px 9px;
+      width: 150px;
+      outline: none;
+      text-align: center;
+      transition: border-color 0.18s, background 0.18s, color 0.18s;
+    }
+    input.pv-gap:focus    { border-color: var(--accent); }
+    input.pv-gap.ok       { border-color: var(--correct);   background: var(--correct-bg);   color: var(--correct);   }
+    input.pv-gap.err      { border-color: var(--incorrect);  background: var(--incorrect-bg); color: var(--incorrect); }
+    input.pv-gap.revealed { border-color: var(--reveal);     background: var(--reveal-bg);    color: var(--reveal);    }
+
+    /* ── SCENARIO ── */
+    .scenario {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 26px 28px;
+      margin-top: 30px;
+    }
+    .scenario h3 {
+      font-family: var(--font-d);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .scenario p { font-size: 14.5px; color: var(--text); line-height: 1.75; margin-bottom: 16px; }
+    .pv-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pv-chip {
+      font-family: var(--font-d);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* ── WRAP-UP ── */
+    .wrapup { margin-top: 52px; padding-top: 36px; border-top: 1px solid var(--border); }
+    .wrapup-qs { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+    .wrapup-q {
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      padding: 13px 17px;
+      border-radius: 0 8px 8px 0;
+      font-size: 14.5px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrapup-q .q-label {
+      display: block;
+      font-family: var(--font-d);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .chip-grid { grid-template-columns: 1fr; }
+      input.gap { width: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="badge">Use of English &middot; Part 2 &middot; Comparison Structures</div>
+  <h1>Comparison Structures</h1>
+  <p class="sub">Open cloze &mdash; comparative frames, degree adverbs &amp; fixed expressions &nbsp;&middot;&nbsp; Phrasal verbs: comparison &amp; evaluation</p>
+</header>
+
+<main class="main">
+
+  <!-- ══════════════════════════════════════════
+       GRAMMAR REFERENCE
+  ═══════════════════════════════════════════ -->
+  <div class="sec-label">Grammar Reference</div>
+
+  <div class="accordion">
+
+    <!-- Panel 1: Comparative structures -->
+    <div class="acc-panel" id="p1">
+      <button class="acc-trigger" onclick="toggle('p1')" type="button">
+        <span class="acc-trigger-title">Comparative Structures</span>
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="acc-body">
+        <table>
+          <tr><th>Structure</th><th>Example</th><th>Note</th></tr>
+          <tr>
+            <td class="tbl-key">as + adj/adv + as</td>
+            <td class="tbl-eg">The results were <strong>as</strong> clear <strong>as</strong> expected.</td>
+            <td class="tbl-note">equality comparison</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">not as / not so + adj + as</td>
+            <td class="tbl-eg">The margin was <strong>not as</strong> wide <strong>as</strong> predicted.</td>
+            <td class="tbl-note"><em>not so</em> is more formal</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">the + comparative…the + comparative</td>
+            <td class="tbl-eg"><strong>The</strong> more data collected, <strong>the</strong> clearer the picture.</td>
+            <td class="tbl-note">both clauses need <em>the</em></td>
+          </tr>
+          <tr>
+            <td class="tbl-key">no sooner…than</td>
+            <td class="tbl-eg"><strong>No sooner</strong> had she spoken <strong>than</strong> the alarm sounded.</td>
+            <td class="tbl-note">inversion required after <em>no sooner</em></td>
+          </tr>
+          <tr>
+            <td class="tbl-key">hardly / scarcely…when / before</td>
+            <td class="tbl-eg"><strong>Hardly</strong> had the meeting ended <strong>when</strong> objections arose.</td>
+            <td class="tbl-note">inversion required; <em>when</em> or <em>before</em></td>
+          </tr>
+          <tr>
+            <td class="tbl-key">no + comparative + than</td>
+            <td class="tbl-eg">The new method is <strong>no</strong> more reliable <strong>than</strong> the old one.</td>
+            <td class="tbl-note"><em>no</em> negates the comparative</td>
+          </tr>
+        </table>
+        <div class="grammar-note">
+          ⚡ <strong>The…the</strong> structures require the definite article before <em>both</em> comparatives — missing the second <em>the</em> is the most common error. The subject–verb order in each clause is statement order, not inverted.
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Degree adverbs -->
+    <div class="acc-panel" id="p2">
+      <button class="acc-trigger" onclick="toggle('p2')" type="button">
+        <span class="acc-trigger-title">Degree Adverbs with Comparatives</span>
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="acc-body">
+        <table>
+          <tr><th>Adverb</th><th>Use</th><th>Example</th></tr>
+          <tr>
+            <td class="tbl-key">far / by far</td>
+            <td class="tbl-note">large degree; formal</td>
+            <td class="tbl-eg"><strong>far</strong> more effective &nbsp;/&nbsp; <strong>by far</strong> the best</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">much</td>
+            <td class="tbl-note">large degree; neutral</td>
+            <td class="tbl-eg"><strong>much</strong> higher than expected</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">considerably</td>
+            <td class="tbl-note">large degree; academic</td>
+            <td class="tbl-eg"><strong>considerably</strong> more complex</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">a great deal</td>
+            <td class="tbl-note">large degree; semi-formal</td>
+            <td class="tbl-eg"><strong>a great deal</strong> faster</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">rather</td>
+            <td class="tbl-note">moderate; British formal hedging</td>
+            <td class="tbl-eg"><strong>rather</strong> more cautious</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">slightly / a little</td>
+            <td class="tbl-note">small degree</td>
+            <td class="tbl-eg"><strong>slightly</strong> higher &nbsp;/&nbsp; <strong>a little</strong> faster</td>
+          </tr>
+        </table>
+        <div class="grammar-note">
+          ⚡ <strong>Position rule:</strong> all degree adverbs precede the comparative — <em>far more reliable</em>, never <em>more far reliable</em>. <em>By far</em> is the exception — it precedes a superlative: <em>by far the most significant</em>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Fixed comparison expressions -->
+    <div class="acc-panel" id="p3">
+      <button class="acc-trigger" onclick="toggle('p3')" type="button">
+        <span class="acc-trigger-title">Fixed Comparison Expressions</span>
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="acc-body">
+        <div class="chip-grid">
+          <div class="chip"><b>compared with / to</b><small>both correct; <em>with</em> more formal</small><em>Compared with last year, output rose.</em></div>
+          <div class="chip"><b>in comparison with</b><small>formal; interchangeable with <em>compared with</em></small><em>In comparison with rivals, costs are low.</em></div>
+          <div class="chip"><b>by contrast</b><small>standalone discourse marker</small><em>By contrast, the second group improved.</em></div>
+          <div class="chip"><b>in contrast to</b><small>followed immediately by noun/gerund</small><em>In contrast to earlier findings…</em></div>
+          <div class="chip"><b>relative to</b><small>academic; means in proportion to</small><em>Output was high relative to investment.</em></div>
+          <div class="chip"><b>as opposed to</b><small>emphasises contrast of two alternatives</small><em>Quality, as opposed to quantity, matters.</em></div>
+          <div class="chip"><b>bear resemblance to</b><small>fixed; <em>little/no/some</em> precedes noun</small><em>It bears no resemblance to the original.</em></div>
+          <div class="chip"><b>stand in contrast to</b><small>formal; subject is the contrasted item</small><em>This stands in stark contrast to…</em></div>
+        </div>
+        <div class="grammar-note">
+          ⚡ <strong>By contrast</strong> vs <strong>in contrast to</strong>: <em>by contrast</em> is a standalone sentence adverbial followed by a comma. <em>In contrast to</em> must be followed directly by a noun or gerund phrase — never a full clause.
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Concession & contrast connectors -->
+    <div class="acc-panel" id="p4">
+      <button class="acc-trigger" onclick="toggle('p4')" type="button">
+        <span class="acc-trigger-title">Concession &amp; Contrast Connectors</span>
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="acc-body">
+        <table>
+          <tr><th>Connector</th><th>Followed by</th><th>Example</th></tr>
+          <tr>
+            <td class="tbl-key">although / even though / though</td>
+            <td class="tbl-note">full clause</td>
+            <td class="tbl-eg"><strong>Although</strong> costs rose, output improved.</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">despite / in spite of</td>
+            <td class="tbl-note">noun / gerund (-ing)</td>
+            <td class="tbl-eg"><strong>Despite</strong> rising costs, output improved.</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">whereas / while</td>
+            <td class="tbl-note">full clause (contrast)</td>
+            <td class="tbl-eg"><strong>Whereas</strong> Group A improved, Group B declined.</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">however / nevertheless / nonetheless</td>
+            <td class="tbl-note">sentence adverbial + comma</td>
+            <td class="tbl-eg">The data was limited. <strong>However</strong>, the trends were clear.</td>
+          </tr>
+          <tr>
+            <td class="tbl-key">yet</td>
+            <td class="tbl-note">coordinating conjunction or adverbial</td>
+            <td class="tbl-eg">Costs rose, <strong>yet</strong> output improved.</td>
+          </tr>
+        </table>
+        <div class="grammar-note">
+          ⚡ <strong>Despite / in spite of</strong> cannot be followed by a full clause. The most common Part 2 error is writing <em>despite + clause</em> instead of <em>despite + -ing</em> or <em>despite the fact that + clause</em>.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /accordion -->
+
+
+  <!-- ══════════════════════════════════════════
+       TEXT 1
+  ═══════════════════════════════════════════ -->
+  <div class="sec-label">Open Cloze &mdash; Text 1 of 2</div>
+
+  <div class="cloze-block">
+    <div class="instr">
+      Read the complete sentence before filling each gap. Ask yourself: <strong>what grammatical role is missing?</strong> One word only. No contractions.
+    </div>
+
+    <div class="cloze-meta">
+      <span class="cloze-title">Remote Work and Office Culture</span>
+      <span class="cloze-range">Gaps 1 – 8</span>
+    </div>
+
+    <div class="cloze-text">
+      Studies comparing remote and office-based workers have found that productivity levels are not always
+      <span class="gap-wrap"><span class="gap-n">1</span><input class="gap" id="g1" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv1" onclick="revealItem(1)" type="button" title="Reveal answer">?</button>
+      straightforward as employers once assumed. Remote workers tend to report
+      <span class="gap-wrap"><span class="gap-n">2</span><input class="gap" id="g2" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv2" onclick="revealItem(2)" type="button" title="Reveal answer">?</button>
+      higher levels of individual focus than their office-based counterparts, though the reverse is often true when it comes to collaborative tasks. Collaborative output from office teams was consistently stronger
+      <span class="gap-wrap"><span class="gap-n">3</span><input class="gap" id="g3" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv3" onclick="revealItem(3)" type="button" title="Reveal answer">?</button>
+      that of remote teams, particularly on projects requiring rapid iteration.
+      <span class="gap-wrap"><span class="gap-n">4</span><input class="gap" id="g4" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv4" onclick="revealItem(4)" type="button" title="Reveal answer">?</button>
+      remote workers showed higher individual output, they reported significantly greater difficulty maintaining clear boundaries between professional and personal time.
+      <span class="gap-wrap"><span class="gap-n">5</span><input class="gap" id="g5" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv5" onclick="revealItem(5)" type="button" title="Reveal answer">?</button>
+      longer employees worked remotely, the more pronounced this blurring of boundaries became.
+      <span class="gap-wrap"><span class="gap-n">6</span><input class="gap" id="g6" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv6" onclick="revealItem(6)" type="button" title="Reveal answer">?</button>
+      with office-based norms, remote work culture appears to demand a
+      <span class="gap-wrap"><span class="gap-n">7</span><input class="gap" id="g7" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv7" onclick="revealItem(7)" type="button" title="Reveal answer">?</button>
+      higher degree of personal self-regulation than most employers had anticipated,
+      <span class="gap-wrap"><span class="gap-n">8</span><input class="gap" id="g8" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv8" onclick="revealItem(8)" type="button" title="Reveal answer">?</button>
+      the widespread assumption that greater autonomy automatically leads to greater efficiency.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkText(1)" type="button">Check Answers</button>
+      <div class="score" id="sc1"></div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       TEXT 2
+  ═══════════════════════════════════════════ -->
+  <div class="sec-label">Open Cloze &mdash; Text 2 of 2</div>
+
+  <div class="cloze-block">
+    <div class="cloze-meta">
+      <span class="cloze-title">Renewable Energy and Economic Growth</span>
+      <span class="cloze-range">Gaps 9 – 16</span>
+    </div>
+
+    <div class="cloze-text">
+      Early projections for renewable energy's contribution to GDP growth were not
+      <span class="gap-wrap"><span class="gap-n">9</span><input class="gap" id="g9" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv9" onclick="revealItem(9)" type="button" title="Reveal answer">?</button>
+      optimistic as the technology's advocates had hoped, at least in the short term. Job creation in the renewable sector has been modest
+      <span class="gap-wrap"><span class="gap-n">10</span><input class="gap" id="g10" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv10" onclick="revealItem(10)" type="button" title="Reveal answer">?</button>
+      to the scale of investment involved, though economists note that long-term returns are likely to be
+      <span class="gap-wrap"><span class="gap-n">11</span><input class="gap" id="g11" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv11" onclick="revealItem(11)" type="button" title="Reveal answer">?</button>
+      more substantial. Some nations have made faster progress
+      <span class="gap-wrap"><span class="gap-n">12</span><input class="gap" id="g12" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv12" onclick="revealItem(12)" type="button" title="Reveal answer">?</button>
+      others, largely due to differences in existing grid infrastructure and government policy frameworks. These disparities are considerable;
+      <span class="gap-wrap"><span class="gap-n">13</span><input class="gap" id="g13" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv13" onclick="revealItem(13)" type="button" title="Reveal answer">?</button>
+      , analysts caution against drawing overly broad conclusions from any single national case study.
+      <span class="gap-wrap"><span class="gap-n">14</span><input class="gap" id="g14" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv14" onclick="revealItem(14)" type="button" title="Reveal answer">?</button>
+      more deeply a government commits to renewable infrastructure, the more resilient its energy supply tends to become over time. This stands in
+      <span class="gap-wrap"><span class="gap-n">15</span><input class="gap" id="g15" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv15" onclick="revealItem(15)" type="button" title="Reveal answer">?</button>
+      to the short-term thinking that has historically dominated energy policy. The evidence now suggests that fossil fuel dependency is
+      <span class="gap-wrap"><span class="gap-n">16</span><input class="gap" id="g16" type="text" autocomplete="off" spellcheck="false" placeholder="___"></span>
+      <button class="reveal-btn" id="rv16" onclick="revealItem(16)" type="button" title="Reveal answer">?</button>
+      more economically rational than the renewable alternatives it has long displaced.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkText(2)" type="button">Check Answers</button>
+      <div class="score" id="sc2"></div>
+    </div>
+  </div>
+
+
+  <div class="divider"></div>
+
+
+  <!-- ══════════════════════════════════════════
+       PHRASAL VERBS
+  ═══════════════════════════════════════════ -->
+  <div class="sec-label">Phrasal Verbs &mdash; 15 min</div>
+
+  <div>
+    <div class="pv-header">
+      <h2>Comparison &amp; Evaluation</h2>
+      <span class="pv-badge">Semantic Field</span>
+    </div>
+
+    <div class="pv-grid">
+      <div class="pv-card">
+        <div class="verb">measure up (to)</div>
+        <div class="def">to be as good as expected or required; to meet a standard</div>
+      </div>
+      <div class="pv-card">
+        <div class="verb">stand out (from)</div>
+        <div class="def">to be noticeably better or different from others in a group</div>
+      </div>
+      <div class="pv-card">
+        <div class="verb">weigh up</div>
+        <div class="def">to carefully consider the pros and cons of two or more options</div>
+      </div>
+      <div class="pv-card">
+        <div class="verb">set apart (from)</div>
+        <div class="def">to make someone or something clearly different or superior</div>
+      </div>
+      <div class="pv-card">
+        <div class="verb">come close (to)</div>
+        <div class="def">to almost match or equal something; to nearly achieve a standard</div>
+      </div>
+      <div class="pv-card">
+        <div class="verb">size up</div>
+        <div class="def">to carefully assess or evaluate someone or something</div>
+      </div>
+    </div>
+
+    <div class="instr">
+      Complete each sentence with the correct phrasal verb in the right form. Each verb is used <strong>once only</strong>. You may need to change the verb form.
+    </div>
+
+    <div class="pv-items">
+
+      <div class="pv-item">
+        <span class="item-n">17</span>
+        Before committing to either proposal, the board spent several weeks
+        <input class="pv-gap" id="pv17" type="text" autocomplete="off" spellcheck="false" placeholder="___">
+        <button class="reveal-btn" id="rv17" onclick="revealItem(17)" type="button" title="Reveal answer">?</button>
+        the potential risks and benefits of each approach.
+      </div>
+
+      <div class="pv-item">
+        <span class="item-n">18</span>
+        What truly
+        <input class="pv-gap" id="pv18" type="text" autocomplete="off" spellcheck="false" placeholder="___">
+        <button class="reveal-btn" id="rv18" onclick="revealItem(18)" type="button" title="Reveal answer">?</button>
+        this candidate from the others was her ability to present complex data in an immediately accessible way.
+      </div>
+
+      <div class="pv-item">
+        <span class="item-n">19</span>
+        The prototype was impressive, but it simply did not
+        <input class="pv-gap" id="pv19" type="text" autocomplete="off" spellcheck="false" placeholder="___">
+        <button class="reveal-btn" id="rv19" onclick="revealItem(19)" type="button" title="Reveal answer">?</button>
+        the standards set by its predecessor.
+      </div>
+
+      <div class="pv-item">
+        <span class="item-n">20</span>
+        The experienced negotiator took a few minutes to
+        <input class="pv-gap" id="pv20" type="text" autocomplete="off" spellcheck="false" placeholder="___">
+        <button class="reveal-btn" id="rv20" onclick="revealItem(20)" type="button" title="Reveal answer">?</button>
+        her opponent before making her opening offer.
+      </div>
+
+      <div class="pv-item">
+        <span class="item-n">21</span>
+        Among all the entries submitted, only two
+        <input class="pv-gap" id="pv21" type="text" autocomplete="off" spellcheck="false" placeholder="___">
+        <button class="reveal-btn" id="rv21" onclick="revealItem(21)" type="button" title="Reveal answer">?</button>
+        as genuinely original — the rest were competent but unremarkable.
+      </div>
+
+      <div class="pv-item">
+        <span class="item-n">22</span>
+        No other submission even
+        <input class="pv-gap" id="pv22" type="text" autocomplete="off" spellcheck="false" placeholder="___">
+        <button class="reveal-btn" id="rv22" onclick="revealItem(22)" type="button" title="Reveal answer">?</button>
+        matching the quality of the winning design, which was unanimously praised by the panel.
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkPV()" type="button">Check Phrasal Verbs</button>
+      <div class="score" id="scPV"></div>
+    </div>
+
+    <div class="scenario">
+      <h3>The Scenario — Production Task</h3>
+      <p>
+        A recruitment panel is evaluating three candidates for a senior research position. The candidates differ significantly in experience, communication skills, and academic output. Use all six phrasal verbs to describe the panel's deliberation and final decision in 6–8 sentences. You may change the verb forms.
+      </p>
+      <div class="pv-chips">
+        <span class="pv-chip">measure up</span>
+        <span class="pv-chip">stand out</span>
+        <span class="pv-chip">weigh up</span>
+        <span class="pv-chip">set apart</span>
+        <span class="pv-chip">come close</span>
+        <span class="pv-chip">size up</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       WRAP-UP
+  ═══════════════════════════════════════════ -->
+  <div class="wrapup">
+    <div class="sec-label">Wrap-up</div>
+    <div class="wrapup-qs">
+      <div class="wrapup-q">
+        <span class="q-label">Metacognitive</span>
+        Gaps 4, 8, and 13 did not test comparison structures at all. Did you identify this before or after checking? What in the surrounding sentence told you what grammatical role was needed?
+      </div>
+      <div class="wrapup-q">
+        <span class="q-label">Structure Contrast</span>
+        Write two sentences: one using <em>by contrast</em> and one using <em>in contrast to</em>. Then explain in one sentence why the two cannot be swapped in your examples.
+      </div>
+      <div class="wrapup-q">
+        <span class="q-label">Production</span>
+        Choose any comparison structure from Panel 1 of the grammar reference that did not appear in today's texts. Write two original sentences using it — one academic register, one neutral.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ── ACCORDION ──────────────────────────────────────────
+  function toggle(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  // ── ANSWER KEYS ────────────────────────────────────────
+  const clozeKey = {
+    g1:  ['as'],
+    g2:  ['far', 'much', 'considerably', 'significantly', 'markedly', 'rather', 'slightly'],
+    g3:  ['than'],
+    g4:  ['whereas', 'while', 'although', 'though'],
+    g5:  ['the'],
+    g6:  ['compared'],
+    g7:  ['much', 'far', 'considerably', 'significantly', 'markedly', 'rather'],
+    g8:  ['despite'],
+    g9:  ['as'],
+    g10: ['relative', 'compared'],
+    g11: ['considerably', 'far', 'much'],
+    g12: ['than'],
+    g13: ['however', 'nevertheless', 'nonetheless'],
+    g14: ['the'],
+    g15: ['contrast'],
+    g16: ['no']
+  };
+
+  const pvKey = {
+    pv17: ['weighing up', 'weigh up'],
+    pv18: ['set apart'],
+    pv19: ['measure up to', 'measure up'],
+    pv20: ['size up'],
+    pv21: ['stood out', 'stand out'],
+    pv22: ['came close to', 'came close', 'come close to', 'come close']
+  };
+
+  const resolved = {};
+  let everChecked1 = false;
+  let everChecked2 = false;
+  let everCheckedPV = false;
+
+  function norm(s) { return s.trim().toLowerCase(); }
+
+  // ── CHECK TEXTS ────────────────────────────────────────
+  function checkText(n) {
+    const ids = n === 1
+      ? ['g1','g2','g3','g4','g5','g6','g7','g8']
+      : ['g9','g10','g11','g12','g13','g14','g15','g16'];
+
+    let correct = 0;
+    ids.forEach(id => {
+      if (resolved[id]) { correct++; return; }
+      const input = document.getElementById(id);
+      if (!input) return;
+      const val = norm(input.value);
+      const isOk = clozeKey[id].map(norm).includes(val);
+      input.classList.remove('ok', 'err', 'revealed');
+      input.classList.add(isOk ? 'ok' : 'err');
+      if (isOk) {
+        resolved[id] = true;
+        correct++;
+        const num = id.replace('g', '');
+        const rv = document.getElementById('rv' + num);
+        if (rv) rv.classList.remove('visible');
+      }
+    });
+
+    const sc = document.getElementById('sc' + n);
+    sc.textContent = correct + ' / 8 correct';
+    sc.className = 'score show ' + (correct >= 6 ? 'good' : 'poor');
+
+    if (n === 1) everChecked1 = true;
+    else everChecked2 = true;
+
+    ids.forEach(id => {
+      if (resolved[id]) return;
+      const input = document.getElementById(id);
+      if (!input || input.value.trim() === '') return;
+      const num = id.replace('g', '');
+      const rv = document.getElementById('rv' + num);
+      if (rv) rv.classList.add('visible');
+    });
+  }
+
+  // ── CHECK PHRASAL VERBS ────────────────────────────────
+  function checkPV() {
+    const ids = Object.keys(pvKey);
+    let correct = 0;
+
+    ids.forEach(id => {
+      if (resolved[id]) { correct++; return; }
+      const input = document.getElementById(id);
+      if (!input) return;
+      const val = norm(input.value);
+      const isOk = pvKey[id].map(norm).includes(val);
+      input.classList.remove('ok', 'err', 'revealed');
+      input.classList.add(isOk ? 'ok' : 'err');
+      if (isOk) {
+        resolved[id] = true;
+        correct++;
+        const num = id.replace('pv', '');
+        const rv = document.getElementById('rv' + num);
+        if (rv) rv.classList.remove('visible');
+      }
+    });
+
+    const sc = document.getElementById('scPV');
+    sc.textContent = correct + ' / 6 correct';
+    sc.className = 'score show ' + (correct >= 5 ? 'good' : 'poor');
+
+    everCheckedPV = true;
+    ids.forEach(id => {
+      if (resolved[id]) return;
+      const input = document.getElementById(id);
+      if (!input || input.value.trim() === '') return;
+      const num = id.replace('pv', '');
+      const rv = document.getElementById('rv' + num);
+      if (rv) rv.classList.add('visible');
+    });
+  }
+
+  // ── REVEAL ─────────────────────────────────────────────
+  function revealItem(n) {
+    // n is the numeric suffix — determine whether cloze (1-16) or PV (17-22)
+    const isPV    = n >= 17;
+    const id      = isPV ? 'pv' + n : 'g' + n;
+    const keyMap  = isPV ? pvKey : clozeKey;
+
+    if (resolved[id]) return;
+    resolved[id] = true;
+
+    const input = document.getElementById(id);
+    if (input) {
+      input.value = keyMap[id][0];
+      input.classList.remove('ok', 'err');
+      input.classList.add('revealed');
+      input.disabled = true;
+    }
+
+    const rv = document.getElementById('rv' + n);
+    if (rv) rv.classList.remove('visible');
+  }
+</script>
+
+</body>
+</html>

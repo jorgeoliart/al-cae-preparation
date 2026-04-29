@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAE UoE — Part 1 — Comparison Structures</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #080b10;
+      --surface:      #0f1318;
+      --surface-2:    #161c24;
+      --border:       rgba(167,139,250,0.14);
+      --accent:       #a78bfa;
+      --accent-dim:   rgba(167,139,250,0.10);
+      --accent-glow:  rgba(167,139,250,0.22);
+      --correct:      #34d399;
+      --correct-bg:   rgba(52,211,153,0.09);
+      --incorrect:    #f87171;
+      --incorrect-bg: rgba(248,113,113,0.08);
+      --reveal:       #f59e0b;
+      --reveal-bg:    rgba(245,158,11,0.10);
+      --text:         #e2e8f0;
+      --muted:        #7c8699;
+      --dim:          #4a5568;
+      --font-d:       'Syne', sans-serif;
+      --font-b:       'Instrument Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .page-header {
+      padding: 52px 24px 36px;
+      max-width: 880px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      padding: 4px 11px;
+      border-radius: 4px;
+      margin-bottom: 22px;
+    }
+    .page-header h1 {
+      font-family: var(--font-d);
+      font-size: clamp(28px, 4.5vw, 42px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+    }
+    .page-header .sub {
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
+
+    .main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 44px 24px 90px;
+    }
+
+    .sec-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .sec-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── ACCORDION ── */
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 52px;
+    }
+    .acc-panel { border-bottom: 1px solid var(--border); }
+    .acc-panel:last-child { border-bottom: none; }
+    .acc-trigger {
+      width: 100%;
+      background: var(--surface);
+      border: none;
+      padding: 17px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.18s;
+    }
+    .acc-trigger:hover { background: var(--surface-2); }
+    .acc-trigger-title {
+      font-family: var(--font-d);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .acc-arrow {
+      font-size: 11px;
+      color: var(--muted);
+      transition: transform 0.22s;
+      flex-shrink: 0;
+    }
+    .acc-panel.open .acc-arrow { transform: rotate(180deg); }
+    .acc-body {
+      display: none;
+      padding: 24px 26px 28px;
+      background: var(--bg);
+    }
+    .acc-panel.open .acc-body { display: block; }
+
+    /* ── TRAP CARDS ── */
+    .trap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .trap-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+    .trap-card .trap-name {
+      font-family: var(--font-d);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 7px;
+    }
+    .trap-card .trap-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 9px;
+    }
+    .trap-card .trap-eg {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      border-left: 2px solid var(--accent-glow);
+      padding-left: 10px;
+    }
+    .trap-card .trap-eg em { color: var(--correct); font-style: normal; font-weight: 600; }
+    .trap-card .trap-eg s  { color: var(--incorrect); text-decoration-color: var(--incorrect); }
+
+    .strategy-note {
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      padding: 11px 15px;
+      border-radius: 0 6px 6px 0;
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+    .strategy-note strong { color: var(--accent); }
+
+    /* ── INSTRUCTION BOX ── */
+    .instr {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      border-radius: 8px;
+      padding: 13px 17px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+    .instr strong { color: var(--accent); }
+
+    /* ── MCQ BLOCK ── */
+    .mcq-block { margin-bottom: 52px; }
+    .mcq-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 14px;
+    }
+    .mcq-title {
+      font-family: var(--font-d);
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .mcq-range {
+      font-family: var(--font-d);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── PASSAGE ── */
+    .passage {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 30px;
+      font-size: 15.5px;
+      line-height: 2.2;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+
+    .gap-inline {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 2px;
+    }
+    .gap-n {
+      font-family: var(--font-d);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      border-right: none;
+      border-radius: 3px 0 0 3px;
+      padding: 3px 5px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .gap-answer {
+      font-family: var(--font-d);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 0 4px 4px 0;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--muted);
+      min-width: 110px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .gap-answer.selected  { border-color: var(--accent);    background: var(--accent-dim);    color: var(--accent);  }
+    .gap-answer.ok        { border-color: var(--correct);   background: var(--correct-bg);    color: var(--correct); cursor: default; }
+    .gap-answer.err       { border-color: var(--incorrect); background: var(--incorrect-bg);  color: var(--incorrect); }
+    .gap-answer.revealed  { border-color: var(--reveal);    background: var(--reveal-bg);     color: var(--reveal);  cursor: default; }
+
+    /* ── OPTIONS ── */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px 32px;
+      margin-bottom: 22px;
+    }
+    .option-item { display: flex; flex-direction: column; gap: 7px; }
+    .option-label {
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .opt-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .option-btns {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .opt-btn {
+      font-family: var(--font-d);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .opt-btn .letter {
+      font-size: 9px;
+      color: var(--muted);
+      background: var(--surface-2);
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .opt-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .opt-btn.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+    .opt-btn.selected .letter { color: var(--accent); background: rgba(167,139,250,0.2); }
+    .opt-btn.ok  { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); cursor: default; }
+    .opt-btn.ok .letter  { color: var(--correct); background: rgba(52,211,153,0.15); }
+    .opt-btn.err { border-color: var(--incorrect); background: var(--incorrect-bg); color: var(--incorrect); }
+    .opt-btn.err .letter { color: var(--incorrect); background: rgba(248,113,113,0.15); }
+    .opt-btn.revealed { border-color: var(--reveal); background: var(--reveal-bg); color: var(--reveal); cursor: default; }
+    .opt-btn.revealed .letter { color: var(--reveal); background: rgba(245,158,11,0.18); }
+    .opt-btn.neutral { opacity: 0.38; cursor: default; }
+    .opt-btn:disabled { cursor: default; }
+
+    /* ── REVEAL BUTTON ── */
+    .reveal-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--dim);
+      color: var(--muted);
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
+      padding: 0;
+      line-height: 1;
+    }
+    .reveal-btn.visible { display: inline-flex; }
+    .reveal-btn:hover { border-color: var(--reveal); color: var(--reveal); background: var(--reveal-bg); }
+
+    /* ── DEBRIEF ── */
+    .debrief-panel {
+      display: none;
+      margin-top: 7px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 12px 15px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .debrief-panel.visible { display: block; }
+    .debrief-panel .correct-label {
+      font-family: var(--font-d);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--correct);
+      margin-bottom: 5px;
+    }
+    .debrief-panel strong { color: var(--text); }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 52px 0; }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+    .btn-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--accent-dim);
+      border: 1.5px solid var(--accent-glow);
+      color: var(--accent);
+      font-family: var(--font-d);
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      padding: 9px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+    }
+    .btn-check:hover { background: rgba(167,139,250,0.18); border-color: var(--accent); }
+
+    .score {
+      display: none;
+      font-family: var(--font-d);
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 9px 16px;
+      border-radius: 6px;
+    }
+    .score.show { display: inline-flex; align-items: center; gap: 8px; }
+    .score.good { background: var(--correct-bg);   color: var(--correct);   border: 1px solid rgba(52,211,153,0.28); }
+    .score.poor { background: var(--incorrect-bg); color: var(--incorrect); border: 1px solid rgba(248,113,113,0.28); }
+
+    /* ── WRAP-UP ── */
+    .wrapup { margin-top: 52px; padding-top: 36px; border-top: 1px solid var(--border); }
+    .wrapup-qs { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+    .wrapup-q {
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      padding: 13px 17px;
+      border-radius: 0 8px 8px 0;
+      font-size: 14.5px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrapup-q .q-label {
+      display: block;
+      font-family: var(--font-d);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .options-grid { grid-template-columns: 1fr; }
+      .trap-grid    { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="badge">Use of English &middot; Part 1 &middot; Comparison Structures</div>
+  <h1>Comparison Structures</h1>
+  <p class="sub">Multiple choice cloze &mdash; degree adverbs, fixed collocations &amp; complementation &nbsp;&middot;&nbsp; Two texts &times; 8 items</p>
+</header>
+
+<main class="main">
+
+  <!-- ══════════════════════════════════════════
+       STRATEGY PANEL
+  ═══════════════════════════════════════════ -->
+  <div class="sec-label">Exam Strategy</div>
+
+  <div class="accordion">
+    <div class="acc-panel" id="sp1">
+      <button class="acc-trigger" onclick="toggle('sp1')" type="button">
+        <span class="acc-trigger-title">The Four Trap Types in Part 1</span>
+        <span class="acc-arrow">▼</span>
+      </button>
+      <div class="acc-body">
+        <div class="trap-grid">
+
+          <div class="trap-card">
+            <div class="trap-name">Trap 1 — Degree Adverb Discrimination</div>
+            <div class="trap-desc">Several adverbs intensify comparatives — but they differ in degree, register, and collocational range. The wrong option is grammatically possible but doesn't fit the register or meaning of the surrounding text.</div>
+            <div class="trap-eg">
+              The results were _____ more significant than expected.<br>
+              <em>considerably</em> ✔ — neutral, academic<br>
+              <s>hugely</s> — too informal for this register<br>
+              <s>much</s> — possible but weaker degree signal
+            </div>
+          </div>
+
+          <div class="trap-card">
+            <div class="trap-name">Trap 2 — Fixed Collocation</div>
+            <div class="trap-desc">Comparison expressions are often fixed — only one preposition or particle collocates correctly. Near-synonyms look plausible but break the fixed phrase.</div>
+            <div class="trap-eg">
+              The new model bears little resemblance _____ its predecessor.<br>
+              <em>to</em> ✔ — <em>bear resemblance to</em> is fixed<br>
+              <s>with</s> &nbsp;<s>from</s> &nbsp;<s>of</s> — none collocate
+            </div>
+          </div>
+
+          <div class="trap-card">
+            <div class="trap-name">Trap 3 — Complementation Frame</div>
+            <div class="trap-desc">Near-synonym comparison verbs require different prepositions or clause structures. The wrong option means roughly the same thing but demands a different grammatical frame than the sentence provides.</div>
+            <div class="trap-eg">
+              The two approaches differ _____ one another in important ways.<br>
+              <em>from</em> ✔ — <em>differ from</em> is the fixed frame<br>
+              <s>with</s> — <em>differ with</em> means to disagree<br>
+              <s>to</s> — used with <em>similar/identical</em>, not <em>differ</em>
+            </div>
+          </div>
+
+          <div class="trap-card">
+            <div class="trap-name">Trap 4 — Register &amp; Connotation</div>
+            <div class="trap-desc">All four options are grammatically possible, but one belongs to the wrong register or carries a connotation that contradicts the meaning or tone of the sentence.</div>
+            <div class="trap-eg">
+              This stands in _____ contrast to the optimism of the previous decade.<br>
+              <em>stark</em> ✔ — precise C1 collocation for strong contrast<br>
+              <s>big</s> — too informal<br>
+              <s>hard</s> — wrong collocation entirely
+            </div>
+          </div>
+
+        </div>
+        <div class="strategy-note">
+          ⚡ <strong>Procedure:</strong> identify what follows the gap before reading the options — a preposition, a noun, a comparative adjective? That immediately filters out two options in most cases. Then use register and degree to choose between the remaining two.
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       TEXT 1
+  ═══════════════════════════════════════════ -->
+  <div class="sec-label">Multiple Choice Cloze &mdash; Text 1 of 2</div>
+
+  <div class="mcq-block">
+    <div class="instr">
+      Read the full sentence before looking at the options. For each gap, decide which word fits the meaning, collocation, and grammar of the surrounding text. Only one answer is correct.
+    </div>
+
+    <div class="mcq-meta">
+      <span class="mcq-title">Urban Growth and Quality of Life</span>
+      <span class="mcq-range">Questions 1 – 8</span>
+    </div>
+
+    <div class="passage" id="passage1">
+      A decade-long study of urban development across twelve European cities has found that the relationship between population growth and quality of life is
+      <span class="gap-inline"><span class="gap-n">1</span><span class="gap-answer" id="ga1">_______</span></span>
+      more complex than early models had suggested. The cities that performed best on wellbeing indicators bore
+      <span class="gap-inline"><span class="gap-n">2</span><span class="gap-answer" id="ga2">_______</span></span>
+      resemblance to the sprawling, car-dependent urban forms that dominated growth in the previous century. Researchers were careful to
+      <span class="gap-inline"><span class="gap-n">3</span><span class="gap-answer" id="ga3">_______</span></span>
+      between cities that had grown organically and those that had expanded through deliberate policy intervention, as the two trajectories produced
+      <span class="gap-inline"><span class="gap-n">4</span><span class="gap-answer" id="ga4">_______</span></span>
+      different outcomes for residents. The findings were notably
+      <span class="gap-inline"><span class="gap-n">5</span><span class="gap-answer" id="ga5">_______</span></span>
+      from what urban planners had previously assumed, challenging the long-held view that density alone determines liveability. By
+      <span class="gap-inline"><span class="gap-n">6</span><span class="gap-answer" id="ga6">_______</span></span>
+      , cities that had invested heavily in green infrastructure showed
+      <span class="gap-inline"><span class="gap-n">7</span><span class="gap-answer" id="ga7">_______</span></span>
+      the same improvements in resident satisfaction regardless of overall size, suggesting that the quality of public space may be
+      <span class="gap-inline"><span class="gap-n">8</span><span class="gap-answer" id="ga8">_______</span></span>
+      more important than population density in determining urban wellbeing.
+    </div>
+
+    <div class="options-grid">
+
+      <div class="option-item">
+        <div class="option-label">1 &nbsp; …is _____ more complex than…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob1">
+            <button class="opt-btn" data-q="1" data-val="A" data-word="vastly"        onclick="selectQ(1,'A')" type="button"><span class="letter">A</span> vastly</button>
+            <button class="opt-btn" data-q="1" data-val="B" data-word="greatly"       onclick="selectQ(1,'B')" type="button"><span class="letter">B</span> greatly</button>
+            <button class="opt-btn" data-q="1" data-val="C" data-word="considerably"  onclick="selectQ(1,'C')" type="button"><span class="letter">C</span> considerably</button>
+            <button class="opt-btn" data-q="1" data-val="D" data-word="highly"        onclick="selectQ(1,'D')" type="button"><span class="letter">D</span> highly</button>
+          </div>
+          <button class="reveal-btn" id="rvb1" onclick="revealMCQ(1)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db1">
+          <div class="correct-label">Correct: C — considerably</div>
+          <strong>Trap: Degree adverb discrimination.</strong> All four modify adjectives or comparatives, but only <em>considerably</em> combines neutral academic register with a strong degree signal appropriate here. <em>Vastly</em> overstates the degree and is informal. <em>Greatly</em> collocates with verbs (<em>greatly improved</em>) not comparatives. <em>Highly</em> modifies adjectives directly (<em>highly complex</em>) but not comparative forms (<em>highly more complex</em> is ungrammatical).
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">2 &nbsp; …bore _____ resemblance to…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob2">
+            <button class="opt-btn" data-q="2" data-val="A" data-word="scarce"   onclick="selectQ(2,'A')" type="button"><span class="letter">A</span> scarce</button>
+            <button class="opt-btn" data-q="2" data-val="B" data-word="slight"   onclick="selectQ(2,'B')" type="button"><span class="letter">B</span> slight</button>
+            <button class="opt-btn" data-q="2" data-val="C" data-word="minor"    onclick="selectQ(2,'C')" type="button"><span class="letter">C</span> minor</button>
+            <button class="opt-btn" data-q="2" data-val="D" data-word="little"   onclick="selectQ(2,'D')" type="button"><span class="letter">D</span> little</button>
+          </div>
+          <button class="reveal-btn" id="rvb2" onclick="revealMCQ(2)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db2">
+          <div class="correct-label">Correct: D — little</div>
+          <strong>Trap: Fixed collocation.</strong> <em>Bear little resemblance to</em> and <em>bear no resemblance to</em> are the fixed expressions at C1. <em>Resemblance</em> is an uncountable noun here — <em>scarce, slight</em>, and <em>minor</em> collocate with countable or physical nouns but not with abstract uncountable nouns in this fixed phrase.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">3 &nbsp; …careful to _____ between cities that…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob3">
+            <button class="opt-btn" data-q="3" data-val="A" data-word="separate"      onclick="selectQ(3,'A')" type="button"><span class="letter">A</span> separate</button>
+            <button class="opt-btn" data-q="3" data-val="B" data-word="distinguish"   onclick="selectQ(3,'B')" type="button"><span class="letter">B</span> distinguish</button>
+            <button class="opt-btn" data-q="3" data-val="C" data-word="contrast"      onclick="selectQ(3,'C')" type="button"><span class="letter">C</span> contrast</button>
+            <button class="opt-btn" data-q="3" data-val="D" data-word="differentiate" onclick="selectQ(3,'D')" type="button"><span class="letter">D</span> differentiate</button>
+          </div>
+          <button class="reveal-btn" id="rvb3" onclick="revealMCQ(3)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db3">
+          <div class="correct-label">Correct: B — distinguish</div>
+          <strong>Trap: Complementation frame.</strong> The frame is <em>verb + between</em>. <em>Distinguish between</em> is the standard academic expression for making intellectual distinctions. <em>Differentiate between</em> also works — see note below. <em>Separate</em> takes <em>from</em>, not <em>between</em>. <em>Contrast</em> takes <em>with</em> or appears without a preposition when the object follows directly — <em>contrast between</em> is not the standard active frame.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">4 &nbsp; …produced _____ different outcomes…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob4">
+            <button class="opt-btn" data-q="4" data-val="A" data-word="markedly"      onclick="selectQ(4,'A')" type="button"><span class="letter">A</span> markedly</button>
+            <button class="opt-btn" data-q="4" data-val="B" data-word="deeply"        onclick="selectQ(4,'B')" type="button"><span class="letter">B</span> deeply</button>
+            <button class="opt-btn" data-q="4" data-val="C" data-word="strongly"      onclick="selectQ(4,'C')" type="button"><span class="letter">C</span> strongly</button>
+            <button class="opt-btn" data-q="4" data-val="D" data-word="severely"      onclick="selectQ(4,'D')" type="button"><span class="letter">D</span> severely</button>
+          </div>
+          <button class="reveal-btn" id="rvb4" onclick="revealMCQ(4)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db4">
+          <div class="correct-label">Correct: A — markedly</div>
+          <strong>Trap: Degree adverb collocation.</strong> <em>Markedly different</em> is a fixed C1 collocation meaning noticeably or significantly different — standard in academic writing. <em>Deeply different</em> collocates with emotional or values-based differences, not research outcomes. <em>Strongly different</em> is not a standard collocation in formal English. <em>Severely</em> collocates with negative states (<em>severely damaged</em>) not with <em>different</em>.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">5 &nbsp; …notably _____ from what planners had assumed…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob5">
+            <button class="opt-btn" data-q="5" data-val="A" data-word="distinct"   onclick="selectQ(5,'A')" type="button"><span class="letter">A</span> distinct</button>
+            <button class="opt-btn" data-q="5" data-val="B" data-word="unlike"     onclick="selectQ(5,'B')" type="button"><span class="letter">B</span> unlike</button>
+            <button class="opt-btn" data-q="5" data-val="C" data-word="separate"   onclick="selectQ(5,'C')" type="button"><span class="letter">C</span> separate</button>
+            <button class="opt-btn" data-q="5" data-val="D" data-word="different"  onclick="selectQ(5,'D')" type="button"><span class="letter">D</span> different</button>
+          </div>
+          <button class="reveal-btn" id="rvb5" onclick="revealMCQ(5)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db5">
+          <div class="correct-label">Correct: D — different</div>
+          <strong>Trap: Complementation frame.</strong> The frame is <em>adjective + from</em>. <em>Different from</em> is the standard frame in formal British English. <em>Distinct from</em> also takes <em>from</em> and means clearly separate — but <em>distinct</em> implies two things are categorically separate rather than merely different in degree, which is too strong here. <em>Unlike</em> is a preposition, not an adjective — it cannot follow <em>notably</em>. <em>Separate from</em> describes physical or categorical division, not the meaning required.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">6 &nbsp; _____ , cities that had invested in green…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob6">
+            <button class="opt-btn" data-q="6" data-val="A" data-word="contrast"    onclick="selectQ(6,'A')" type="button"><span class="letter">A</span> contrast</button>
+            <button class="opt-btn" data-q="6" data-val="B" data-word="comparison"  onclick="selectQ(6,'B')" type="button"><span class="letter">B</span> comparison</button>
+            <button class="opt-btn" data-q="6" data-val="C" data-word="opposition"  onclick="selectQ(6,'C')" type="button"><span class="letter">C</span> opposition</button>
+            <button class="opt-btn" data-q="6" data-val="D" data-word="distinction" onclick="selectQ(6,'D')" type="button"><span class="letter">D</span> distinction</button>
+          </div>
+          <button class="reveal-btn" id="rvb6" onclick="revealMCQ(6)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db6">
+          <div class="correct-label">Correct: A — contrast</div>
+          <strong>Trap: Fixed collocation.</strong> <em>By contrast</em> is the fixed discourse marker introducing a contrasting point — it is always <em>by</em>, not <em>in</em>. Note: <em>in contrast</em> exists but takes <em>to</em> immediately after (<em>in contrast to X</em>). Here the gap is a standalone discourse marker with a comma following it, so <em>by contrast</em> is the only valid form. <em>By comparison, by opposition, by distinction</em> are not standard discourse markers.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">7 &nbsp; …showed _____ the same improvements…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob7">
+            <button class="opt-btn" data-q="7" data-val="A" data-word="nearly"    onclick="selectQ(7,'A')" type="button"><span class="letter">A</span> nearly</button>
+            <button class="opt-btn" data-q="7" data-val="B" data-word="broadly"   onclick="selectQ(7,'B')" type="button"><span class="letter">B</span> broadly</button>
+            <button class="opt-btn" data-q="7" data-val="C" data-word="mostly"    onclick="selectQ(7,'C')" type="button"><span class="letter">C</span> mostly</button>
+            <button class="opt-btn" data-q="7" data-val="D" data-word="roughly"   onclick="selectQ(7,'D')" type="button"><span class="letter">D</span> roughly</button>
+          </div>
+          <button class="reveal-btn" id="rvb7" onclick="revealMCQ(7)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db7">
+          <div class="correct-label">Correct: B — broadly</div>
+          <strong>Trap: Register discrimination.</strong> <em>Broadly the same</em> is the formal, academic hedging expression meaning approximately or generally the same — standard in research writing. <em>Nearly the same</em> is neutral but slightly informal. <em>Mostly the same</em> focuses on proportion rather than degree. <em>Roughly the same</em> is informal and implies approximation in measurement — appropriate in spoken or casual register, not academic prose.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">8 &nbsp; …may be _____ more important than density…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob8">
+            <button class="opt-btn" data-q="8" data-val="A" data-word="quite"        onclick="selectQ(8,'A')" type="button"><span class="letter">A</span> quite</button>
+            <button class="opt-btn" data-q="8" data-val="B" data-word="rather"        onclick="selectQ(8,'B')" type="button"><span class="letter">B</span> rather</button>
+            <button class="opt-btn" data-q="8" data-val="C" data-word="somewhat"      onclick="selectQ(8,'C')" type="button"><span class="letter">C</span> somewhat</button>
+            <button class="opt-btn" data-q="8" data-val="D" data-word="far"           onclick="selectQ(8,'D')" type="button"><span class="letter">D</span> far</button>
+          </div>
+          <button class="reveal-btn" id="rvb8" onclick="revealMCQ(8)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db8">
+          <div class="correct-label">Correct: D — far</div>
+          <strong>Trap: Degree adverb before comparative.</strong> The key is the modal <em>may be</em> — the authors are making a cautious but strong claim. <em>Far more important</em> signals a large, confident degree of difference and is the standard formal intensifier before comparatives. <em>Rather more</em> is British formal hedging — too understated for a conclusion. <em>Somewhat more</em> signals a small difference — too weak for the intended emphasis. <em>Quite more important</em> is ungrammatical — <em>quite</em> modifies adjectives directly (<em>quite important</em>) but cannot precede a comparative form.
+        </div>
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkMCQ(1)" type="button">Check Answers</button>
+      <div class="score" id="sc1"></div>
+    </div>
+  </div>
+
+
+  <div class="divider"></div>
+
+
+  <!-- ══════════════════════════════════════════
+       TEXT 2
+  ═══════════════════════════════════════════ -->
+  <div class="sec-label">Multiple Choice Cloze &mdash; Text 2 of 2</div>
+
+  <div class="mcq-block">
+    <div class="mcq-meta">
+      <span class="mcq-title">Technology and Human Productivity</span>
+      <span class="mcq-range">Questions 9 – 16</span>
+    </div>
+
+    <div class="passage" id="passage2">
+      A series of studies examining the impact of digital tools on workplace productivity has produced results that are
+      <span class="gap-inline"><span class="gap-n">9</span><span class="gap-answer" id="ga9">_______</span></span>
+      less dramatic than the technology sector's own projections had implied. The latest report
+      <span class="gap-inline"><span class="gap-n">10</span><span class="gap-answer" id="ga10">_______</span></span>
+      sharply with earlier research that had championed unrestricted digital access as a straightforward productivity multiplier. Its authors noted that the outcomes bore
+      <span class="gap-inline"><span class="gap-n">11</span><span class="gap-answer" id="ga11">_______</span></span>
+      resemblance to what proponents had promised, and called earlier claims
+      <span class="gap-inline"><span class="gap-n">12</span><span class="gap-answer" id="ga12">_______</span></span>
+      question. However, the new findings were broadly
+      <span class="gap-inline"><span class="gap-n">13</span><span class="gap-answer" id="ga13">_______</span></span>
+      with a growing body of independent research suggesting that the relationship between technology and performance is highly context-dependent. The report stands in
+      <span class="gap-inline"><span class="gap-n">14</span><span class="gap-answer" id="ga14">_______</span></span>
+      contrast to the optimism of a decade ago, when digital transformation was widely seen as an unqualified good. The productivity margin attributable to digital tools was
+      <span class="gap-inline"><span class="gap-n">15</span><span class="gap-answer" id="ga15">_______</span></span>
+      than the researchers had anticipated, and the gap between high-performing and low-performing teams appeared to differ
+      <span class="gap-inline"><span class="gap-n">16</span><span class="gap-answer" id="ga16">_______</span></span>
+      more by management quality than by technology access.
+    </div>
+
+    <div class="options-grid">
+
+      <div class="option-item">
+        <div class="option-label">9 &nbsp; …results that are _____ less dramatic than…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob9">
+            <button class="opt-btn" data-q="9" data-val="A" data-word="deeply"        onclick="selectQ(9,'A')" type="button"><span class="letter">A</span> deeply</button>
+            <button class="opt-btn" data-q="9" data-val="B" data-word="considerably"  onclick="selectQ(9,'B')" type="button"><span class="letter">B</span> considerably</button>
+            <button class="opt-btn" data-q="9" data-val="C" data-word="strongly"      onclick="selectQ(9,'C')" type="button"><span class="letter">C</span> strongly</button>
+            <button class="opt-btn" data-q="9" data-val="D" data-word="largely"       onclick="selectQ(9,'D')" type="button"><span class="letter">D</span> largely</button>
+          </div>
+          <button class="reveal-btn" id="rvb9" onclick="revealMCQ(9)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db9">
+          <div class="correct-label">Correct: B — considerably</div>
+          <strong>Trap: Degree adverb before comparative.</strong> Same pattern as Q1 — <em>considerably</em> is the neutral academic intensifier for comparatives. <em>Deeply</em> modifies emotional or values-based adjectives (<em>deeply troubled</em>) not comparatives. <em>Strongly</em> does not modify comparative adjective phrases. <em>Largely</em> modifies verbs or adjectives directly (<em>largely irrelevant</em>) but not comparative constructions.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">10 &nbsp; The latest report _____ sharply with earlier research…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob10">
+            <button class="opt-btn" data-q="10" data-val="A" data-word="conflicted"   onclick="selectQ(10,'A')" type="button"><span class="letter">A</span> conflicted</button>
+            <button class="opt-btn" data-q="10" data-val="B" data-word="disagreed"    onclick="selectQ(10,'B')" type="button"><span class="letter">B</span> disagreed</button>
+            <button class="opt-btn" data-q="10" data-val="C" data-word="contrasted"   onclick="selectQ(10,'C')" type="button"><span class="letter">C</span> contrasted</button>
+            <button class="opt-btn" data-q="10" data-val="D" data-word="differed"     onclick="selectQ(10,'D')" type="button"><span class="letter">D</span> differed</button>
+          </div>
+          <button class="reveal-btn" id="rvb10" onclick="revealMCQ(10)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db10">
+          <div class="correct-label">Correct: C — contrasted</div>
+          <strong>Trap: Complementation + collocation.</strong> <em>Contrast sharply with</em> is a fixed academic collocation — the adverb <em>sharply</em> collocates almost exclusively with <em>contrast</em> in this frame. <em>Differed</em> takes <em>from</em>, not <em>with</em>. <em>Conflicted with</em> implies contradiction between claims, not a stylistic or directional comparison. <em>Disagreed</em> takes a human or organisational subject — a report cannot disagree.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">11 &nbsp; …outcomes bore _____ resemblance to…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob11">
+            <button class="opt-btn" data-q="11" data-val="A" data-word="few"     onclick="selectQ(11,'A')" type="button"><span class="letter">A</span> few</button>
+            <button class="opt-btn" data-q="11" data-val="B" data-word="no"      onclick="selectQ(11,'B')" type="button"><span class="letter">B</span> no</button>
+            <button class="opt-btn" data-q="11" data-val="C" data-word="slight"  onclick="selectQ(11,'C')" type="button"><span class="letter">C</span> slight</button>
+            <button class="opt-btn" data-q="11" data-val="D" data-word="scarce"  onclick="selectQ(11,'D')" type="button"><span class="letter">D</span> scarce</button>
+          </div>
+          <button class="reveal-btn" id="rvb11" onclick="revealMCQ(11)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db11">
+          <div class="correct-label">Correct: B — no</div>
+          <strong>Trap: Fixed collocation + uncountable noun.</strong> <em>Bear no resemblance to</em> is a fixed expression. <em>Resemblance</em> is uncountable here — <em>few</em> modifies countable nouns only. <em>Slight resemblance</em> is possible in a different sentence but the context states the outcomes were nothing like what was promised — total absence, not partial similarity. <em>Scarce</em> modifies countable nouns or is used predicatively, not as a pre-modifier before an uncountable noun.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">12 &nbsp; …called earlier claims _____ question…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob12">
+            <button class="opt-btn" data-q="12" data-val="A" data-word="under"   onclick="selectQ(12,'A')" type="button"><span class="letter">A</span> under</button>
+            <button class="opt-btn" data-q="12" data-val="B" data-word="in"      onclick="selectQ(12,'B')" type="button"><span class="letter">B</span> in</button>
+            <button class="opt-btn" data-q="12" data-val="C" data-word="to"      onclick="selectQ(12,'C')" type="button"><span class="letter">C</span> to</button>
+            <button class="opt-btn" data-q="12" data-val="D" data-word="into"    onclick="selectQ(12,'D')" type="button"><span class="letter">D</span> into</button>
+          </div>
+          <button class="reveal-btn" id="rvb12" onclick="revealMCQ(12)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db12">
+          <div class="correct-label">Correct: D — into</div>
+          <strong>Trap: Fixed collocation.</strong> <em>Call into question</em> is the fixed phrase. <em>Call under question</em> is not a standard expression. <em>In question</em> means currently under discussion — it cannot follow <em>called</em> in this active frame. <em>Call to question</em> is not idiomatic in standard British English.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">13 &nbsp; …the new findings were broadly _____ with…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob13">
+            <button class="opt-btn" data-q="13" data-val="A" data-word="comparable"   onclick="selectQ(13,'A')" type="button"><span class="letter">A</span> comparable</button>
+            <button class="opt-btn" data-q="13" data-val="B" data-word="compatible"   onclick="selectQ(13,'B')" type="button"><span class="letter">B</span> compatible</button>
+            <button class="opt-btn" data-q="13" data-val="C" data-word="consistent"   onclick="selectQ(13,'C')" type="button"><span class="letter">C</span> consistent</button>
+            <button class="opt-btn" data-q="13" data-val="D" data-word="compliant"    onclick="selectQ(13,'D')" type="button"><span class="letter">D</span> compliant</button>
+          </div>
+          <button class="reveal-btn" id="rvb13" onclick="revealMCQ(13)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db13">
+          <div class="correct-label">Correct: C — consistent</div>
+          <strong>Trap: Semantic precision + complementation.</strong> <em>Consistent with</em> is the standard academic phrase meaning in agreement with or supported by — exactly what is needed when findings align with other research. <em>Comparable with</em> means similar in size or degree, not alignment of conclusions. <em>Compatible with</em> means not contradicted by — possible but weaker; it implies absence of conflict rather than positive agreement. <em>Compliant with</em> refers to rules or regulations, not research findings.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">14 &nbsp; The report stands in _____ contrast to…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob14">
+            <button class="opt-btn" data-q="14" data-val="A" data-word="sharp"   onclick="selectQ(14,'A')" type="button"><span class="letter">A</span> sharp</button>
+            <button class="opt-btn" data-q="14" data-val="B" data-word="strong"  onclick="selectQ(14,'B')" type="button"><span class="letter">B</span> strong</button>
+            <button class="opt-btn" data-q="14" data-val="C" data-word="great"   onclick="selectQ(14,'C')" type="button"><span class="letter">C</span> great</button>
+            <button class="opt-btn" data-q="14" data-val="D" data-word="stark"   onclick="selectQ(14,'D')" type="button"><span class="letter">D</span> stark</button>
+          </div>
+          <button class="reveal-btn" id="rvb14" onclick="revealMCQ(14)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db14">
+          <div class="correct-label">Correct: D — stark</div>
+          <strong>Trap: Register and collocation.</strong> <em>Stark contrast</em> is the C1 collocation for a dramatic, undeniable difference — especially used in formal writing to emphasise how dramatically two things diverge. <em>Sharp contrast</em> is also correct and frequently used — see note below. <em>Strong contrast</em> is possible but less idiomatic in formal prose. <em>Great contrast</em> collocates in literary or descriptive contexts, not academic analysis.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">15 &nbsp; The productivity margin was _____ than anticipated…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob15">
+            <button class="opt-btn" data-q="15" data-val="A" data-word="smaller"    onclick="selectQ(15,'A')" type="button"><span class="letter">A</span> smaller</button>
+            <button class="opt-btn" data-q="15" data-val="B" data-word="narrower"   onclick="selectQ(15,'B')" type="button"><span class="letter">B</span> narrower</button>
+            <button class="opt-btn" data-q="15" data-val="C" data-word="lesser"     onclick="selectQ(15,'C')" type="button"><span class="letter">C</span> lesser</button>
+            <button class="opt-btn" data-q="15" data-val="D" data-word="slimmer"    onclick="selectQ(15,'D')" type="button"><span class="letter">D</span> slimmer</button>
+          </div>
+          <button class="reveal-btn" id="rvb15" onclick="revealMCQ(15)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db15">
+          <div class="correct-label">Correct: B — narrower</div>
+          <strong>Trap: Semantic precision.</strong> A <em>margin</em> is conceptually measured in width — it is wide or narrow, not big or small. <em>Narrower margin</em> is therefore the precise, idiomatic collocation. <em>Smaller margin</em> is commonly used and understood, but less precise at C1 level. <em>Lesser margin</em> is archaic and not standard in modern academic English. <em>Slimmer margin</em> is used in political or business contexts but is informal.
+        </div>
+      </div>
+
+      <div class="option-item">
+        <div class="option-label">16 &nbsp; …appeared to differ _____ more by management quality…</div>
+        <div class="opt-row">
+          <div class="option-btns" id="ob16">
+            <button class="opt-btn" data-q="16" data-val="A" data-word="substantially" onclick="selectQ(16,'A')" type="button"><span class="letter">A</span> substantially</button>
+            <button class="opt-btn" data-q="16" data-val="B" data-word="largely"       onclick="selectQ(16,'B')" type="button"><span class="letter">B</span> largely</button>
+            <button class="opt-btn" data-q="16" data-val="C" data-word="greatly"       onclick="selectQ(16,'C')" type="button"><span class="letter">C</span> greatly</button>
+            <button class="opt-btn" data-q="16" data-val="D" data-word="considerably"  onclick="selectQ(16,'D')" type="button"><span class="letter">D</span> considerably</button>
+          </div>
+          <button class="reveal-btn" id="rvb16" onclick="revealMCQ(16)" type="button" title="Reveal answer">?</button>
+        </div>
+        <div class="debrief-panel" id="db16">
+          <div class="correct-label">Correct: A — substantially</div>
+          <strong>Trap: Degree adverb modifying a verb.</strong> Here the adverb modifies the verb <em>differ</em> directly — not a comparative adjective. <em>Substantially</em> is the precise formal collocate for <em>differ</em> in academic writing: <em>differ substantially</em> is the established phrase. <em>Considerably</em> more naturally modifies comparatives (<em>considerably more</em>) than verbs directly. <em>Largely</em> and <em>greatly</em> do not naturally collocate with <em>differ</em> in formal prose.
+        </div>
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-check" onclick="checkMCQ(2)" type="button">Check Answers</button>
+      <div class="score" id="sc2"></div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       WRAP-UP
+  ═══════════════════════════════════════════ -->
+  <div class="wrapup">
+    <div class="sec-label">Wrap-up</div>
+    <div class="wrapup-qs">
+      <div class="wrapup-q">
+        <span class="q-label">Trap Audit</span>
+        Look at your incorrect answers and identify the trap type for each. Degree adverb errors and collocation errors require different responses — if your errors cluster around one type, what does that tell you about where to focus?
+      </div>
+      <div class="wrapup-q">
+        <span class="q-label">Degree Adverb Precision</span>
+        Five items in this session involved degree adverbs before comparatives or adjectives: <em>considerably, markedly, far, broadly, substantially</em>. Write one original sentence for each that makes its correct collocational context clear.
+      </div>
+      <div class="wrapup-q">
+        <span class="q-label">Preposition Audit</span>
+        From today's session: <em>differ ___, contrast ___, consistent ___, bear resemblance ___, stand in contrast ___</em>. Fill in the correct preposition for each without checking. Then verify against the debriefs.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ── ACCORDION ──────────────────────────────────────────
+  function toggle(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  // ── ANSWER KEY ─────────────────────────────────────────
+  const key = {
+    1: 'C', 2: 'D', 3: 'B', 4: 'A', 5: 'D', 6: 'A', 7: 'B', 8: 'D',
+    9: 'B', 10: 'C', 11: 'B', 12: 'D', 13: 'C', 14: 'D', 15: 'B', 16: 'A'
+  };
+
+  // ── STATE ──────────────────────────────────────────────
+  const chosen   = {};
+  const resolved = {};
+  const everChecked = { 1: false, 2: false };
+
+  // ── SELECT ─────────────────────────────────────────────
+  function selectQ(q, val) {
+    if (resolved[q]) return;
+    chosen[q] = val;
+
+    document.querySelectorAll(`#ob${q} .opt-btn`).forEach(b => {
+      b.classList.remove('selected');
+      if (b.dataset.val === val) b.classList.add('selected');
+    });
+
+    const btn = document.querySelector(`#ob${q} .opt-btn[data-val="${val}"]`);
+    const ga  = document.getElementById('ga' + q);
+    if (btn && ga) { ga.textContent = btn.dataset.word; ga.classList.add('selected'); }
+  }
+
+  // ── CHECK ──────────────────────────────────────────────
+  function checkMCQ(n) {
+    const qs = n === 1 ? [1,2,3,4,5,6,7,8] : [9,10,11,12,13,14,15,16];
+    let correct = 0;
+
+    qs.forEach(q => {
+      if (resolved[q]) { correct++; return; }
+      const val = chosen[q];
+      if (!val) return;
+
+      const isOk = val === key[q];
+      const btns = document.querySelectorAll(`#ob${q} .opt-btn`);
+      const ga   = document.getElementById('ga' + q);
+
+      btns.forEach(b => {
+        b.classList.remove('selected');
+        b.disabled = isOk;
+        if (isOk) {
+          b.classList.add(b.dataset.val === key[q] ? 'ok' : 'neutral');
+        } else {
+          if (b.dataset.val === val) b.classList.add('err');
+        }
+      });
+
+      if (ga) {
+        ga.classList.remove('selected', 'ok', 'err');
+        ga.classList.add(isOk ? 'ok' : 'err');
+      }
+
+      if (isOk) {
+        resolved[q] = true;
+        correct++;
+        const rv = document.getElementById('rvb' + q);
+        if (rv) rv.classList.remove('visible');
+        const db = document.getElementById('db' + q);
+        if (db) db.classList.add('visible');
+      }
+    });
+
+    const sc = document.getElementById('sc' + n);
+    sc.textContent = correct + ' / 8 correct';
+    sc.className = 'score show ' + (correct >= 6 ? 'good' : 'poor');
+
+    everChecked[n] = true;
+    qs.forEach(q => {
+      if (resolved[q]) return;
+      if (!chosen[q]) return;
+      const rv = document.getElementById('rvb' + q);
+      if (rv) rv.classList.add('visible');
+    });
+  }
+
+  // ── REVEAL ─────────────────────────────────────────────
+  function revealMCQ(q) {
+    if (resolved[q]) return;
+    resolved[q] = true;
+
+    const correctVal = key[q];
+    document.querySelectorAll(`#ob${q} .opt-btn`).forEach(b => {
+      b.classList.remove('selected', 'err', 'ok');
+      b.disabled = true;
+      b.classList.add(b.dataset.val === correctVal ? 'revealed' : 'neutral');
+    });
+
+    const ga = document.getElementById('ga' + q);
+    if (ga) {
+      const btn = document.querySelector(`#ob${q} .opt-btn[data-val="${correctVal}"]`);
+      if (btn) ga.textContent = btn.dataset.word;
+      ga.classList.remove('selected', 'ok', 'err');
+      ga.classList.add('revealed');
+    }
+
+    const rv = document.getElementById('rvb' + q);
+    if (rv) rv.classList.remove('visible');
+    const db = document.getElementById('db' + q);
+    if (db) db.classList.add('visible');
+  }
+</script>
+
+</body>
+</html>
